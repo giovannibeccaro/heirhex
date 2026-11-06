@@ -21,6 +21,10 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 **Il dato più importante emerso**: con il mazzo base i combattimenti durano 5-8 turni invece di 3, e costano pochissima vita (vedi domanda 1 e `docs/report-simulazione.md`).
 
 ## Domande per Giovanni
+### Tappa 2b (nuove)
+1. **Forma divorata**: va bene potenziare l'intenzione con più danno quando i dati non ne indicano una? In alternativa si aggiunge al foglio una colonna "potenziata in forma divorata" nella scheda Intenzioni (lo script la esporterebbe in `intenzioni_potenziate`).
+
+### Tappe 0-2 (chiuse)
 **Risposte del 2026-11-06 in `docs/RISPOSTE.md`.** Le domande qui sotto sono chiuse.
 
 1. **Ancora dei 3 turni** (dalla simulazione): con il mazzo base i combattimenti durano 5-8 turni. L'ancora vale per il mazzo base o per un mazzo di metà vita? Se vale per il mazzo base, o la vita dei nemici (72) è troppo alta o il mazzo base ha troppa poca offesa (4 attacchi su 10 carte). Vedi `docs/report-simulazione.md`.
@@ -55,9 +59,16 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Push su GitHub**: il primo push falliva con HTTP 400 (pacchetto grande per GUT); risolto con `git config http.postBuffer 524288000`, solo nella configurazione locale del repository.
 - **Nomi dei campi dello schema scritti nel codice** (`effetto["valore"]`, `d.get("vita")`, le chiavi del riepilogo e del registro): li considero lo schema dei dati, non identificatori interni, e non li ho spostati in `Id`. Spostarli renderebbe il codice molto meno leggibile (`effetto[Id.VALORE]`). Sono invece in `Id` tutti i **valori** che quei campi possono assumere. Se preferisci centralizzare anche i nomi dei campi, è un lavoro meccanico.
 - **Test con stringhe letterali**: i test scrivono effetti e impostazioni come stringhe (`{"tipo": "danno"}`), come fanno i JSON; il motore li accetta perché converte sempre con `StringName(...)`.
+- **Quale intenzione potenzia la forma divorata**: il foglio dà il moltiplicatore (1,5) ma non dice quale intenzione. Se il nemico ha nei dati `forme.divorata.intenzioni_potenziate`, uso quelle; altrimenti (oggi tutti i nemici) l'intenzione con più danno tra le sue, esclusi i colpi letali; a parità vince la prima. Per la Janara Madre risulta *Assalto alla casa* (19), di poco sopra *Colpo* (18).
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.6 — Riesportazione e forma divorata ✅ (Tappa 2b, D58, D60)
+- Dati riesportati dal foglio (in T2.5, poi confermati senza differenze): efficienza 0,6 → nemici normali **54** di vita, Tiranno **432**; danni dei nemici +25% (Morso 15, Morso della luna 28, Colpo 18…); G = 3 nell'economia; *Ricordo di {antenato}* con `esilia`; scheda Forme fattura con `divorata.intenzione_potenziata = 1.5` (cella D6).
+- Forma divorata: l'intenzione potenziata ha i valori in punti × 1,5, oltre ai moltiplicatori globali (es. 22 × 1,5 × 1,3 = 42,9 → 43). Il valore resta decimale fino al calcolo finale, così si arrotonda una volta sola. Le intenzioni aggiunte dalle forme non vengono potenziate. Il registro annota quale intenzione è potenziata.
+- Il validatore controlla che le `intenzioni_potenziate` esistano. **0 errori**, 1 avviso (*Il nome del morto*, noto).
+- Test: 5 nuovi in `test/nemici/test_nemici.gd`. 175 test verdi.
 
 ### T1.9 — Identificatori centralizzati ✅ (Tappa 2b, D57)
 - `core/id.gd` (`Id`): tutti gli identificatori interni come costanti `StringName` (`&"danno"`), con gli elenchi ammessi: tipi di effetto (in e fuori combattimento), bersagli, zone e modi, eventi, momenti del lascito, tipi di stato e di carta, comportamenti, livelli, forme, età, operazioni, durate, proprietà, tipi di oggetto e filtri dei modificatori, voci del registro. Un nome usato in più ruoli (es. `mano`) è una sola costante.

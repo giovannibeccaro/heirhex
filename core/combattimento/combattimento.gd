@@ -54,10 +54,34 @@ func _applica_forma(n: Nemico, forma: StringName) -> void:
 	n.vita_max = roundi(calcola(n.vita_max, Id.VITA_MAX, Id.NEMICO, n))
 	n.vita = n.vita_max
 	var forme_dati: Dictionary = n.dati.get("forme", {})
+	if moltiplicatori.has("intenzione_potenziata"):
+		_potenzia_intenzioni(n, forme_dati.get(forma, {}), float(moltiplicatori["intenzione_potenziata"]))
 	for nome_forma in Id.FORME:
 		n.intenzioni_base.append_array(forme_dati.get(nome_forma, {}).get("intenzioni_aggiunte", []))
 		if nome_forma == forma:
 			break
+
+
+## D60: nella forma divorata un'intenzione ha i valori in punti moltiplicati (oltre ai moltiplicatori globali).
+## Quali: "intenzioni_potenziate" nei dati del nemico; se mancano, la sua intenzione con più danno.
+## Il valore resta decimale: si arrotonda una volta sola, con i modificatori (valore_effetto).
+func _potenzia_intenzioni(n: Nemico, dati_forma: Dictionary, moltiplicatore: float) -> void:
+	var ids: Array = dati_forma.get("intenzioni_potenziate", [])
+	if ids.is_empty():
+		var piu_forte := IntelligenzaNemici.intenzione_piu_dannosa(n.dati.get("intenzioni", []))
+		if not piu_forte.is_empty():
+			ids = [piu_forte["id"]]
+	for i in n.intenzioni_base.size():
+		var intenzione: Dictionary = n.intenzioni_base[i]
+		if not ids.has(intenzione.get("id")):
+			continue
+		var copia := intenzione.duplicate(true)
+		for e: Dictionary in copia.get("effetti", []):
+			if StringName(e.get("tipo", "")) in Id.EFFETTI_IN_PUNTI and e.has("valore"):
+				e["valore"] = float(e["valore"]) * moltiplicatore
+		copia["potenziata"] = true
+		n.intenzioni_base[i] = copia
+		registro.aggiungi(0, Id.R_INTENZIONE_POTENZIATA, {"nemico": nome_tecnico(n), "intenzione": copia["id"], "moltiplicatore": moltiplicatore})
 
 
 func _prepara_giocatore(d: Dictionary) -> void:
