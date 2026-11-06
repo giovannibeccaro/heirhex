@@ -20,5 +20,8 @@
   },
   "casa": {
     "vita": 35
+  },
+  "invecchiamento": {
+    "piu_forte_aumento": 0.3
   }
 }

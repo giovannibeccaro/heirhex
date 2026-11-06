@@ -92,6 +92,11 @@ const ETA_ADULTA := &"eta_adulta"
 const VECCHIAIA := &"vecchiaia"
 const ETA: Array[StringName] = [INFANZIA, GIOVINEZZA, ETA_ADULTA, VECCHIAIA]
 
+# --- Evoluzioni delle carte che invecchiano (D43) ---------------------------------------
+const PIU_FORTE := &"piu_forte"
+const TRADIZIONE := &"tradizione"
+const EVOLUZIONI: Array[StringName] = [PIU_FORTE, TRADIZIONE]
+
 # --- Momenti del Lascito ----------------------------------------------------------------
 const INIZIO_VITA := &"inizio_vita"
 const MOMENTI_LASCITO: Array[StringName] = [INIZIO_VITA, INIZIO_COMBATTIMENTO]

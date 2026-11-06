@@ -35,10 +35,16 @@ func _init(p_catalogo: Catalogo, p_casuale: Casuale, p_regole: RegoleCombattimen
 	regole = p_regole if p_regole != null else RegoleCombattimento.new()
 
 
-## Crea una copia di carta dal catalogo, con uid nuovo.
-func nuova_carta(id_carta: String, ereditata: bool = false, livello: int = 0) -> Carta:
+## Crea una copia di carta dal catalogo, con uid nuovo. Una carta con livello > 0 ha le sue
+## evoluzioni applicate ai dati (senza elenco: "Più forte" tante volte quanto il livello).
+func nuova_carta(id_carta: String, ereditata: bool = false, livello: int = 0, evoluzioni: Array = []) -> Carta:
 	var dati := catalogo.carta(id_carta)
 	assert(not dati.is_empty(), "Carta sconosciuta: " + id_carta)
+	if livello > 0 or not evoluzioni.is_empty():
+		var elenco := evoluzioni if not evoluzioni.is_empty() else Invecchiamento.evoluzioni_predefinite(livello)
+		var aumento: Variant = catalogo.bilanciamento.get("invecchiamento", {}).get("piu_forte_aumento")
+		assert(aumento != null, "Manca invecchiamento.piu_forte_aumento nel bilanciamento")
+		dati = Invecchiamento.applica(dati, elenco, float(aumento))
 	var c := Carta.new(_prossimo_uid_carta, dati, ereditata, livello)
 	_prossimo_uid_carta += 1
 	return c

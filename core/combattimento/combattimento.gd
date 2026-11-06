@@ -14,7 +14,7 @@ var esito: Esito = Esito.IN_CORSO
 
 ## impostazioni:
 ##   seme: int
-##   mazzo: Array di id oppure { id, ereditata, livello }
+##   mazzo: Array di id oppure { id, ereditata, livello, evoluzioni }
 ##   nemici: Array di id oppure { id, forma, quota_vita, intenzioni_fase }
 ##   giocatore: { vita, vita_max, stati }
 ##   casa: { vita, vita_max }
@@ -98,7 +98,8 @@ func _prepara_casa(d: Dictionary) -> void:
 
 func _crea_carta(voce: Variant) -> Carta:
 	if voce is Dictionary:
-		return stato.nuova_carta(str(voce["id"]), bool(voce.get("ereditata", false)), int(voce.get("livello", 0)))
+		return stato.nuova_carta(str(voce["id"]), bool(voce.get("ereditata", false)), int(voce.get("livello", 0)),
+			voce.get("evoluzioni", []))
 	return stato.nuova_carta(str(voce))
 
 

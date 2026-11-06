@@ -65,9 +65,17 @@ git push origin main
 - **Test con stringhe letterali**: i test scrivono effetti e impostazioni come stringhe (`{"tipo": "danno"}`), come fanno i JSON; il motore li accetta perché converte sempre con `StringName(...)`.
 - ~~**Quale intenzione potenzia la forma divorata**: l'intenzione con più danno~~ — superata da D62 (T2.8): ora la indica il foglio.
 - **Obiettivo di vita persa**: le risposte dicono che le Ancore (righe 8-9) sono passate a 8-12%, ma nel foglio le righe "Vita persa obiettivo" (9-10) dicono ancora 10% e 15%. Per la taratura uso gli obiettivi per forma della scheda Forme fattura (base 8-12%), che sono più precisi; le Ancore restano esportate così come sono.
+- **"+1 a pesca o cariche"** (D43) per una carta senza punti che ha sia pesca sia cariche (es. *Lamento funebre*): +1 solo al primo dei due effetti nell'ordine della carta. Due evoluzioni = la regola applicata due volte, arrotondando ogni volta (16 → 21 → 27).
+- **Carte "ereditate" nei mazzi di riferimento**: le Radici potenziano solo le carte ereditate, e il foglio non dice quali lo sono. In simulazione considero ereditate le carte con livello ≥ 1 (sono per forza passate di generazione); le carte di famiglia di livello 0 contano come nuove. È la scelta prudente: sottostima un po' le Radici.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.11 — Invecchiamento delle carte ✅ (Tappa 2d, D43)
+- `core/eredita/invecchiamento.gd` (`Invecchiamento`): l'evoluzione "Più forte" come regola pura. +30% (dal foglio, `invecchiamento.piu_forte_aumento`) ai valori in punti, arrotondati; se la carta non ha punti, +1 alla pesca o alle cariche di uno stato. Energia, scarta, esilia, rimuovi stato non cambiano. "Tradizione" non è implementata (errore se richiesta).
+- `StatoCombattimento.nuova_carta()` applica le evoluzioni alle carte con livello > 0; nelle impostazioni del mazzo si può dare l'elenco (`evoluzioni`), altrimenti è "Più forte" ripetuta per il livello. I dati del catalogo non vengono toccati.
+- Esempi coi dati veri: *Rimandare la fattura* di famiglia 21 danni, degli avi 27; *Aglio* di famiglia 7 blocco; *Invocare gli avi* di famiglia 4 danni.
+- Test: `test/eredita/test_invecchiamento.gd` (9 test). 193 test verdi.
 
 ### T2.10 — Mazzi di riferimento e obiettivi delle forme ✅ (Tappa 2d, D65)
 - `esporta.py`: nuova sezione `mazzi_riferimento` in `bilanciamento.json` (`{fase: {generazione, carte: [{carta, copie, livello}]}}`; il livello si legge come numero o con l'etichetta della scheda Invecchiamento: "di famiglia" = 1, "degli avi" = 2) e, per ogni forma, `obiettivi` (turni e vita persa, min e max) e `mazzo_riferimento`. Le righe di nota della scheda Forme fattura vengono saltate.
