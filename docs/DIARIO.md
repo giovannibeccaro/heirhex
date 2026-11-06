@@ -3,19 +3,26 @@
 Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al più vecchio.
 
 ## Riassunto per Giovanni
-*Tappa 2b completata il 2026-11-06. Ramo `autonomo/correzioni-revisione` (creato da `autonomo/tappe-0-2`), pushato su GitHub, **nessun merge**.*
+*Tappa 2c completata il 2026-11-06. Ramo `autonomo/risposte-2b` (creato da `autonomo/correzioni-revisione`), pushato su GitHub.*
 
-**Cosa è cambiato (Tappa 2b)**
-- **T2.5 — La casa** (D59): la culla è diventata la casa di famiglia, presente in tutte le età. Rinominata ovunque (codice, dati, testi, test); tolta la logica "inattiva in giovinezza".
-- **T1.9 — Identificatori centralizzati** (D57): `core/id.gd` raccoglie tutti gli identificatori interni come `StringName`. Il caricatore converte i JSON e rifiuta i valori sconosciuti, e ha subito trovato una riga del foglio esportata male (il moltiplicatore 1,5 letto come una quarta forma).
-- **T2.6 — Dati e forma divorata** (D58, D60): dati riesportati (nemici 54 di vita, danni +25%, G = 3, *Ricordo* con `esilia`); l'intenzione potenziata della forma divorata vale × 1,5 oltre ai moltiplicatori globali.
-- **T2.7 — Simulazione**: report con il confronto prima / dopo. L'obiettivo dei 4 turni ora sta tra la strategia prudente e quella aggressiva per tutti i nemici; il Lupenaro resta il più duro.
-- 175 test verdi, validatore a 0 errori (1 avviso noto: *Il nome del morto*).
+**Merge su `main` non fatto**: me l'hai chiesto, ma `.claude/settings.json` vieta `git merge` (e il push su `main`), e non ho aggirato la regola. Per farlo tu (avanzamento rapido, senza conflitti; porta su `main` le tappe 0, 1, 2, 2b e 2c):
+```sh
+git switch main
+git merge --ff-only autonomo/risposte-2b
+git push origin main
+```
 
-**Cosa serve da te**: rispondere alle domande qui sotto, rivedere il ramo e decidere il merge (questo ramo contiene anche le tappe 0-2).
+**Cosa è cambiato (Tappa 2c)**
+- **T2.8** (D62, D63): l'intenzione potenziata della forma divorata ora viene dalla colonna O del foglio; il motore non la indovina più. Ululato a 6. I valori divorati calcolati dal motore coincidono con la colonna J del foglio (test).
+- **T2.9**: simulazione rifatta con il confronto con la Tappa 2b e uno scenario con la forma divorata. Risposta sul Morso della luna nel registro qui sotto.
+- Piano aggiornato con la Tappa 2c e la nota D64 (Pantafica e Munaciello si misurano su una vita intera).
+- 179 test verdi, validatore a 0 errori.
 
 ## Domande per Giovanni
-### Tappa 2b (nuove)
+### Tappa 2c (nuove)
+1. **Morso della luna divorato**: non uccide a vita piena, ma contro il Lupenaro divorato chiude quasi ogni combattimento in vecchiaia con il mazzo base. Lo verifichiamo con un mazzo realistico di generazione 5 quando esisterà la stirpe, o vuoi già ora un limite (es. un colpo potenziato non supera una quota della vita massima)?
+
+### Tappa 2b (risposte in `docs/RISPOSTE.md`, D62-D64: chiuse)
 1. **Forma divorata**: va bene potenziare l'intenzione con più danno quando i dati non ne indicano una? In alternativa si aggiunge al foglio una colonna "potenziata in forma divorata" nella scheda Intenzioni (lo script la esporterebbe in `intenzioni_potenziate`).
 2. **Lupenaro**: con il Morso della luna a 28 è di gran lunga il nemico più duro (16-21% di vita persa, 7-8 turni con la strategia prudente). È voluto, visto che insegna a leggere le intenzioni, o va avvicinato agli altri?
 3. **Pantafica e Munaciello** tolgono poca vita diretta (0-10%): il loro costo sta in Fattura, Paura e Dispetto, che una simulazione di un solo combattimento non vede. Ti serve una misura diversa per loro (es. Fattura accumulata in una vita), da fare quando ci sarà la tappa della vita?
@@ -60,6 +67,12 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.9 — Simulazione rifatta, con la forma divorata ✅ (fine Tappa 2c)
+- `strumenti/simula.gd`: nuovo scenario "Forma divorata" (tutti i nemici normali, giovinezza / età adulta / vecchiaia, strategia prudente e solo attacco) che misura dal registro il danno subito a ogni esecuzione dell'intenzione potenziata e quante sconfitte chiude.
+- `docs/report-simulazione.md`: tabelle aggiornate, confronto con la Tappa 2b, osservazioni.
+- **Forma base**: cambia solo il Lupenaro (Ululato 6): 6,9-8,0 turni e 15-17% di vita persa con la strategia prudente (prima 7,5-8,4 e 16-20%).
+- **Il Morso della luna divorato (55) è letale?** Da solo a vita piena no, in nessuna età (vita minima 60; il colpo più forte subito è stato 51, perché il blocco ne toglie sempre un po'). **Ma chiude quasi tutti i combattimenti contro il Lupenaro divorato con il mazzo base**: in vecchiaia è il colpo finale nel 99,9% dei combattimenti (strategia prudente) e nel 58% (solo attacco); in età adulta la strategia prudente vince l'1% dei combattimenti. Gli altri nemici divorati costano molta vita (Pantafica 45-66%, Munaciello 18-46%) ma raramente uccidono. Limite: è il mazzo della prima generazione, mentre la forma divorata arriva dalla quinta.
 
 ### T2.8 — Intenzione potenziata dai dati ✅ (Tappa 2c, D62, D63)
 - `esporta.py` legge la colonna O "Potenziata in divorata" (`sì` o vuoto; altro = errore) e scrive `forme.divorata.intenzioni_potenziate` nel nemico. Dal foglio: Lupenaro `morso_della_luna`, Janara `assalto_alla_casa`, Pantafica `peso_sul_cuore`, Munaciello `sgambetto`; la Janara Madre nessuna.

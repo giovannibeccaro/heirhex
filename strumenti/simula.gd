@@ -10,6 +10,8 @@ const REPORT := "res://docs/report-simulazione.md"
 const ETA: Array[StringName] = [Id.GIOVINEZZA, Id.ETA_ADULTA]
 ## Scenario di riferimento del report (età adulta, strategia che non si difende).
 const SENZA_DIFESA := &"senza_difesa"
+## Età dello scenario con la forma divorata (anche la vecchiaia: è la vita più bassa).
+const ETA_DIVORATA: Array[StringName] = [Id.GIOVINEZZA, Id.ETA_ADULTA, Id.VECCHIAIA]
 
 
 func _initialize() -> void:
@@ -45,20 +47,30 @@ func _initialize() -> void:
 	risultati[SENZA_DIFESA] = {}
 	for id in nemici:
 		risultati[SENZA_DIFESA][id] = _simula(catalogo, regole, mazzo, id, Id.ETA_ADULTA, quanti, false)
+	# Forma divorata: tutte le età, con le due strategie
+	var divorata := {}
+	for eta in ETA_DIVORATA:
+		for difende in [true, false]:
+			for id in nemici:
+				divorata[[eta, difende, id]] = _simula(catalogo, regole, mazzo, id, eta, quanti, difende, Id.DIVORATA)
+		print("divorata / %s: fatto" % eta)
 	var secondi := (Time.get_ticks_msec() - inizio) / 1000.0
 	_scrivi_report(b, casata, mazzo.size(), nemici, risultati, quanti, secondi, turni_obiettivo)
+	_aggiungi_divorata(nemici, divorata, quanti)
 	print("Report scritto in %s (%.1f s)" % [REPORT, secondi])
 	quit(0)
 
 
-func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemico: String, eta: StringName, quanti: int, difende: bool = true) -> Dictionary:
+func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemico: String, eta: StringName, quanti: int, difende: bool = true, forma: StringName = Id.BASE) -> Dictionary:
 	var b := catalogo.bilanciamento
 	var dati_eta: Dictionary = b["eta"][eta]
 	var vita := int(dati_eta["vita"])
-	var t := {"vittorie": 0, "turni": [], "turni_vittorie": [], "vita_persa": [], "casa_persa": [], "tratti": 0, "fattura": [], "interrotti": 0}
+	var potenziate: Array = catalogo.nemici[nemico].get("forme", {}).get(forma, {}).get("intenzioni_potenziate", []) if forma != Id.BASE else []
+	var t := {"vittorie": 0, "turni": [], "turni_vittorie": [], "vita_persa": [], "casa_persa": [], "tratti": 0, "fattura": [], "interrotti": 0,
+		"vita": vita, "colpi_potenziati": [], "uccisi_dal_potenziato": 0}
 	for seme in range(1, quanti + 1):
 		var c := Combattimento.new(catalogo, {
-			"seme": seme, "mazzo": mazzo, "nemici": [nemico],
+			"seme": seme, "mazzo": mazzo, "nemici": [{"id": nemico, "forma": forma}],
 			"giocatore": {"vita": vita, "vita_max": vita},
 			"casa": {"vita": int(b["casa"]["vita"])},
 			"mano": int(dati_eta["mano"]),
@@ -75,7 +87,32 @@ func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemi
 		t["casa_persa"].append(int(b["casa"]["vita"]) - int(r["casa_vita"]))
 		t["tratti"] += int(r["tratti_negativi"])
 		t["fattura"].append(int(r["stati_persistenti"].get("fattura", 0)))
+		_colpi_potenziati(c, potenziate, t)
 	return t
+
+
+## Dal registro: danno subito dal giocatore a ogni esecuzione di un'intenzione potenziata,
+## e se quel colpo ha chiuso il combattimento con la sconfitta.
+func _colpi_potenziati(c: Combattimento, potenziate: Array, t: Dictionary) -> void:
+	if potenziate.is_empty():
+		return
+	var in_corso := false
+	var subito := 0
+	for v in c.registro.voci:
+		if v["tipo"] == Id.R_INTENZIONE_ESEGUITA:
+			if in_corso:
+				t["colpi_potenziati"].append(subito)
+			in_corso = potenziate.has(str(v.get("intenzione", "")))
+			subito = 0
+		elif in_corso and v["tipo"] == Id.DANNO and v.get("a") == Id.GIOCATORE:
+			subito += int(v["subito"])
+		elif in_corso and v["tipo"] == Id.FINE_COMBATTIMENTO and v.get("esito") == "sconfitta":
+			t["uccisi_dal_potenziato"] += 1
+		elif in_corso and v["tipo"] in [Id.R_INTENZIONE, Id.INIZIO_TURNO]:
+			t["colpi_potenziati"].append(subito)
+			in_corso = false
+	if in_corso:
+		t["colpi_potenziati"].append(subito)
 
 
 func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, risultati: Dictionary, quanti: int, secondi: float, turni_argomento: String) -> void:
@@ -120,6 +157,32 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 	r.append("(scritte a mano dopo l'esecuzione, vedi sotto)")
 	var f := FileAccess.open(REPORT, FileAccess.WRITE)
 	f.store_string("\n".join(r) + "\n")
+	f.close()
+
+
+func _aggiungi_divorata(nemici: Array, divorata: Dictionary, quanti: int) -> void:
+	var r := PackedStringArray()
+	r.append("")
+	r.append("## Forma divorata")
+	r.append("")
+	r.append("Tutti i nemici in forma divorata (vita × 1,6, danni × 1,3, intenzione potenziata × 1,5 in più), stesso mazzo base. \"Colpo potenziato\": danno subito dal giocatore quando il nemico esegue la sua intenzione potenziata (dopo il blocco). La Janara potenzia l'assalto alla casa, che non colpisce il giocatore.")
+	r.append("")
+	r.append("| Età (vita) | Strategia | Nemico | Vittorie | Turni medi | Vita persa media | Colpi potenziati subiti | Danno medio del colpo potenziato | Colpo potenziato più forte | Sconfitte per il colpo potenziato |")
+	r.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+	for eta in ETA_DIVORATA:
+		for difende in [true, false]:
+			for id in nemici:
+				var t: Dictionary = divorata[[eta, difende, id]]
+				var colpi: Array = t["colpi_potenziati"]
+				r.append("| %s (%d) | %s | %s | %.1f%% | %.2f | %.1f%% | %d | %s | %s | %.1f%% |" % [
+					str(eta).replace("_", " "), t["vita"], "difende" if difende else "solo attacco", id,
+					100.0 * t["vittorie"] / quanti, _media(t["turni"]), _media(t["vita_persa"]) * 100.0,
+					colpi.size(), "%.1f" % _media(colpi) if not colpi.is_empty() else "–",
+					str(_max(colpi)) if not colpi.is_empty() else "–", 100.0 * t["uccisi_dal_potenziato"] / quanti])
+	var testo := FileAccess.get_file_as_string(REPORT)
+	testo = testo.replace("\n## Osservazioni", "\n".join(r) + "\n\n## Osservazioni")
+	var f := FileAccess.open(REPORT, FileAccess.WRITE)
+	f.store_string(testo)
 	f.close()
 
 
