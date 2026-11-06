@@ -74,7 +74,7 @@ La logica sta in `core/dati/validatore.gd` (`Validatore`), così il gioco potrà
 
 ## Simulazione di bilanciamento
 ```sh
-godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000 --casata masciare --turni-obiettivo 4
+godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000
 ```
-`--turni-obiettivo` è la durata con cui confrontare i risultati: senza, si usa l'ancora del foglio (3, mazzo medio); per le Masciare l'obiettivo è circa 4 (D58).
+D65: ogni forma della fattura contro il mazzo di riferimento della sua fase, tre età, tre strategie (ragionevole, prudente, aggressiva), con la distanza dagli obiettivi della scheda Forme fattura.
 Gioca i combattimenti con il mazzo base della casata contro ogni nemico normale (giovinezza ed età adulta, più una variante di riferimento che attacca soltanto) con la strategia semplice di `core/simulazione/giocatore_automatico.gd`, e riscrive `docs/report-simulazione.md` (la sezione Osservazioni va poi riscritta a mano). C'è anche uno scenario con tutti i nemici in forma divorata (tre età, due strategie) che misura il colpo dell'intenzione potenziata. Circa un minuto con 1000 combattimenti.

@@ -67,9 +67,18 @@ git push origin main
 - **Obiettivo di vita persa**: le risposte dicono che le Ancore (righe 8-9) sono passate a 8-12%, ma nel foglio le righe "Vita persa obiettivo" (9-10) dicono ancora 10% e 15%. Per la taratura uso gli obiettivi per forma della scheda Forme fattura (base 8-12%), che sono più precisi; le Ancore restano esportate così come sono.
 - **"+1 a pesca o cariche"** (D43) per una carta senza punti che ha sia pesca sia cariche (es. *Lamento funebre*): +1 solo al primo dei due effetti nell'ordine della carta. Due evoluzioni = la regola applicata due volte, arrotondando ogni volta (16 → 21 → 27).
 - **Carte "ereditate" nei mazzi di riferimento**: le Radici potenziano solo le carte ereditate, e il foglio non dice quali lo sono. In simulazione considero ereditate le carte con livello ≥ 1 (sono per forza passate di generazione); le carte di famiglia di livello 0 contano come nuove. È la scelta prudente: sottostima un po' le Radici.
+- **Obiettivo di turni esatto** ("4" nella forma base): lo tratto come 3,5-4,5, perché una media non è mai esattamente un intero.
+- **Soglia della strategia ragionevole: 15%** della vita massima (`GiocatoreAutomatico.SOGLIA_DIFESA`). È una scelta mia, non del design; il report dice qual è.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.12 — Simulazione contro i mazzi di riferimento ✅ (Tappa 2d, D65)
+- `GiocatoreAutomatico`: tre strategie (enum `Strategia`). Nuova **ragionevole**: gioca prima le carte che preparano (pesca, Radici); si difende solo da un colpo oltre il 15% della vita massima o letale, e blocca solo finché il danno resta sopra quella soglia; attacca subito se può uccidere il nemico nel turno.
+- `core/simulazione/simulatore.gd` (`Simulatore`): mazzo di riferimento di una fase, scenario di N combattimenti con le misure, statistiche e distanza dagli obiettivi; lo usano il report e la taratura.
+- `strumenti/simula.gd` riscritto: forma × mazzo della sua fase × 3 età × 3 strategie × 4 nemici, 1000 combattimenti per riga (circa 3,5 minuti), riepilogo con la distanza dagli obiettivi.
+- **Risultati** (strategia ragionevole): forma base nei turni per tutti, vita persa solo la Pantafica dentro; toccata quasi tutta nei turni, Lupenaro (35%) e Pantafica (18%) sopra la vita obiettivo; **divorata tutta fuori, sul lato "troppo difficile"** (5,3-6,2 turni; vita persa 24-77%). La Janara non toglie mai vita al giocatore (solo alla casa).
+- Test: 9 nuovi (strategie e simulatore). 202 test verdi.
 
 ### T2.11 — Invecchiamento delle carte ✅ (Tappa 2d, D43)
 - `core/eredita/invecchiamento.gd` (`Invecchiamento`): l'evoluzione "Più forte" come regola pura. +30% (dal foglio, `invecchiamento.piu_forte_aumento`) ai valori in punti, arrotondati; se la carta non ha punti, +1 alla pesca o alle cariche di uno stato. Energia, scarta, esilia, rimuovi stato non cambiano. "Tradizione" non è implementata (errore se richiesta).
