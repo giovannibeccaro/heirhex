@@ -14,7 +14,7 @@ var esito: Esito = Esito.IN_CORSO
 ## impostazioni:
 ##   seme: int
 ##   mazzo: Array di id oppure { id, ereditata, livello }
-##   nemici: Array di id oppure { id, quota_vita }
+##   nemici: Array di id oppure { id, forma, quota_vita, intenzioni_fase }
 ##   giocatore: { vita, vita_max, stati }
 ##   culla: { vita, vita_max, attiva }
 ##   mano: carte pescate a inizio turno (età)
@@ -34,6 +34,27 @@ func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattim
 	for voce in impostazioni.get("nemici", []):
 		stato.nemici.append(_crea_nemico(voce))
 	stato.casuale.mescola(stato.mazzo)
+
+
+## Forma della fattura: moltiplicatori di vita e danno (bilanciamento) come modificatori,
+## più le intenzioni aggiunte dal nemico (le forme sono cumulative: divorata include toccata).
+func _applica_forma(n: Nemico, forma: String) -> void:
+	n.forma = forma
+	if forma == "base":
+		return
+	var moltiplicatori: Dictionary = stato.catalogo.bilanciamento.get("forme", {}).get(forma, {})
+	var filtro := {"uid": n.uid}
+	for coppia in [["vita_max", "vita"], ["valore_effetti", "danno"]]:
+		if moltiplicatori.has(coppia[1]):
+			stato.modificatori.aggiungi_da_dizionario({"fonte": "forma." + forma, "bersaglio": {"tipo": "nemico", "filtro": filtro},
+				"proprieta": coppia[0], "operazione": "moltiplica", "valore": moltiplicatori[coppia[1]], "durata": "combattimento"})
+	n.vita_max = roundi(calcola(n.vita_max, "vita_max", "nemico", n))
+	n.vita = n.vita_max
+	var forme_dati: Dictionary = n.dati.get("forme", {})
+	for nome_forma in ["toccata", "divorata"]:
+		n.intenzioni_base.append_array(forme_dati.get(nome_forma, {}).get("intenzioni_aggiunte", []))
+		if nome_forma == forma:
+			break
 
 
 func _prepara_giocatore(d: Dictionary) -> void:
@@ -58,6 +79,13 @@ func _crea_carta(voce: Variant) -> Carta:
 func _crea_nemico(voce: Variant) -> Nemico:
 	var d: Dictionary = voce if voce is Dictionary else {"id": str(voce)}
 	var n := stato.nuovo_nemico(str(d["id"]))
+	_applica_forma(n, str(d.get("forma", "base")))
+	# Intenzioni generate da fuori (es. carte rubate dal Tiranno) per l'ultima fase
+	if d.has("intenzioni_fase") and not n.fasi.is_empty():
+		var ultima: Dictionary = n.fasi.back()
+		var intenzioni: Array = ultima.get("intenzioni", []).duplicate()
+		intenzioni.append_array(d["intenzioni_fase"])
+		ultima["intenzioni"] = intenzioni
 	if d.has("quota_vita"):
 		n.vita = maxi(1, roundi(n.vita_max * float(d["quota_vita"])))
 	return n

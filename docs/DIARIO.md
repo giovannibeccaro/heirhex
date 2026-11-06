@@ -6,6 +6,8 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 (da compilare alla fine del piano o quando l'agente si ferma)
 
 ## Domande per Giovanni
+2. **Lingua del codice**: hai chiesto perché è in italiano. Seguo la convenzione di `CLAUDE.md` (identificatori e commenti in italiano, come il design e i dati). Se preferisci l'inglese conviene deciderlo presto: ora il cambio costa poco.
+3. **Forma "divorata"**: lo schema prevede `intenzioni_potenziate: ["morso"]` ma non dice di quanto. Per ora il motore gestisce solo i moltiplicatori globali di vita e danno e le `intenzioni_aggiunte` (cumulative: la divorata ha anche quelle della toccata). Come va potenziata un'intenzione?
 1. **Furto della Janara Madre "dalla mano"**: la mano si scarta a fine turno, quindi nel turno dei nemici è vuota. Per ora la Janara Madre ruba una carta a caso **tra quelle della mano appena scartata** (`ruba_carta` con `da: mano`). Alternative: rubare dal mazzo, oppure rubare all'inizio del tuo turno dopo la pesca. Quale preferisci?
 
 ## Scelte prese da solo
@@ -24,9 +26,18 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Effetti a fine combattimento**: quando il combattimento è finito i mattoncini non si eseguono più; l'evento `fine_combattimento` serve agli ascoltatori esterni (la vita, le ricompense), non a effetti di carte o stati.
 - **Paura**: all'inizio del tuo turno (dopo la pesca) la carta giocabile più costosa in mano costa +1 fino alla fine del turno; a parità di costo tocca la prima in mano. Una carica = un turno. Se il costo si ricalcolasse dopo ogni carta giocata, la Paura renderebbe +1 ogni carta del turno: troppo forte.
 - **Fattura oltre la soglia**: se le cariche superano 7 (es. 5 + 4), si compie una volta e le cariche in eccesso si perdono (il dato dice "rimuovi tutte").
+- **Comportamento pesato senza scelte valide**: se `max_di_fila` e `ricarica` escludono tutto, si ignora prima la ricarica, poi anche il limite di fila (non succede con i dati attuali). Un'intenzione annullata conta comunque come scelta.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.7 — Nemici ✅
+- `core/nemici/intelligenza_nemici.gd`: comportamento `sequenza` (campo `sequenza` con gli id, anche ripetuti) e `pesato` (`peso`, `max_di_fila`, `ricarica`); intenzioni a turno fisso (`turno: N`); fasi (`fasi: [{ sotto_quota_vita, comportamento, intenzioni }]`, non tornano indietro); `conto_alla_rovescia()` per l'interfaccia.
+- `Nemico`: intenzioni base, fasi, forma, memoria delle scelte.
+- Forme della fattura: i moltiplicatori di vita e danno (da `bilanciamento.forme`) diventano modificatori del sistema unico (`vita_max` e `valore_effetti` sul nemico); le `intenzioni_aggiunte` delle forme si sommano.
+- Ultimo rintocco: intenzione con `turno: 8`, `non_annullabile`, effetto `danno` con `letale: true` (toglie tutta la vita, ignora blocco e modificatori). Vale anche nella seconda fase.
+- Le intenzioni generate dalle carte rubate arrivano da fuori (`impostazioni.nemici[i].intenzioni_fase`): la traduzione carta → intenzione è della tappa 5.
+- Test: `test/nemici/test_nemici.gd` (14 test, tra cui 300 turni di comportamento pesato che rispettano i limiti).
 
 ### T1.4 — Stati ✅
 - `data/manuali/stati.json`: **Fattura** (soglia 7, 30% della vita massima ignorando il blocco, si azzera, `persistente`), **Paura** (durata), **Malocchio** (durata: a inizio turno scarta una carta a caso), **Radici** (intensità: +2 per carica a danno, blocco e cura delle carte ereditate). Nessuna regola specifica nel codice: tutto è dato.

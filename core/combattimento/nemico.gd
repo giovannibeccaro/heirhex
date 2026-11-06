@@ -4,10 +4,21 @@ extends Combattente
 
 var uid: int
 var dati: Dictionary
-var intenzione: Dictionary = {}   ## intenzione mostrata per il prossimo turno
-var passo_sequenza: int = 0       ## posizione nella sequenza (comportamento "sequenza")
+var forma: String = "base"            ## base, toccata, divorata (forme della fattura)
+var intenzione: Dictionary = {}       ## intenzione mostrata per il prossimo turno
 var intenzione_annullata: bool = false
-var carte_rubate: Array[int] = []  ## uid delle carte rubate in questo combattimento
+var carte_rubate: Array[int] = []     ## uid delle carte rubate in questo combattimento
+
+## Intenzioni della fase base (dati + aggiunte della forma).
+var intenzioni_base: Array = []
+## Fasi successive: { sotto_quota_vita, comportamento, intenzioni, sequenza }.
+var fasi: Array = []
+var fase: int = 0                     ## 0 = base; 1.. = indice in fasi + 1
+
+# Memoria del comportamento
+var passo_sequenza: int = 0
+var storico: Array[String] = []       ## id delle intenzioni scelte, dalla più vecchia
+var ultimo_uso: Dictionary = {}       ## id intenzione -> turno in cui è stata scelta
 
 
 func _init(p_uid: int = 0, p_dati: Dictionary = {}, p_vita_max: int = -1) -> void:
@@ -15,3 +26,24 @@ func _init(p_uid: int = 0, p_dati: Dictionary = {}, p_vita_max: int = -1) -> voi
 	super._init(str(p_dati.get("id", "")), v, str(p_dati.get("nome", "")))
 	uid = p_uid
 	dati = p_dati
+	intenzioni_base = (p_dati.get("intenzioni", []) as Array).duplicate()
+	for f in p_dati.get("fasi", []):
+		fasi.append((f as Dictionary).duplicate(true))
+
+
+## Le intenzioni e il comportamento della fase attuale.
+func intenzioni_attive() -> Array:
+	return intenzioni_base if fase == 0 else fasi[fase - 1].get("intenzioni", [])
+
+
+func comportamento_attivo() -> String:
+	if fase == 0:
+		return str(dati.get("comportamento", "pesato"))
+	return str(fasi[fase - 1].get("comportamento", "pesato"))
+
+
+func sequenza_attiva() -> Array:
+	var origine: Dictionary = dati if fase == 0 else fasi[fase - 1]
+	if origine.has("sequenza"):
+		return origine["sequenza"]
+	return intenzioni_attive().map(func(i: Dictionary) -> String: return str(i["id"]))

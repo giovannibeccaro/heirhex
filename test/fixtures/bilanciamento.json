@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "forme": {
+    "base": { "dalla_generazione": 1, "vita": 1, "danno": 1 },
+    "toccata": { "dalla_generazione": 3, "vita": 1.3, "danno": 1.15 },
+    "divorata": { "dalla_generazione": 5, "vita": 1.6, "danno": 1.3 }
+  }
+}

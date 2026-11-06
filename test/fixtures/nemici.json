@@ -99,6 +99,223 @@
           ]
         }
       ]
+    },
+    {
+      "id": "lupo",
+      "nome": "test.lupo",
+      "ruolo": "assalitore",
+      "livello": "normale",
+      "vita": 72,
+      "comportamento": "sequenza",
+      "sequenza": [
+        "morso",
+        "morso",
+        "ululato",
+        "morso_grosso"
+      ],
+      "intenzioni": [
+        {
+          "id": "morso",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 12,
+              "bersaglio": "giocatore"
+            }
+          ]
+        },
+        {
+          "id": "ululato",
+          "tipo": "difesa",
+          "effetti": [
+            {
+              "tipo": "blocco",
+              "valore": 10,
+              "bersaglio": "se"
+            }
+          ]
+        },
+        {
+          "id": "morso_grosso",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 22,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ],
+      "forme": {
+        "toccata": {
+          "intenzioni_aggiunte": [
+            {
+              "id": "zampata",
+              "tipo": "attacco",
+              "effetti": [
+                {
+                  "tipo": "danno",
+                  "valore": 5,
+                  "bersaglio": "giocatore"
+                }
+              ]
+            }
+          ]
+        },
+        "divorata": {
+          "intenzioni_aggiunte": [
+            {
+              "id": "furia",
+              "tipo": "attacco",
+              "effetti": [
+                {
+                  "tipo": "danno",
+                  "valore": 30,
+                  "bersaglio": "giocatore"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "strega",
+      "nome": "test.strega",
+      "ruolo": "predatore_culla",
+      "livello": "normale",
+      "vita": 72,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "graffio",
+          "tipo": "attacco_culla",
+          "peso": 3,
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 10,
+              "bersaglio": "culla"
+            }
+          ]
+        },
+        {
+          "id": "maleficio",
+          "tipo": "maleficio",
+          "peso": 1,
+          "max_di_fila": 1,
+          "ricarica": 3,
+          "effetti": [
+            {
+              "tipo": "applica_stato",
+              "stato": "malocchio",
+              "valore": 1,
+              "bersaglio": "giocatore"
+            }
+          ]
+        },
+        {
+          "id": "riparo",
+          "tipo": "difesa",
+          "peso": 1,
+          "max_di_fila": 1,
+          "effetti": [
+            {
+              "tipo": "blocco",
+              "valore": 8,
+              "bersaglio": "se"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "madre",
+      "nome": "test.madre",
+      "ruolo": "tiranno",
+      "livello": "tiranno",
+      "vita": 200,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "colpo",
+          "tipo": "attacco",
+          "peso": 1,
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 5,
+              "bersaglio": "giocatore"
+            }
+          ]
+        },
+        {
+          "id": "ultimo_rintocco",
+          "tipo": "speciale",
+          "turno": 8,
+          "non_annullabile": true,
+          "effetti": [
+            {
+              "tipo": "danno",
+              "letale": true,
+              "ignora_blocco": true,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ],
+      "fasi": [
+        {
+          "sotto_quota_vita": 0.5,
+          "comportamento": "sequenza",
+          "intenzioni": []
+        }
+      ]
+    },
+    {
+      "id": "madre_con_fase",
+      "nome": "test.madre",
+      "ruolo": "tiranno",
+      "livello": "tiranno",
+      "vita": 200,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "colpo",
+          "tipo": "attacco",
+          "peso": 1,
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 5,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ],
+      "fasi": [
+        {
+          "sotto_quota_vita": 0.5,
+          "comportamento": "sequenza",
+          "intenzioni": [
+            {
+              "id": "furia",
+              "tipo": "attacco",
+              "effetti": [
+                {
+                  "tipo": "danno",
+                  "valore": 20,
+                  "bersaglio": "giocatore"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

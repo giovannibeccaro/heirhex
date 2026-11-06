@@ -107,6 +107,10 @@ static func bersagli(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto
 
 static func _danno(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
 	for b in bersagli(c, effetto, ctx):
+		# "letale": toglie tutta la vita, ignora blocco e modificatori (l'ultimo rintocco)
+		if bool(effetto.get("letale", false)):
+			c.infliggi_danno(b, b.vita, true, ctx.sorgente)
+			continue
 		var valore := c.valore_effetto(effetto, ctx, b)
 		c.infliggi_danno(b, valore, bool(effetto.get("ignora_blocco", false)), ctx.sorgente)
 

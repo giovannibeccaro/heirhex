@@ -16,6 +16,7 @@ static func catalogo() -> Catalogo:
 	c.nemici = Catalogo.indicizza(leggi_json(CARTELLA + "nemici.json")["nemici"])
 	# Stati di prova + gli stati veri (scritti a mano, non dipendono dall'esportazione)
 	c.stati = Catalogo.indicizza(leggi_json(CARTELLA + "stati.json")["stati"])
+	c.bilanciamento = leggi_json(CARTELLA + "bilanciamento.json")
 	c.stati.merge(Catalogo.indicizza(leggi_json("res://data/manuali/stati.json")["stati"]))
 	return c
 
