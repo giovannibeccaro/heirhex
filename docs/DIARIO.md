@@ -21,6 +21,8 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 **Il dato più importante emerso**: con il mazzo base i combattimenti durano 5-8 turni invece di 3, e costano pochissima vita (vedi domanda 1 e `docs/report-simulazione.md`).
 
 ## Domande per Giovanni
+**Risposte del 2026-11-06 in `docs/RISPOSTE.md`.** Le domande qui sotto sono chiuse.
+
 1. **Ancora dei 3 turni** (dalla simulazione): con il mazzo base i combattimenti durano 5-8 turni. L'ancora vale per il mazzo base o per un mazzo di metà vita? Se vale per il mazzo base, o la vita dei nemici (72) è troppo alta o il mazzo base ha troppa poca offesa (4 attacchi su 10 carte). Vedi `docs/report-simulazione.md`.
 2. **Furto della Janara Madre "dalla mano"**: la mano si scarta a fine turno, quindi nel turno dei nemici è vuota. Per ora la Janara Madre ruba una carta a caso **tra quelle della mano appena scartata** (`ruba_carta` con `da: mano`). Alternative: rubare dal mazzo, oppure rubare all'inizio del tuo turno dopo la pesca. Quale preferisci?
 3. **Grani: G = 18 nel foglio, G = 3 in D54.** La scheda Economia ha ancora i valori vecchi (carta comune 45, rara 70…), mentre il registro decisioni dice G = 3 (comune 8, rara 12, unica 18). Ho esportato il foglio così com'è: va aggiornato il foglio?

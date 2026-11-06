@@ -54,3 +54,17 @@ Specifiche: `06-prototipo/schemi-dati.md`, foglio `06-prototipo/bilanciamento.xl
 ## Alla fine
 - Diario aggiornato con un **riassunto per Giovanni**: cosa funziona, scelte prese da solo, domande aperte, cosa serve da lui.
 - Push del ramo. **Non** fare merge su `main`: lo decide Giovanni dopo la revisione.
+
+---
+
+## Tappa 2b — Correzioni dopo la revisione (2026-11-06)
+Leggi prima `docs/RISPOSTE.md`: contiene le risposte di Giovanni alle domande del diario e le nuove decisioni (D57-D61). Lavora sul ramo **`autonomo/correzioni-revisione`**, creato a partire da `autonomo/tappe-0-2`.
+
+| Id | Compito | Finito quando |
+| --- | --- | --- |
+| T2.5 | **La culla diventa la casa** (D59): rinomina in codice, dati manuali, testi e test (`culla` → `casa`, `se_o_culla` → `se_o_casa`, `attacco_culla` → `attacco_casa`, `predatore_culla` → `predatore_casa`). La casa è attiva **in tutte le età**: niente più logica "culla inattiva in giovinezza". Stesse regole: vita 35, a 0 tratto negativo all'erede e torna a metà | Nessun riferimento a "culla" rimasto (codice, dati, testi, test); test verdi |
+| T1.9 | **Identificatori centralizzati** (vedi `CLAUDE.md`), se non già fatto: bersagli, tipi di effetto, stati, agganci in `enum` o costanti `StringName` definite una volta; il caricatore converte e rifiuta valori sconosciuti | Nessun identificatore interno scritto a mano fuori dal file dedicato; test verdi |
+| T2.6 | **Riesporta dal foglio** (nuove ancore: efficienza 0,6, danno dei nemici +25%, G = 3, divorata × 1,5 in Forme fattura cella D6, *Ricordo* con `esilia`) e implementa il potenziamento della forma divorata (× 1,5 sui valori dell'intenzione indicata, oltre ai moltiplicatori globali). Validatore a zero errori | JSON rigenerati, validatore verde, test sulla forma divorata |
+| T2.7 | **Rifai la simulazione** e aggiorna `docs/report-simulazione.md` con una tabella **prima / dopo** (turni medi, vita persa, casa persa) e le osservazioni. Obiettivo indicativo per le Masciare: circa 4 turni, 10-15% di vita persa. Non correggere i numeri: solo misurare | Report aggiornato con il confronto |
+
+Alla fine: diario aggiornato con riassunto e domande, push del ramo, nessun merge.
