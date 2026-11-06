@@ -15,6 +15,7 @@ var mano: Array[Carta] = []
 var scarti: Array[Carta] = []
 var esilio: Array[Carta] = []
 var rubate: Array[Carta] = []  ## rubate dai nemici per il resto del combattimento
+var ultima_mano: Array[Carta] = []  ## la mano scartata a fine turno (serve al furto)
 
 var energia: int = 0
 var mano_dimensione: int = 5   ## carte pescate a inizio turno (dipende dall'età)

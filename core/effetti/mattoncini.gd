@@ -19,6 +19,38 @@ static func esegui(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) 
 			_danno(c, effetto, ctx)
 		"blocco":
 			_blocco(c, effetto, ctx)
+		"cura":
+			for b in bersagli(c, effetto, ctx):
+				c.cura(b, c.valore_effetto(effetto, ctx, b))
+		"pesca":
+			c.pesca(int(effetto.get("valore", 1)))
+		"energia":
+			c.stato.energia = maxi(0, c.stato.energia + int(effetto.get("valore", 1)))
+		"applica_stato":
+			for b in bersagli(c, effetto, ctx):
+				c.applica_stato(b, str(effetto["stato"]), int(effetto.get("valore", 1)))
+		"rimuovi_stato":
+			for b in bersagli(c, effetto, ctx):
+				var quante: Variant = effetto.get("valore", "tutte")
+				c.rimuovi_stato(b, str(effetto["stato"]), -1 if str(quante) == "tutte" else int(quante))
+		"aggiungi_carta":
+			_aggiungi_carta(c, effetto)
+		"scarta":
+			_scarta(c, effetto, ctx)
+		"esilia":
+			_esilia(c, effetto, ctx)
+		"annulla_intenzione":
+			for b in bersagli(c, effetto, ctx):
+				if b is Nemico:
+					c.annulla_intenzione(b as Nemico)
+		"riprendi_dagli_scarti":
+			_riprendi(c, effetto, ctx)
+		"ruba_carta":
+			if ctx.sorgente is Nemico:
+				_ruba(c, effetto, ctx.sorgente as Nemico)
+		"evoca":
+			for i in int(effetto.get("valore", 1)):
+				c.evoca(str(effetto["nemico"]))
 		_:
 			push_error("Mattoncino sconosciuto: " + tipo)
 
@@ -80,3 +112,108 @@ static func _danno(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) 
 static func _blocco(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
 	for b in bersagli(c, effetto, ctx):
 		c.aggiungi_blocco(b, c.valore_effetto(effetto, ctx, b))
+
+
+## Aggiunge copie di una carta: "dove" = mazzo (posizione casuale), mano o scarti.
+static func _aggiungi_carta(c: Combattimento, effetto: Dictionary) -> void:
+	var s := c.stato
+	for i in int(effetto.get("valore", 1)):
+		var carta := s.nuova_carta(str(effetto["carta"]))
+		match str(effetto.get("dove", "mazzo")):
+			"mano":
+				if s.mano.size() < s.regole.mano_limite:
+					s.mano.append(carta)
+				else:
+					s.scarti.append(carta)
+			"scarti":
+				s.scarti.append(carta)
+			_:
+				s.mazzo.insert(s.casuale.intero(0, s.mazzo.size()), carta)
+		c.registro.aggiungi(s.turno, "carta_aggiunta", {"carta": carta.id, "uid": carta.uid, "dove": effetto.get("dove", "mazzo")})
+
+
+## Scarta carte dalla mano: "modo" = scelta (scelte.scarta = [uid]) o casuale.
+static func _scarta(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
+	var s := c.stato
+	var scelte := _carte_scelte(s.mano, effetto, ctx, "scarta", str(effetto.get("modo", "scelta")) == "casuale", s.casuale)
+	for carta in scelte:
+		s.mano.erase(carta)
+		s.scarti.append(carta)
+		c.registro.aggiungi(s.turno, "scartata", {"carta": carta.id, "uid": carta.uid})
+
+
+## Esilia: bersaglio "se" = la carta giocata; "mano" = carte scelte dalla mano (scelte.esilia).
+static func _esilia(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
+	var s := c.stato
+	if str(effetto.get("bersaglio", "se")) == "se":
+		if ctx.carta != null:
+			ctx.esilia_carta = true
+		return
+	for carta in _carte_scelte(s.mano, effetto, ctx, "esilia", false, s.casuale):
+		s.mano.erase(carta)
+		s.esilio.append(carta)
+		c.registro.aggiungi(s.turno, "esiliata", {"carta": carta.id, "uid": carta.uid})
+
+
+## Riprende carte dagli scarti in mano (scelte.riprendi); senza scelta, l'ultima scartata.
+static func _riprendi(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
+	var s := c.stato
+	var n := int(effetto.get("valore", 1))
+	var carte: Array[Carta] = []
+	if ctx.scelte.has("riprendi"):
+		carte = _carte_scelte(s.scarti, effetto, ctx, "riprendi", false, s.casuale)
+	else:
+		for i in mini(n, s.scarti.size()):
+			carte.append(s.scarti[s.scarti.size() - 1 - i])
+	for carta in carte:
+		if s.mano.size() >= s.regole.mano_limite:
+			break
+		s.scarti.erase(carta)
+		s.mano.append(carta)
+		c.registro.aggiungi(s.turno, "ripresa", {"carta": carta.id, "uid": carta.uid})
+
+
+## Un nemico ruba carte a caso per il resto del combattimento.
+## "da" = mano: nel turno dei nemici la mano è già scartata, quindi ruba tra le carte
+## della mano appena scartata (ancora negli scarti). "da" = mazzo: dal mazzo.
+static func _ruba(c: Combattimento, effetto: Dictionary, ladro: Nemico) -> void:
+	var s := c.stato
+	var da_mazzo := str(effetto.get("da", "mano")) == "mazzo"
+	for i in int(effetto.get("valore", 1)):
+		var candidate: Array[Carta] = []
+		if da_mazzo:
+			candidate = s.mazzo.duplicate()
+		elif not s.mano.is_empty():
+			candidate = s.mano.duplicate()
+		else:
+			candidate = s.ultima_mano.filter(func(x: Carta) -> bool: return s.scarti.has(x))
+		if candidate.is_empty():
+			return
+		var carta: Carta = candidate[s.casuale.indice(candidate.size())]
+		s.mazzo.erase(carta)
+		s.mano.erase(carta)
+		s.scarti.erase(carta)
+		s.rubate.append(carta)
+		ladro.carte_rubate.append(carta.uid)
+		c.registro.aggiungi(s.turno, "rubata", {"carta": carta.id, "uid": carta.uid, "da": c.nome_tecnico(ladro)})
+
+
+## Sceglie fino a "valore" carte da una zona: dalle scelte del giocatore, a caso, o le prime.
+static func _carte_scelte(zona: Array[Carta], effetto: Dictionary, ctx: ContestoEffetto, chiave: String, casuale: bool, rng: Casuale) -> Array[Carta]:
+	var n := int(effetto.get("valore", 1))
+	var risultato: Array[Carta] = []
+	if casuale:
+		var copia := zona.duplicate()
+		rng.mescola(copia)
+		for i in mini(n, copia.size()):
+			risultato.append(copia[i])
+		return risultato
+	if ctx.scelte.has(chiave):
+		for uid in ctx.scelte[chiave]:
+			for carta in zona:
+				if carta.uid == int(uid) and risultato.size() < n:
+					risultato.append(carta)
+		return risultato
+	for i in mini(n, zona.size()):
+		risultato.append(zona[i])
+	return risultato

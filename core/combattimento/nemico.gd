@@ -6,6 +6,8 @@ var uid: int
 var dati: Dictionary
 var intenzione: Dictionary = {}   ## intenzione mostrata per il prossimo turno
 var passo_sequenza: int = 0       ## posizione nella sequenza (comportamento "sequenza")
+var intenzione_annullata: bool = false
+var carte_rubate: Array[int] = []  ## uid delle carte rubate in questo combattimento
 
 
 func _init(p_uid: int = 0, p_dati: Dictionary = {}, p_vita_max: int = -1) -> void:

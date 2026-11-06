@@ -33,6 +33,72 @@
       "vita": 500,
       "comportamento": "sequenza",
       "intenzioni": []
+    },
+    {
+      "id": "ladro",
+      "nome": "test.ladro",
+      "ruolo": "disturbatore",
+      "livello": "normale",
+      "vita": 40,
+      "comportamento": "sequenza",
+      "intenzioni": [
+        {
+          "id": "furto",
+          "tipo": "speciale",
+          "effetti": [
+            {
+              "tipo": "ruba_carta",
+              "da": "mano",
+              "valore": 1,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evocatore",
+      "nome": "test.evocatore",
+      "ruolo": "oppressore",
+      "livello": "normale",
+      "vita": 40,
+      "comportamento": "sequenza",
+      "intenzioni": [
+        {
+          "id": "chiamata",
+          "tipo": "speciale",
+          "effetti": [
+            {
+              "tipo": "evoca",
+              "nemico": "fantoccio",
+              "valore": 1,
+              "bersaglio": "se"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inarrestabile",
+      "nome": "test.inarrestabile",
+      "ruolo": "assalitore",
+      "livello": "normale",
+      "vita": 40,
+      "comportamento": "sequenza",
+      "intenzioni": [
+        {
+          "id": "colpo_certo",
+          "tipo": "attacco",
+          "non_annullabile": true,
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 9,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

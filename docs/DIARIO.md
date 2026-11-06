@@ -6,7 +6,7 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 (da compilare alla fine del piano o quando l'agente si ferma)
 
 ## Domande per Giovanni
-(nessuna per ora)
+1. **Furto della Janara Madre "dalla mano"**: la mano si scarta a fine turno, quindi nel turno dei nemici è vuota. Per ora la Janara Madre ruba una carta a caso **tra quelle della mano appena scartata** (`ruba_carta` con `da: mano`). Alternative: rubare dal mazzo, oppure rubare all'inizio del tuo turno dopo la pesca. Quale preferisci?
 
 ## Scelte prese da solo
 - **Godot non è in `/Applications`**: l'eseguibile usato è `/Users/giovannibeccaro/Downloads/Godot.app/Contents/MacOS/Godot` (4.7.2). Conviene spostarlo in `/Applications` (i comandi in `docs/COMANDI.md` usano una variabile `GODOT`, facile da cambiare).
@@ -21,6 +21,13 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.3 — Mattoncini ✅
+- `core/effetti/mattoncini.gd`: danno (nemico, tutti, casuale, `percentuale`, `ignora_blocco`), blocco (se, culla, `se_o_culla` scelto con `scelte.se_o_culla`), cura, pesca, energia, applica_stato, rimuovi_stato (numero o `"tutte"`), aggiungi_carta (`dove`: mazzo/mano/scarti), scarta (`modo`: scelta/casuale), esilia (`bersaglio`: se = la carta giocata, mano = carte scelte), annulla_intenzione (rispetta `non_annullabile`), riprendi_dagli_scarti, ruba_carta (`da`: mano/mazzo), evoca (`nemico`, limite di nemici in campo).
+- Le scelte del giocatore arrivano in `gioca_carta(uid, scelte)`: `nemico` (uid), `se_o_culla`, `scarta`/`esilia`/`riprendi` (liste di uid). Senza scelta il motore usa un valore predefinito (primo nemico vivo, "se", prime carte, ultima scartata).
+- Test: `test/effetti/test_mattoncini.gd` (46 test, compresi blocco che assorbe tutto, bersaglio morto, mazzo e scarti vuoti, limite della mano, culla a 0).
+- `strumenti/test.sh` ora fallisce anche se uno script ha un errore di sintassi: GUT da solo saltava il file e diceva "tutti verdi".
+- Nota Godot: il progetto tratta come errore l'avviso "tipo dedotto da un Variant" (`var x := array.back()`); in quei casi serve il tipo esplicito (`var x: Carta = ...`).
 
 ### T1.2 — Ciclo del turno ✅
 - `Combattimento`: `inizia()`, `gioca_carta(uid, scelte)`, `termina_turno()`, `finito()`. Inizio turno: blocco ridotto (quota in `RegoleCombattimento.quota_blocco_mantenuta`, 0,5 = dimezzato, 0 = svanisce), 3 energia (non si accumula), pesca fino alla mano dell'età. Fine turno: scarto della mano, turno dei nemici (ognuno riduce il proprio blocco, esegue l'intenzione mostrata), poi i nemici rivelano la successiva.

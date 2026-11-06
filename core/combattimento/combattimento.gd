@@ -100,6 +100,7 @@ func termina_turno() -> void:
 	if finito():
 		return
 	registro.aggiungi(stato.turno, "fine_turno", {"chi": "giocatore"})
+	stato.ultima_mano = stato.mano.duplicate()
 	while not stato.mano.is_empty():
 		stato.scarti.append(stato.mano.pop_front())
 	_turno_dei_nemici()
@@ -162,17 +163,65 @@ func infliggi_danno(bersaglio: Combattente, valore: int, ignora_blocco: bool, so
 		bersaglio.blocco -= assorbito
 	var subito := mini(valore - assorbito, bersaglio.vita)
 	bersaglio.vita -= subito
-	registro.aggiungi(stato.turno, "danno", {"da": _nome(sorgente), "a": _nome(bersaglio),
+	registro.aggiungi(stato.turno, "danno", {"da": nome_tecnico(sorgente), "a": nome_tecnico(bersaglio),
 		"valore": valore, "assorbito": assorbito, "subito": subito, "vita": bersaglio.vita})
 	if bersaglio.vita <= 0:
 		_a_zero(bersaglio)
+
+
+func cura(bersaglio: Combattente, valore: int) -> void:
+	if not bersaglio.e_vivo() or valore <= 0:
+		return
+	var curata := mini(valore, bersaglio.vita_max - bersaglio.vita)
+	bersaglio.vita += curata
+	registro.aggiungi(stato.turno, "cura", {"a": nome_tecnico(bersaglio), "valore": valore, "curata": curata, "vita": bersaglio.vita})
+
+
+func applica_stato(bersaglio: Combattente, id_stato: String, cariche: int) -> void:
+	if cariche <= 0 or not bersaglio.e_vivo():
+		return
+	bersaglio.stati[id_stato] = bersaglio.cariche(id_stato) + cariche
+	registro.aggiungi(stato.turno, "stato_applicato", {"a": nome_tecnico(bersaglio), "stato": id_stato, "cariche": cariche, "totale": bersaglio.cariche(id_stato)})
+
+
+## Toglie cariche di uno stato; quante < 0 = tutte.
+func rimuovi_stato(bersaglio: Combattente, id_stato: String, quante: int) -> void:
+	var prima := bersaglio.cariche(id_stato)
+	if prima <= 0:
+		return
+	var dopo := 0 if quante < 0 else maxi(0, prima - quante)
+	if dopo == 0:
+		bersaglio.stati.erase(id_stato)
+	else:
+		bersaglio.stati[id_stato] = dopo
+	registro.aggiungi(stato.turno, "stato_rimosso", {"a": nome_tecnico(bersaglio), "stato": id_stato, "tolte": prima - dopo, "totale": dopo})
+
+
+func annulla_intenzione(n: Nemico) -> void:
+	if n.intenzione.is_empty() or bool(n.intenzione.get("non_annullabile", false)):
+		registro.aggiungi(stato.turno, "annullamento_fallito", {"nemico": nome_tecnico(n)})
+		return
+	n.intenzione_annullata = true
+	registro.aggiungi(stato.turno, "intenzione_annullata", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
+
+
+## Fa entrare un nuovo nemico (rispetta il limite di nemici in campo). Restituisce il nemico o null.
+func evoca(id_nemico: String) -> Nemico:
+	if stato.nemici_vivi().size() >= stato.regole.nemici_max:
+		registro.aggiungi(stato.turno, "evocazione_fallita", {"nemico": id_nemico})
+		return null
+	var n := stato.nuovo_nemico(id_nemico)
+	stato.nemici.append(n)
+	registro.aggiungi(stato.turno, "evocato", {"nemico": nome_tecnico(n)})
+	_rivela_intenzione(n, stato.turno + 1)
+	return n
 
 
 func aggiungi_blocco(bersaglio: Combattente, valore: int) -> void:
 	if valore <= 0:
 		return
 	bersaglio.blocco += valore
-	registro.aggiungi(stato.turno, "blocco", {"a": _nome(bersaglio), "valore": valore, "totale": bersaglio.blocco})
+	registro.aggiungi(stato.turno, "blocco", {"a": nome_tecnico(bersaglio), "valore": valore, "totale": bersaglio.blocco})
 
 
 # === Ciclo del turno ===========================================================
@@ -193,8 +242,11 @@ func _turno_dei_nemici() -> void:
 		if not n.e_vivo():
 			continue
 		_riduci_blocco(n)
-		if not n.intenzione.is_empty():
-			registro.aggiungi(stato.turno, "intenzione_eseguita", {"nemico": _nome(n), "intenzione": n.intenzione.get("id", "")})
+		if n.intenzione_annullata:
+			n.intenzione_annullata = false
+			registro.aggiungi(stato.turno, "intenzione_saltata", {"nemico": nome_tecnico(n)})
+		elif not n.intenzione.is_empty():
+			registro.aggiungi(stato.turno, "intenzione_eseguita", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
 			Mattoncini.esegui_lista(self, n.intenzione.get("effetti", []), ContestoEffetto.new(n))
 		if finito():
 			return
@@ -204,7 +256,7 @@ func _turno_dei_nemici() -> void:
 
 func _rivela_intenzione(n: Nemico, turno: int) -> void:
 	n.intenzione = IntelligenzaNemici.scegli(n, turno, stato.casuale)
-	registro.aggiungi(stato.turno, "intenzione", {"nemico": _nome(n), "intenzione": n.intenzione.get("id", ""), "per_turno": turno})
+	registro.aggiungi(stato.turno, "intenzione", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", ""), "per_turno": turno})
 
 
 ## All'inizio del turno di chi lo possiede il blocco si riduce (dimezzato, arrotondato per difetto).
@@ -229,7 +281,7 @@ func _a_zero(c: Combattente) -> void:
 		stato.culla.vita = maxi(1, roundi(stato.culla.vita_max / 2.0))
 		registro.aggiungi(stato.turno, "culla_a_zero", {"tratti_negativi": stato.culla.tratti_negativi, "vita": stato.culla.vita})
 	elif c is Nemico:
-		registro.aggiungi(stato.turno, "morte", {"nemico": _nome(c)})
+		registro.aggiungi(stato.turno, "morte", {"nemico": nome_tecnico(c)})
 		(c as Nemico).intenzione = {}
 		if stato.nemici_vivi().is_empty():
 			_termina(Esito.VITTORIA)
@@ -250,7 +302,7 @@ func _serve_nemico(carta: Carta) -> bool:
 
 
 ## Nome tecnico per il registro (id e uid), non testo di gioco.
-func _nome(c: Combattente) -> String:
+func nome_tecnico(c: Combattente) -> String:
 	if c is Nemico:
 		return "%s#%d" % [c.id, (c as Nemico).uid]
 	return c.id
