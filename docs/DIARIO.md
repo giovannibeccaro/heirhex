@@ -3,26 +3,23 @@
 Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al più vecchio.
 
 ## Riassunto per Giovanni
-*Piano completato il 2026-11-06: tappe 0, 1 e 2, tutti i compiti fatti. Ramo `autonomo/tappe-0-2`, pushato su GitHub, **nessun merge su `main`**.*
+*Tappa 2b completata il 2026-11-06. Ramo `autonomo/correzioni-revisione` (creato da `autonomo/tappe-0-2`), pushato su GitHub, **nessun merge**.*
 
-**Cosa funziona**
-- **Progetto**: struttura delle cartelle, GUT 9.7.1, test headless con `strumenti/test.sh` (**163 test verdi**), testi tradotti con `tr()`, preset Web (mancano solo i modelli di esportazione).
-- **Motore di combattimento** (`core/`, solo classi pure, nessun nodo): turno completo con blocco dimezzato (quota configurabile), energia, mano per età, rimescolamento; culla con tratto negativo; 15 mattoncini; Fattura, Paura, Malocchio e Radici scritti **come dati** (`data/manuali/stati.json`); sistema unico dei modificatori; eventi di gioco a cui si agganciano stati, modificatori e lasciti; nemici a sequenza e pesati, forme della fattura, fasi del Tiranno, ultimo rintocco; esito, riepilogo e registro leggibile. Stesso seme = stessa partita, registro compreso.
-- **Dati**: `strumenti/esporta.py` legge il foglio e scrive i JSON; caricatore con controllo dello schema; validatore (0 errori sui dati attuali); simulazione di 1000 combattimenti per nemico con report.
-- Comandi spiegati in `docs/COMANDI.md`.
+**Cosa è cambiato (Tappa 2b)**
+- **T2.5 — La casa** (D59): la culla è diventata la casa di famiglia, presente in tutte le età. Rinominata ovunque (codice, dati, testi, test); tolta la logica "inattiva in giovinezza".
+- **T1.9 — Identificatori centralizzati** (D57): `core/id.gd` raccoglie tutti gli identificatori interni come `StringName`. Il caricatore converte i JSON e rifiuta i valori sconosciuti, e ha subito trovato una riga del foglio esportata male (il moltiplicatore 1,5 letto come una quarta forma).
+- **T2.6 — Dati e forma divorata** (D58, D60): dati riesportati (nemici 54 di vita, danni +25%, G = 3, *Ricordo* con `esilia`); l'intenzione potenziata della forma divorata vale × 1,5 oltre ai moltiplicatori globali.
+- **T2.7 — Simulazione**: report con il confronto prima / dopo. L'obiettivo dei 4 turni ora sta tra la strategia prudente e quella aggressiva per tutti i nemici; il Lupenaro resta il più duro.
+- 175 test verdi, validatore a 0 errori (1 avviso noto: *Il nome del morto*).
 
-**Cosa serve da te**
-1. Rispondere alle domande qui sotto: le prime tre toccano il design e il bilanciamento.
-2. Rivedere il ramo e decidere il merge su `main`.
-3. Installare i modelli di esportazione di Godot 4.7.2 (Editor → Gestisci modelli di esportazione) quando servirà il primo playtest web, cioè dalla tappa 3.
-4. Facoltativo: spostare `Godot.app` da Download ad Applicazioni.
-5. Le traduzioni inglesi di carte e nemici in `testi.csv` sono vuote.
-
-**Il dato più importante emerso**: con il mazzo base i combattimenti durano 5-8 turni invece di 3, e costano pochissima vita (vedi domanda 1 e `docs/report-simulazione.md`).
+**Cosa serve da te**: rispondere alle domande qui sotto, rivedere il ramo e decidere il merge (questo ramo contiene anche le tappe 0-2).
 
 ## Domande per Giovanni
 ### Tappa 2b (nuove)
 1. **Forma divorata**: va bene potenziare l'intenzione con più danno quando i dati non ne indicano una? In alternativa si aggiunge al foglio una colonna "potenziata in forma divorata" nella scheda Intenzioni (lo script la esporterebbe in `intenzioni_potenziate`).
+2. **Lupenaro**: con il Morso della luna a 28 è di gran lunga il nemico più duro (16-21% di vita persa, 7-8 turni con la strategia prudente). È voluto, visto che insegna a leggere le intenzioni, o va avvicinato agli altri?
+3. **Pantafica e Munaciello** tolgono poca vita diretta (0-10%): il loro costo sta in Fattura, Paura e Dispetto, che una simulazione di un solo combattimento non vede. Ti serve una misura diversa per loro (es. Fattura accumulata in una vita), da fare quando ci sarà la tappa della vita?
+4. **Nomi dei campi**: in `Id` ho messo tutti i *valori* degli identificatori, non i *nomi dei campi* dello schema (`"valore"`, `"bersaglio"`…). Ti va bene così? (Vedi "Scelte prese da solo".)
 
 ### Tappe 0-2 (chiuse)
 **Risposte del 2026-11-06 in `docs/RISPOSTE.md`.** Le domande qui sotto sono chiuse.
@@ -63,6 +60,11 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.7 — Simulazione rifatta ✅ (fine Tappa 2b)
+- `docs/report-simulazione.md` rigenerato con i dati nuovi (1000 combattimenti per nemico e per scenario) e con la sezione **Prima / dopo** (turni medi, vita persa, casa persa) composta dal report precedente.
+- `strumenti/simula.gd`: nuovo parametro `--turni-obiettivo` (per le Masciare 4, D58; senza parametro l'ancora del foglio).
+- **Risultati**: strategia "difende sempre" 4,2-5,8 turni contro Janara, Pantafica e Munaciello (prima 5-8), Lupenaro ancora 7,5-8,4; strategia "solo attacco" 3,3-3,5 turni per tutti (prima 4-5). L'obiettivo dei 4 turni ora sta **dentro la forbice** tra le due strategie per tutti i nemici. Vita persa: Lupenaro 16-21% (sopra la fascia), Pantafica 1-10%, Munaciello 0-5%; la Janara colpisce solo la casa (1-15 punti su 35, mai a 0). Nessun numero corretto.
 
 ### T2.6 — Riesportazione e forma divorata ✅ (Tappa 2b, D58, D60)
 - Dati riesportati dal foglio (in T2.5, poi confermati senza differenze): efficienza 0,6 → nemici normali **54** di vita, Tiranno **432**; danni dei nemici +25% (Morso 15, Morso della luna 28, Colpo 18…); G = 3 nell'economia; *Ricordo di {antenato}* con `esilia`; scheda Forme fattura con `divorata.intenzione_potenziata = 1.5` (cella D6).

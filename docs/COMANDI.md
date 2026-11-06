@@ -74,6 +74,7 @@ La logica sta in `core/dati/validatore.gd` (`Validatore`), così il gioco potrà
 
 ## Simulazione di bilanciamento
 ```sh
-godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000 --casata masciare
+godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000 --casata masciare --turni-obiettivo 4
 ```
+`--turni-obiettivo` è la durata con cui confrontare i risultati: senza, si usa l'ancora del foglio (3, mazzo medio); per le Masciare l'obiettivo è circa 4 (D58).
 Gioca i combattimenti con il mazzo base della casata contro ogni nemico normale (giovinezza ed età adulta, più una variante di riferimento che attacca soltanto) con la strategia semplice di `core/simulazione/giocatore_automatico.gd`, e riscrive `docs/report-simulazione.md` (la sezione Osservazioni va poi riscritta a mano). Circa 15 secondi per 1000 combattimenti per scenario.

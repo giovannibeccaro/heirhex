@@ -1,6 +1,7 @@
 extends SceneTree
 ## Simulazione di bilanciamento (vedi docs/COMANDI.md):
-##   godot --headless --path . -s res://strumenti/simula.gd [-- --combattimenti 1000 --casata masciare]
+##   godot --headless --path . -s res://strumenti/simula.gd [-- --combattimenti 1000 --casata masciare --turni-obiettivo 4]
+## --turni-obiettivo: durata con cui confrontare i risultati (predefinita: l'ancora del foglio, per il mazzo medio).
 ## Gioca molti combattimenti con il mazzo base di una casata contro ogni nemico normale,
 ## con la strategia semplice di GiocatoreAutomatico, e scrive docs/report-simulazione.md.
 ## Non cambia nessun numero: misura e riporta.
@@ -15,6 +16,7 @@ func _initialize() -> void:
 	var argomenti := OS.get_cmdline_user_args()
 	var quanti := int(_argomento(argomenti, "--combattimenti", "1000"))
 	var casata := _argomento(argomenti, "--casata", "masciare")
+	var turni_obiettivo := _argomento(argomenti, "--turni-obiettivo", "")
 	var caricatore := Caricatore.new()
 	var catalogo := caricatore.carica()
 	if catalogo == null:
@@ -44,7 +46,7 @@ func _initialize() -> void:
 	for id in nemici:
 		risultati[SENZA_DIFESA][id] = _simula(catalogo, regole, mazzo, id, Id.ETA_ADULTA, quanti, false)
 	var secondi := (Time.get_ticks_msec() - inizio) / 1000.0
-	_scrivi_report(b, casata, mazzo.size(), nemici, risultati, quanti, secondi)
+	_scrivi_report(b, casata, mazzo.size(), nemici, risultati, quanti, secondi, turni_obiettivo)
 	print("Report scritto in %s (%.1f s)" % [REPORT, secondi])
 	quit(0)
 
@@ -76,9 +78,9 @@ func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemi
 	return t
 
 
-func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, risultati: Dictionary, quanti: int, secondi: float) -> void:
+func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, risultati: Dictionary, quanti: int, secondi: float, turni_argomento: String) -> void:
 	var a: Dictionary = b["ancore"]
-	var turni_obiettivo := float(a["turni_normale"])
+	var turni_obiettivo := float(a["turni_normale"]) if turni_argomento == "" else float(turni_argomento)
 	var min_vita := float(a["vita_persa_min"]) * 100.0
 	var max_vita := float(a["vita_persa_max"]) * 100.0
 	var r := PackedStringArray()
@@ -90,7 +92,7 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 	r.append("- Mazzo base della casata **%s** (%d carte), %d combattimenti per nemico e per età (semi da 1 a %d), forma base dei nemici." % [casata, carte, quanti, quanti])
 	r.append("- Età: vita e carte in mano dal foglio (scheda Età); casa (%d) in tutte le età; vita piena a inizio combattimento." % int(b["casa"]["vita"]))
 	r.append("- Strategia (`core/simulazione/giocatore_automatico.gd`): se un'intenzione visibile farà danni a te o alla casa oltre il blocco, gioca la carta che blocca di più (prima te, poi la casa); altrimenti la carta che fa più danni, sul nemico con meno vita; poi il resto.")
-	r.append("- Ancore di confronto (scheda Ancore): **%d turni** per un combattimento normale, **%d-%d%%** di vita persa." % [int(turni_obiettivo), int(min_vita), int(max_vita)])
+	r.append("- Obiettivo di confronto: **%s turni** per un combattimento normale (ancora del foglio: %d, per un mazzo medio tra le casate) e **%d-%d%%** di vita persa (scheda Ancore)." % [str(turni_obiettivo), int(a["turni_normale"]), int(min_vita), int(max_vita)])
 	r.append("- Tempo di calcolo: %.1f s." % secondi)
 	var titoli := {Id.GIOVINEZZA: "Giovinezza", Id.ETA_ADULTA: "Età adulta",
 		SENZA_DIFESA: "Riferimento: età adulta, strategia che attacca soltanto"}
@@ -98,7 +100,7 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 		r.append("")
 		r.append("## " + str(titoli[eta]))
 		r.append("")
-		r.append("| Nemico | Vittorie | Turni medi | Turni (min–max) | Vita persa media | Vita persa (10°–90° perc.) | Rispetto alle ancore | Casa persa media | Tratti negativi | Fattura a fine combattimento |")
+		r.append("| Nemico | Vittorie | Turni medi | Turni (min–max) | Vita persa media | Vita persa (10°–90° perc.) | Rispetto all'obiettivo | Casa persa media | Tratti negativi | Fattura a fine combattimento |")
 		r.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
 		for id in nemici:
 			var t: Dictionary = risultati[eta][id]
@@ -112,7 +114,7 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 				vita_media, _percentile(t["vita_persa"], 0.1) * 100.0, _percentile(t["vita_persa"], 0.9) * 100.0,
 				", ".join(giudizio), _media(t["casa_persa"]), 100.0 * t["tratti"] / quanti, _media(t["fattura"])])
 	r.append("")
-	r.append("Legenda: \"turni nella norma\" = media entro ±0,5 dall'ancora; \"vita nella norma\" = media nella fascia delle ancore.")
+	r.append("Legenda: \"turni nella norma\" = media entro ±0,5 dall'obiettivo; \"vita nella norma\" = media nella fascia delle ancore. Casa persa: punti di vita della casa (35) persi in media.")
 	r.append("")
 	r.append("## Osservazioni")
 	r.append("(scritte a mano dopo l'esecuzione, vedi sotto)")
