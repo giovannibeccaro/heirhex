@@ -1,1 +1,17 @@
-{ "schema": 1, "stati": [] }
+{
+  "schema": 1,
+  "stati": [
+    { "id": "brucia", "nome": "test.brucia", "tipo": "durata",
+      "agganci": [ { "quando": "inizio_turno", "effetti": [ { "tipo": "danno", "valore": 3, "bersaglio": "se", "ignora_blocco": true } ] } ] },
+    { "id": "accumulo", "nome": "test.accumulo", "tipo": "soglia", "soglia": 3,
+      "agganci": [ { "quando": "soglia_raggiunta", "effetti": [
+        { "tipo": "danno", "valore": 10, "bersaglio": "se", "ignora_blocco": true },
+        { "tipo": "rimuovi_stato", "stato": "accumulo", "valore": "tutte", "bersaglio": "se" } ] } ] },
+    { "id": "vigore", "nome": "test.vigore", "tipo": "intensita",
+      "modificatori": [ { "bersaglio": { "tipo": "carta" }, "proprieta": "valore_effetti", "operazione": "somma", "valore": 1, "per_carica": true } ] },
+    { "id": "fragile", "nome": "test.fragile", "tipo": "durata",
+      "modificatori": [ { "bersaglio": { "tipo": "se" }, "proprieta": "danno_subito", "operazione": "moltiplica", "valore": 2 } ] },
+    { "id": "eco", "nome": "test.eco", "tipo": "intensita",
+      "agganci": [ { "quando": "carta_giocata", "effetti": [ { "tipo": "blocco", "valore": 1, "bersaglio": "se" } ] } ] }
+  ]
+}

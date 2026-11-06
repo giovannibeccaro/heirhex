@@ -7,6 +7,7 @@ enum Esito { IN_CORSO, VITTORIA, SCONFITTA }
 
 var stato: StatoCombattimento
 var registro := Registro.new()
+var eventi := EventiGioco.new()
 var esito: Esito = Esito.IN_CORSO
 
 
@@ -18,6 +19,7 @@ var esito: Esito = Esito.IN_CORSO
 ##   culla: { vita, vita_max, attiva }
 ##   mano: carte pescate a inizio turno (età)
 ##   modificatori: Array di modificatori (dizionari) attivi in questo combattimento
+##   agganci: Array di { quando, effetti } eseguiti dal giocatore (lasciti, amuleti…)
 func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattimento = null) -> void:
 	var casuale := Casuale.new(int(impostazioni.get("seme", 0)))
 	stato = StatoCombattimento.new(catalogo, casuale, regole)
@@ -26,6 +28,7 @@ func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattim
 	stato.mano_dimensione = int(impostazioni.get("mano", 5))
 	for m in impostazioni.get("modificatori", []):
 		stato.modificatori.aggiungi_da_dizionario(m)
+	stato.agganci = impostazioni.get("agganci", []).duplicate()
 	for voce in impostazioni.get("mazzo", []):
 		stato.mazzo.append(_crea_carta(voce))
 	for voce in impostazioni.get("nemici", []):
@@ -65,7 +68,12 @@ func _crea_nemico(voce: Variant) -> Nemico:
 ## Avvia il combattimento: i nemici mostrano l'intenzione e inizia il primo turno.
 func inizia() -> void:
 	registro.aggiungi(0, "inizio_combattimento", {"nemici": stato.nemici.map(func(n: Nemico) -> String: return n.id)})
-	for n in stato.nemici:
+	emetti(EventiGioco.INIZIO_COMBATTIMENTO, {"chi": stato.giocatore})
+	for n in stato.nemici.duplicate():
+		emetti(EventiGioco.INIZIO_COMBATTIMENTO, {"chi": n})
+	if finito():
+		return
+	for n in stato.nemici_vivi():
 		_rivela_intenzione(n, 1)
 	_inizia_turno_giocatore()
 
@@ -95,6 +103,7 @@ func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
 	else:
 		stato.scarti.append(carta)
 	stato.giocate[carta.uid] = int(stato.giocate.get(carta.uid, 0)) + 1
+	emetti(EventiGioco.CARTA_GIOCATA, {"chi": stato.giocatore, "carta": carta})
 	return true
 
 
@@ -103,7 +112,9 @@ func termina_turno() -> void:
 	if finito():
 		return
 	registro.aggiungi(stato.turno, "fine_turno", {"chi": "giocatore"})
-	stato.modificatori.scadenza("turno")
+	emetti(EventiGioco.FINE_TURNO, {"chi": stato.giocatore})
+	if finito():
+		return
 	stato.ultima_mano = stato.mano.duplicate()
 	while not stato.mano.is_empty():
 		stato.scarti.append(stato.mano.pop_front())
@@ -133,7 +144,23 @@ func calcola(base: float, proprieta: String, tipo_oggetto: String, oggetto: Vari
 
 ## Modificatori che non stanno nella lista ma nascono dallo stato (es. gli stati con cariche).
 func modificatori_extra() -> Array[Modificatore]:
-	return []
+	return GestoreStati.modificatori(self)
+
+
+## Emette un evento di gioco: reagiscono gli stati, i modificatori a tempo, gli agganci esterni,
+## poi chi si è registrato con eventi.ascolta().
+func emetti(evento: String, dati: Dictionary) -> void:
+	GestoreStati.reagisci(self, evento, dati)
+	var chi: Variant = dati.get("chi")
+	if evento == EventiGioco.FINE_TURNO and chi == stato.giocatore:
+		stato.modificatori.scadenza("turno")
+	elif evento == EventiGioco.FINE_COMBATTIMENTO:
+		stato.modificatori.scadenza("combattimento")
+	if chi == null or chi == stato.giocatore:
+		for aggancio in stato.agganci:
+			if str(aggancio.get("quando", "")) == evento and not finito():
+				Mattoncini.esegui_lista(self, aggancio.get("effetti", []), ContestoEffetto.new(stato.giocatore))
+	eventi.emetti(evento, dati)
 
 
 ## Valore finale di un effetto (percentuale, modificatori della fonte e del bersaglio).
@@ -217,6 +244,7 @@ func applica_stato(bersaglio: Combattente, id_stato: String, cariche: int) -> vo
 		return
 	bersaglio.stati[id_stato] = bersaglio.cariche(id_stato) + cariche
 	registro.aggiungi(stato.turno, "stato_applicato", {"a": nome_tecnico(bersaglio), "stato": id_stato, "cariche": cariche, "totale": bersaglio.cariche(id_stato)})
+	GestoreStati.controlla_soglia(self, bersaglio, id_stato)
 
 
 ## Toglie cariche di uno stato; quante < 0 = tutte.
@@ -269,6 +297,8 @@ func _inizia_turno_giocatore() -> void:
 	stato.energia = maxi(0, roundi(calcola(stato.regole.energia_per_turno, "energia", "giocatore", stato.giocatore)))
 	var mano := roundi(calcola(stato.mano_dimensione, "mano", "giocatore", stato.giocatore))
 	pesca(maxi(0, mano - stato.mano.size()))
+	# Dopo la pesca, così gli stati che agiscono sulla mano (es. scartare) trovano le carte
+	emetti(EventiGioco.INIZIO_TURNO, {"chi": stato.giocatore})
 
 
 func _turno_dei_nemici() -> void:
@@ -278,12 +308,20 @@ func _turno_dei_nemici() -> void:
 		if not n.e_vivo():
 			continue
 		_riduci_blocco(n)
+		emetti(EventiGioco.INIZIO_TURNO, {"chi": n})
+		if finito():
+			return
+		if not n.e_vivo():
+			continue
 		if n.intenzione_annullata:
 			n.intenzione_annullata = false
 			registro.aggiungi(stato.turno, "intenzione_saltata", {"nemico": nome_tecnico(n)})
 		elif not n.intenzione.is_empty():
 			registro.aggiungi(stato.turno, "intenzione_eseguita", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
 			Mattoncini.esegui_lista(self, n.intenzione.get("effetti", []), ContestoEffetto.new(n))
+		if finito():
+			return
+		emetti(EventiGioco.FINE_TURNO, {"chi": n})
 		if finito():
 			return
 	for n in stato.nemici_vivi():
@@ -327,8 +365,8 @@ func _termina(e: Esito) -> void:
 	if finito():
 		return
 	esito = e
-	stato.modificatori.scadenza("combattimento")
 	registro.aggiungi(stato.turno, "fine_combattimento", {"esito": Esito.keys()[e].to_lower()})
+	emetti(EventiGioco.FINE_COMBATTIMENTO, {"esito": Esito.keys()[e].to_lower()})
 
 
 func _serve_nemico(carta: Carta) -> bool:

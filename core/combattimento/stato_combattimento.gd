@@ -6,6 +6,8 @@ var casuale: Casuale
 var regole: RegoleCombattimento
 var catalogo: Catalogo
 var modificatori := SistemaModificatori.new()
+## Agganci esterni (lasciti, amuleti, presenze): { quando, effetti }, eseguiti dal giocatore.
+var agganci: Array = []
 
 var giocatore: Combattente
 var culla: Culla

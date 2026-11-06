@@ -21,9 +21,17 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Ordine dei compiti**: T1.5 (modificatori) e T1.6 (agganci) prima di T1.4 (stati), perché Radici e Paura sono modificatori e Malocchio e Fattura reagiscono ad agganci. Un commit per compito resta.
 - **Più modificatori "imposta"** sulla stessa proprietà: vale l'ultimo aggiunto.
 - **Durata "turno"**: scade alla fine del turno del giocatore.
+- **Effetti a fine combattimento**: quando il combattimento è finito i mattoncini non si eseguono più; l'evento `fine_combattimento` serve agli ascoltatori esterni (la vita, le ricompense), non a effetti di carte o stati.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.6 — Agganci agli eventi di gioco ✅
+- `core/eventi/eventi_gioco.gd` (`EventiGioco`): eventi `inizio_combattimento`, `fine_combattimento`, `inizio_turno`, `fine_turno`, `carta_giocata`, `soglia_raggiunta`; `ascolta(evento, funzione)` per chi vuole agganciarsi da fuori (interfaccia, vita, future meccaniche).
+- `Combattimento.emetti()` è il punto unico: reagiscono gli stati, scadono i modificatori a tempo (`turno` alla fine del turno del giocatore, `combattimento` alla fine), partono gli agganci esterni (`impostazioni.agganci`, per Lascito, amuleti, presenze), poi gli ascoltatori.
+- `core/stati/gestore_stati.gd` (`GestoreStati`): regole generiche degli stati (intensità, durata che cala a fine turno di chi lo porta, soglia), agganci degli stati e modificatori degli stati (anche `per_carica`, e bersaglio `se` = chi porta lo stato).
+- `inizio_turno` del giocatore scatta **dopo** la pesca (così il Malocchio trova carte da scartare).
+- Test: `test/eventi/test_agganci.gd` (11 test) con stati di prova in `test/fixtures/stati.json`.
 
 ### T1.5 — Modificatori ✅ (fatto prima di T1.4: Radici e Paura ne hanno bisogno)
 - `core/modificatori/modificatore.gd` (`Modificatore`) e `sistema_modificatori.gd` (`SistemaModificatori`): un'unica forma `{fonte, bersaglio {tipo, filtro}, proprieta, operazione, valore, durata}`; ordine fisso somma → moltiplica → imposta; durate ordinate (la fine del combattimento toglie anche quelli del turno; restano `vita` e `stirpe`).
