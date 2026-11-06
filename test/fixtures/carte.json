@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "carte": [
+    { "id": "colpo", "nome": "test.colpo", "tipo": "attacco", "rarita": "base", "costo": 1,
+      "effetti": [ { "tipo": "danno", "valore": 10, "bersaglio": "nemico" } ] },
+    { "id": "colpo_grosso", "nome": "test.colpo_grosso", "tipo": "attacco", "rarita": "comune", "costo": 2,
+      "effetti": [ { "tipo": "danno", "valore": 20, "bersaglio": "nemico" } ] },
+    { "id": "riparo", "nome": "test.riparo", "tipo": "difesa", "rarita": "base", "costo": 1,
+      "effetti": [ { "tipo": "blocco", "valore": 7, "bersaglio": "se_o_culla" } ] },
+    { "id": "pesca_due", "nome": "test.pesca_due", "tipo": "abilita", "rarita": "comune", "costo": 1,
+      "effetti": [ { "tipo": "pesca", "valore": 2 } ] },
+    { "id": "sporco", "nome": "test.sporco", "tipo": "negativa", "rarita": "base", "costo": 0, "effetti": [] }
+  ]
+}

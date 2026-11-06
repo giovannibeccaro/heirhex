@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "nemici": [
+    { "id": "fantoccio", "nome": "test.fantoccio", "ruolo": "assalitore", "livello": "normale", "vita": 50,
+      "comportamento": "sequenza", "sequenza": ["pugno"],
+      "intenzioni": [
+        { "id": "pugno", "tipo": "attacco", "effetti": [ { "tipo": "danno", "valore": 5, "bersaglio": "giocatore" } ] }
+      ] }
+  ]
+}
