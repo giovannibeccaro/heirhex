@@ -6,6 +6,8 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 (da compilare alla fine del piano o quando l'agente si ferma)
 
 ## Domande per Giovanni
+6. **Ancora dei 3 turni** (dalla simulazione): con il mazzo base i combattimenti durano 5-8 turni. L'ancora vale per il mazzo base o per un mazzo di metà vita? Se vale per il mazzo base, o la vita dei nemici (72) è troppo alta o il mazzo base ha troppa poca offesa (4 attacchi su 10 carte). Vedi `docs/report-simulazione.md`.
+7. **Janara in giovinezza**: senza culla non fa danni. Va esclusa dalla giovinezza con `eta_comparsa`, oppure in giovinezza deve attaccare te?
 4. **Grani: G = 18 nel foglio, G = 3 in D54.** La scheda Economia ha ancora i valori vecchi (carta comune 45, rara 70…), mentre il registro decisioni dice G = 3 (comune 8, rara 12, unica 18). Ho esportato il foglio così com'è: va aggiornato il foglio?
 5. **Carte con effetti che il foglio non sa esprimere**: *Il nome del morto* (+4 danni per antenato) è esportata con soli 4 danni; *Ricordo di {antenato}* "si esilia dopo l'uso" è scritto solo nelle note. Per il secondo basterebbe aggiungere nel foglio un effetto `esilia` / `se` (come Pane e sale). Per il primo serve un mattoncino nuovo (contatore degli antenati) quando arriverà la stirpe.
 2. **Lingua del codice**: hai chiesto perché è in italiano. Seguo la convenzione di `CLAUDE.md` (identificatori e commenti in italiano, come il design e i dati). Se preferisci l'inglese conviene deciderlo presto: ora il cambio costa poco.
@@ -36,6 +38,11 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.4 — Simulazione ✅ (fine Tappa 2)
+- `core/simulazione/giocatore_automatico.gd` (`GiocatoreAutomatico`): la strategia semplice del piano (difende se l'intenzione è un attacco, altrimenti gioca la carta con più danni sul nemico più debole), più una variante "solo attacco" come riferimento. Test in `test/simulazione/`.
+- `strumenti/simula.gd`: 1000 combattimenti per nemico normale e per età (giovinezza ed età adulta), mazzo base delle Masciare, dati veri. 16 secondi in tutto.
+- **Risultati** (`docs/report-simulazione.md`): vittorie 100%; **turni medi 5-8** (ancora: 3); **vita persa 0-9%** (ancora: 10-15%). Anche attaccando soltanto si resta a 4-5 turni: il mazzo base fa circa 16-20 danni a turno, l'ancora ne presume 24. La Janara non toglie mai vita al giocatore (colpisce solo la culla). Nessun numero corretto, come da piano.
 
 ### T2.3 — Validatore ✅
 - `core/dati/validatore.gd` (`Validatore`): riferimenti (stati, carte, nemici evocati, intenzioni delle sequenze, mazzi base), tipi di effetto e bersagli (elenchi in `Mattoncini.TIPI` e `Mattoncini.BERSAGLI`, un'unica fonte), effetti fuori combattimento ammessi solo nel Lascito, eventi degli agganci, filtri e durate dei modificatori, chiavi di testo. Budget fuori soglia = avviso.

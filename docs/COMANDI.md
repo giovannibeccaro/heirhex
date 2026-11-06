@@ -71,3 +71,9 @@ Controlla: versioni di schema, riferimenti a id esistenti (stati, carte, nemici,
 Con `--correggi` le chiavi mancanti vengono aggiunte con il nome italiano provvisorio del foglio (`data/generati/testi_provvisori.csv`) e la colonna inglese vuota, da tradurre.
 Ordine consigliato dopo aver cambiato il foglio: `esporta.py` → `valida.sh --correggi` → `test.sh`.
 La logica sta in `core/dati/validatore.gd` (`Validatore`), così il gioco potrà eseguirla anche all'avvio in modalità debug.
+
+## Simulazione di bilanciamento
+```sh
+godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000 --casata masciare
+```
+Gioca i combattimenti con il mazzo base della casata contro ogni nemico normale (giovinezza ed età adulta, più una variante di riferimento che attacca soltanto) con la strategia semplice di `core/simulazione/giocatore_automatico.gd`, e riscrive `docs/report-simulazione.md` (la sezione Osservazioni va poi riscritta a mano). Circa 15 secondi per 1000 combattimenti per scenario.
