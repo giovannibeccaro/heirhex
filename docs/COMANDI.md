@@ -27,3 +27,21 @@ godot --headless --path . -s res://addons/gut/gut_cmdln.gd
 - La configurazione (cartella `test/`, prefisso `test_`, sottocartelle) sta in `.gutconfig.json`.
 
 I test si possono lanciare anche dall'editor: pannello **GUT** in basso (il plugin è attivo in Progetto → Impostazioni → Plugin).
+
+## Esportazione Web (playtest nel browser)
+Prerequisito, **una volta sola**: installare i modelli di esportazione di Godot 4.7.2 (circa 1 GB, non inclusi nel repository).
+In Godot: **Editor → Gestisci modelli di esportazione → Scarica e installa**.
+
+Poi:
+```sh
+mkdir -p build/web
+godot --headless --path . --export-release "Web" build/web/index.html
+```
+Il preset "Web" sta in `export_presets.cfg`: senza thread (`variant/thread_support=false`), così il gioco gira su qualsiasi hosting statico (es. itch.io) senza intestazioni speciali; escluse dall'esportazione le cartelle `test/`, `addons/gut/`, `strumenti/`, `docs/`.
+La cartella `build/` è ignorata da git.
+
+Per provarla in locale serve un piccolo server (il browser non apre i file `.wasm` da `file://`):
+```sh
+python3 -m http.server -d build/web 8000
+```
+e aprire http://localhost:8000.

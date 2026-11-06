@@ -11,3 +11,6 @@ __pycache__/
 
 # Traduzioni generate da Godot importando testi/testi.csv
 *.translation
+
+# Esportazioni
+build/

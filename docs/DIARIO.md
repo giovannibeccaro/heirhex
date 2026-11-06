@@ -17,6 +17,11 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 
 ## Registro dei compiti
 
+### T0.4 — Preset di esportazione Web ✅
+- `export_presets.cfg` con il preset "Web" (senza thread, uscita in `build/web/index.html`, esclusi test, GUT, strumenti, docs). `build/` in `.gitignore`.
+- Verifica: `--export-release "Web"` riconosce il preset e si ferma solo per i **modelli di esportazione mancanti** (`web_nothreads_release.zip`). **Non li ho scaricati** (circa 1 GB): vanno installati da Godot, Editor → Gestisci modelli di esportazione. Istruzioni in `docs/COMANDI.md`.
+- Il progetto non ha ancora una scena principale: l'esportazione avrà senso dalla tappa 3.
+
 ### T0.3 — Testi ✅
 - `testi/testi.csv` con 3 chiavi di esempio; importato da Godot come traduzione (`testi.it.translation`, `testi.en.translation`), registrato in `project.godot` (Internazionalizzazione → Traduzioni), lingua di riserva `it`.
 - I file `.translation` sono generati dall'importazione: aggiunti a `.gitignore` (`strumenti/test.sh` li rigenera con `--import`).
