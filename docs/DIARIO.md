@@ -31,6 +31,13 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 
 ## Registro dei compiti
 
+### T1.8 — Esito e registro ✅ (fine Tappa 1)
+- `Combattimento.esito` (in corso, vittoria, sconfitta); dopo la fine nessuna azione ha effetto.
+- `Combattimento.riepilogo()`: esito, turni, vita iniziale/finale/persa, stati persistenti (la Fattura passa alla vita), culla e tratti negativi, carte giocate per uid e per id (servirà all'obolo), carte rubate, vita dei nemici in quota (servirà al Tiranno tra le generazioni).
+- `Registro.righe()` / `testo()`: una riga tecnica per azione, es. `[T1] danno da=lupo#1 a=giocatore valore=12 assorbito=7 subito=5 vita=95`. È un testo di debug, generico (nessun codice per tipo di voce), non di gioco.
+- Test: `test/combattimento/test_esito.gd` (combattimento completo contro un lupo di prova, registro leggibile, stesso seme = stesso registro).
+- Totale Tappa 1: 137 test verdi.
+
 ### T1.7 — Nemici ✅
 - `core/nemici/intelligenza_nemici.gd`: comportamento `sequenza` (campo `sequenza` con gli id, anche ripetuti) e `pesato` (`peso`, `max_di_fila`, `ricarica`); intenzioni a turno fisso (`turno: N`); fasi (`fasi: [{ sotto_quota_vita, comportamento, intenzioni }]`, non tornano indietro); `conto_alla_rovescia()` per l'interfaccia.
 - `Nemico`: intenzioni base, fasi, forma, memoria delle scelte.

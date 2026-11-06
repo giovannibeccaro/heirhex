@@ -8,6 +8,7 @@ enum Esito { IN_CORSO, VITTORIA, SCONFITTA }
 var stato: StatoCombattimento
 var registro := Registro.new()
 var eventi := EventiGioco.new()
+var _vita_iniziale: int = 0
 var esito: Esito = Esito.IN_CORSO
 
 
@@ -25,6 +26,7 @@ func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattim
 	stato = StatoCombattimento.new(catalogo, casuale, regole)
 	_prepara_giocatore(impostazioni.get("giocatore", {}))
 	_prepara_culla(impostazioni.get("culla", {}))
+	_vita_iniziale = stato.giocatore.vita
 	stato.mano_dimensione = int(impostazioni.get("mano", 5))
 	for m in impostazioni.get("modificatori", []):
 		stato.modificatori.aggiungi_da_dizionario(m)
@@ -153,6 +155,35 @@ func termina_turno() -> void:
 
 func finito() -> bool:
 	return esito != Esito.IN_CORSO
+
+
+## Cosa serve alla vita dopo il combattimento (e agli snapshot).
+func riepilogo() -> Dictionary:
+	var g := stato.giocatore
+	var persistenti := {}
+	for id_stato in g.stati:
+		if bool(stato.catalogo.stato(id_stato).get("persistente", false)):
+			persistenti[id_stato] = g.stati[id_stato]
+	var giocate_per_carta := {}
+	for carta in stato.tutte_le_carte():
+		var volte := int(stato.giocate.get(carta.uid, 0))
+		if volte > 0:
+			giocate_per_carta[carta.id] = int(giocate_per_carta.get(carta.id, 0)) + volte
+	return {
+		"esito": Esito.keys()[esito].to_lower(),
+		"turni": stato.turno,
+		"vita": g.vita,
+		"vita_max": g.vita_max,
+		"vita_iniziale": _vita_iniziale,
+		"vita_persa": _vita_iniziale - g.vita,
+		"stati_persistenti": persistenti,
+		"culla_vita": stato.culla.vita,
+		"tratti_negativi": stato.culla.tratti_negativi,
+		"giocate": stato.giocate.duplicate(),
+		"giocate_per_carta": giocate_per_carta,
+		"carte_rubate": stato.rubate.map(func(x: Carta) -> String: return x.id),
+		"nemici": stato.nemici.map(func(n: Nemico) -> Dictionary: return {"id": n.id, "vita": n.vita, "vita_max": n.vita_max, "quota_vita": n.quota_vita()}),
+	}
 
 
 # === Valori calcolati (li usa anche l'interfaccia) =============================
