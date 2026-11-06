@@ -19,6 +19,7 @@ var rubate: Array[Carta] = []  ## rubate dai nemici per il resto del combattimen
 var energia: int = 0
 var mano_dimensione: int = 5   ## carte pescate a inizio turno (dipende dall'età)
 var turno: int = 0             ## 1 = primo turno del giocatore
+var giocate: Dictionary = {}   ## uid carta -> volte giocata (serve all'obolo)
 
 var _prossimo_uid_carta: int = 1
 var _prossimo_uid_nemico: int = 1

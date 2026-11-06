@@ -3,7 +3,11 @@ extends RefCounted
 ## Il combattimento: crea lo stato e applica le regole del turno.
 ## L'interfaccia (o una simulazione) chiama solo i metodi pubblici: inizia, gioca_carta, termina_turno.
 
+enum Esito { IN_CORSO, VITTORIA, SCONFITTA }
+
 var stato: StatoCombattimento
+var registro := Registro.new()
+var esito: Esito = Esito.IN_CORSO
 
 
 ## impostazioni:
@@ -51,3 +55,202 @@ func _crea_nemico(voce: Variant) -> Nemico:
 	if d.has("quota_vita"):
 		n.vita = maxi(1, roundi(n.vita_max * float(d["quota_vita"])))
 	return n
+
+
+# === Azioni pubbliche ==========================================================
+
+## Avvia il combattimento: i nemici mostrano l'intenzione e inizia il primo turno.
+func inizia() -> void:
+	registro.aggiungi(0, "inizio_combattimento", {"nemici": stato.nemici.map(func(n: Nemico) -> String: return n.id)})
+	for n in stato.nemici:
+		_rivela_intenzione(n, 1)
+	_inizia_turno_giocatore()
+
+
+## Gioca una carta dalla mano. scelte: { nemico: uid, se_o_culla: "se"|"culla", ... }.
+## Restituisce false (senza cambiare nulla) se la carta non si può giocare.
+func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
+	if finito():
+		return false
+	var carta := stato.carta_in_mano(uid)
+	if carta == null or not carta.giocabile():
+		return false
+	var costo := costo_carta(carta)
+	if costo > stato.energia:
+		return false
+	if _serve_nemico(carta) and scelte.has("nemico"):
+		var scelto := stato.nemico_per_uid(int(scelte["nemico"]))
+		if scelto == null or not scelto.e_vivo():
+			return false
+	stato.energia -= costo
+	stato.mano.erase(carta)
+	registro.aggiungi(stato.turno, "carta_giocata", {"carta": carta.id, "uid": carta.uid, "costo": costo})
+	var ctx := ContestoEffetto.new(stato.giocatore, carta, scelte)
+	Mattoncini.esegui_lista(self, carta.effetti(), ctx)
+	if ctx.esilia_carta or carta.esilia_dopo_uso():
+		stato.esilio.append(carta)
+	else:
+		stato.scarti.append(carta)
+	stato.giocate[carta.uid] = int(stato.giocate.get(carta.uid, 0)) + 1
+	return true
+
+
+## Fine del turno del giocatore: scarta la mano, turno dei nemici, nuovo turno.
+func termina_turno() -> void:
+	if finito():
+		return
+	registro.aggiungi(stato.turno, "fine_turno", {"chi": "giocatore"})
+	while not stato.mano.is_empty():
+		stato.scarti.append(stato.mano.pop_front())
+	_turno_dei_nemici()
+	if not finito():
+		_inizia_turno_giocatore()
+
+
+func finito() -> bool:
+	return esito != Esito.IN_CORSO
+
+
+# === Valori calcolati (li usa anche l'interfaccia) =============================
+
+func costo_carta(carta: Carta) -> int:
+	return maxi(0, carta.costo_base())
+
+
+## Valore finale di un effetto (con percentuale e modificatori), per un bersaglio.
+func valore_effetto(effetto: Dictionary, ctx: ContestoEffetto, bersaglio: Combattente = null) -> int:
+	var base := float(effetto.get("valore", 0))
+	if bool(effetto.get("percentuale", false)) and bersaglio != null:
+		base = bersaglio.vita_max * base / 100.0
+	return maxi(0, roundi(base))
+
+
+## Il nemico scelto dal giocatore; se manca la scelta, il primo vivo.
+func nemico_scelto(scelte: Dictionary) -> Nemico:
+	if scelte.has("nemico"):
+		var n := stato.nemico_per_uid(int(scelte["nemico"]))
+		return n if n != null and n.e_vivo() else null
+	var vivi := stato.nemici_vivi()
+	return vivi[0] if not vivi.is_empty() else null
+
+
+# === Operazioni elementari (usate dai mattoncini) ==============================
+
+## Pesca n carte; rimescola gli scarti quando il mazzo finisce. Restituisce le carte pescate.
+func pesca(n: int) -> int:
+	var pescate := 0
+	for i in n:
+		if stato.mano.size() >= stato.regole.mano_limite:
+			break
+		if stato.mazzo.is_empty():
+			if stato.scarti.is_empty():
+				break
+			_rimescola_scarti()
+		stato.mano.append(stato.mazzo.pop_back())
+		pescate += 1
+	if pescate > 0:
+		registro.aggiungi(stato.turno, "pesca", {"carte": pescate})
+	return pescate
+
+
+func infliggi_danno(bersaglio: Combattente, valore: int, ignora_blocco: bool, sorgente: Combattente) -> void:
+	if not bersaglio.e_vivo() or valore <= 0:
+		return
+	var assorbito := 0
+	if not ignora_blocco:
+		assorbito = mini(bersaglio.blocco, valore)
+		bersaglio.blocco -= assorbito
+	var subito := mini(valore - assorbito, bersaglio.vita)
+	bersaglio.vita -= subito
+	registro.aggiungi(stato.turno, "danno", {"da": _nome(sorgente), "a": _nome(bersaglio),
+		"valore": valore, "assorbito": assorbito, "subito": subito, "vita": bersaglio.vita})
+	if bersaglio.vita <= 0:
+		_a_zero(bersaglio)
+
+
+func aggiungi_blocco(bersaglio: Combattente, valore: int) -> void:
+	if valore <= 0:
+		return
+	bersaglio.blocco += valore
+	registro.aggiungi(stato.turno, "blocco", {"a": _nome(bersaglio), "valore": valore, "totale": bersaglio.blocco})
+
+
+# === Ciclo del turno ===========================================================
+
+func _inizia_turno_giocatore() -> void:
+	stato.turno += 1
+	registro.aggiungi(stato.turno, "inizio_turno", {"chi": "giocatore"})
+	_riduci_blocco(stato.giocatore)
+	_riduci_blocco(stato.culla)
+	stato.energia = stato.regole.energia_per_turno
+	pesca(maxi(0, stato.mano_dimensione - stato.mano.size()))
+
+
+func _turno_dei_nemici() -> void:
+	# Copia: i nemici evocati in questo turno agiscono dal prossimo.
+	var in_campo := stato.nemici.duplicate()
+	for n: Nemico in in_campo:
+		if not n.e_vivo():
+			continue
+		_riduci_blocco(n)
+		if not n.intenzione.is_empty():
+			registro.aggiungi(stato.turno, "intenzione_eseguita", {"nemico": _nome(n), "intenzione": n.intenzione.get("id", "")})
+			Mattoncini.esegui_lista(self, n.intenzione.get("effetti", []), ContestoEffetto.new(n))
+		if finito():
+			return
+	for n in stato.nemici_vivi():
+		_rivela_intenzione(n, stato.turno + 1)
+
+
+func _rivela_intenzione(n: Nemico, turno: int) -> void:
+	n.intenzione = IntelligenzaNemici.scegli(n, turno, stato.casuale)
+	registro.aggiungi(stato.turno, "intenzione", {"nemico": _nome(n), "intenzione": n.intenzione.get("id", ""), "per_turno": turno})
+
+
+## All'inizio del turno di chi lo possiede il blocco si riduce (dimezzato, arrotondato per difetto).
+func _riduci_blocco(c: Combattente) -> void:
+	c.blocco = floori(c.blocco * stato.regole.quota_blocco_mantenuta)
+
+
+func _rimescola_scarti() -> void:
+	stato.mazzo.append_array(stato.scarti)
+	stato.scarti.clear()
+	stato.casuale.mescola(stato.mazzo)
+	registro.aggiungi(stato.turno, "rimescola", {"carte": stato.mazzo.size()})
+
+
+func _a_zero(c: Combattente) -> void:
+	if c == stato.giocatore:
+		_termina(Esito.SCONFITTA)
+	elif c == stato.culla:
+		# Tratto negativo all'erede (massimo uno per combattimento), poi la culla torna a metà.
+		if stato.culla.tratti_negativi == 0:
+			stato.culla.tratti_negativi = 1
+		stato.culla.vita = maxi(1, roundi(stato.culla.vita_max / 2.0))
+		registro.aggiungi(stato.turno, "culla_a_zero", {"tratti_negativi": stato.culla.tratti_negativi, "vita": stato.culla.vita})
+	elif c is Nemico:
+		registro.aggiungi(stato.turno, "morte", {"nemico": _nome(c)})
+		(c as Nemico).intenzione = {}
+		if stato.nemici_vivi().is_empty():
+			_termina(Esito.VITTORIA)
+
+
+func _termina(e: Esito) -> void:
+	if finito():
+		return
+	esito = e
+	registro.aggiungi(stato.turno, "fine_combattimento", {"esito": Esito.keys()[e].to_lower()})
+
+
+func _serve_nemico(carta: Carta) -> bool:
+	for e in carta.effetti():
+		if str(e.get("bersaglio", "")) == "nemico":
+			return true
+	return false
+
+
+## Nome tecnico per il registro (id e uid), non testo di gioco.
+func _nome(c: Combattente) -> String:
+	if c is Nemico:
+		return "%s#%d" % [c.id, (c as Nemico).uid]
+	return c.id

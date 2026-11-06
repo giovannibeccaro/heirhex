@@ -13,9 +13,22 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Python degli strumenti in un ambiente locale** (`strumenti/.venv`, ignorato da git): il Python di Homebrew non permette `pip install --user` (PEP 668). Dentro c'è solo `openpyxl`.
 - **Intestazione di `testi.csv`: `keys,it,en`** (come nel piano), non `chiave,it,en` come in `CLAUDE.md`: `keys` è la convenzione di Godot. La prima colonna in realtà può chiamarsi in qualsiasi modo; se preferisci `chiave` basta rinominarla.
 - **Testi inglesi provvisori**: dove manca una traduzione ne metto una provvisoria (es. Fattura → "Hex"), da rivedere.
+- **Blocco ridotto per difetto**: 7 dimezzato fa 3 (arrotondamento per difetto). Il blocco dei nemici si riduce all'inizio del *loro* turno, come per il giocatore.
+- **Limite della mano: 10 carte** (`RegoleCombattimento.mano_limite`): il design non lo fissa; oltre il limite le carte restano nel mazzo.
+- **Culla inattiva** (giovinezza): gli effetti che la bersagliano non fanno nulla e il blocco "a te o alla culla" va a te. Presumo che i nemici che puntano alla culla compaiano solo dall'età adulta (`eta_comparsa`).
+- **Culla a 0**: torna a metà della vita massima arrotondata (35 → 18). Se torna a 0 nello stesso combattimento torna di nuovo a metà, senza un secondo tratto.
+- **Bersaglio "nemico" non scelto**: il motore usa il primo nemico vivo; una scelta che punta a un nemico morto rende la carta non giocabile (la carta resta in mano, nessun costo).
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.2 — Ciclo del turno ✅
+- `Combattimento`: `inizia()`, `gioca_carta(uid, scelte)`, `termina_turno()`, `finito()`. Inizio turno: blocco ridotto (quota in `RegoleCombattimento.quota_blocco_mantenuta`, 0,5 = dimezzato, 0 = svanisce), 3 energia (non si accumula), pesca fino alla mano dell'età. Fine turno: scarto della mano, turno dei nemici (ognuno riduce il proprio blocco, esegue l'intenzione mostrata), poi i nemici rivelano la successiva.
+- Rimescolamento degli scarti quando il mazzo finisce; limite di carte in mano (10, configurabile).
+- Culla a 0: un tratto negativo (massimo uno per combattimento) e torna a metà.
+- `Mattoncini` (danno e blocco per ora) con funzioni statiche; `IntelligenzaNemici` (sequenza per ora); `Registro` di base.
+- Test: `test/combattimento/test_turno.gd` (15 test, tra cui un ciclo di 6 turni che conserva le carte).
+- Nota Godot: due `RefCounted` che si tengono a vicenda non vengono mai liberati (Godot conta i riferimenti, non ha un garbage collector). Per questo i mattoncini ricevono il combattimento come parametro invece di tenerlo in una variabile.
 
 ### T1.1 — Stato del combattimento ✅
 - `core/casuale.gd` (`Casuale`): generatore con seme, mescolamento Fisher-Yates, scelta pesata, stato salvabile (per snapshot).

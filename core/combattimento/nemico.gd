@@ -5,6 +5,7 @@ extends Combattente
 var uid: int
 var dati: Dictionary
 var intenzione: Dictionary = {}   ## intenzione mostrata per il prossimo turno
+var passo_sequenza: int = 0       ## posizione nella sequenza (comportamento "sequenza")
 
 
 func _init(p_uid: int = 0, p_dati: Dictionary = {}, p_vita_max: int = -1) -> void:
