@@ -1,10 +1,20 @@
-# Risposte di Giovanni alle domande del diario (Tappa 2b, 2026-11-06)
+# Risposte di Giovanni (Tappa 2c, 2026-11-06)
 
-Decisioni registrate nella cartella di design (`05-decisioni/registro-decisioni.md`, D62-D64). Il foglio `06-prototipo/bilanciamento.xlsx` è già aggiornato.
+Decisione registrata nella cartella di design: `05-decisioni/registro-decisioni.md`, **D65**. Il foglio `06-prototipo/bilanciamento.xlsx` è già aggiornato.
 
-1. **Forma divorata (D62).** Nella scheda Intenzioni c'è una nuova colonna **O "Potenziata in divorata"** (valore `sì` o vuoto), dopo Note. Al massimo una per nemico: Lupenaro `morso_della_luna`, Janara `assalto_alla_casa`, Pantafica `peso_sul_cuore`, Munaciello `sgambetto`. La colonna J (Valore divorata) già applica il ×1,5 di D6. Aggiorna esportatore, schema e caricatore perché leggano il campo dai dati invece di indovinarlo; aggiungi un test.
-2. **Lupenaro (D63).** Ululato da 10 a **6** blocco. Morso della luna resta 28.
-3. **Pantafica e Munaciello (D64).** D'accordo: si misurano su una vita intera nella tappa della vita. Annotalo nel piano.
-4. **Id (D64).** Valori sì, nomi dei campi no: va bene così.
+**Domanda sul Morso della luna divorato: nessun limite.** Il problema era la misura: il mazzo base contro la forma divorata (generazione 5) non dice niente. Non va giudicato solo il Lupenaro: probabilmente sono gli altri divorati a essere troppo deboli.
 
-Da fare adesso: riesportare i dati, rifare la simulazione (confronto con la Tappa 2b) e controllare in particolare il Morso della luna divorato (55 danni in un colpo): segnala nel diario se in simulazione è letale.
+## Tappa 2d — taratura contro i mazzi di riferimento
+
+Novità nel foglio:
+- **Scheda "Mazzi di riferimento"**: un mazzo medio per fase (`inizio` gen. 1, `meta` gen. 3, `fine` gen. 5), colonne Fase, Generazione, Carta (id), Copie, Livello (`0`, `di famiglia` = un'evoluzione Più forte, `degli avi` = due; valori dalla scheda Invecchiamento). Solo Masciare.
+- **Scheda "Forme fattura"**, colonne F-J: turni obiettivo (min, max), vita persa obiettivo (min, max), mazzo di riferimento della forma. Base 4 turni / 8-12%; toccata 4-5 / 10-15%; divorata 4-5 / 12-18%.
+- **Ancore** righe 8-9: vita persa obiettivo ora 8-12%.
+
+Compiti (un commit ciascuno, ramo nuovo da `main`):
+1. **T2.10** Esportare le due novità (schema e caricatore aggiornati, validatore: le carte dei mazzi esistono, i livelli sono validi, ogni forma ha un mazzo). Test.
+2. **T2.11** Applicare l'invecchiamento alle carte dei mazzi di riferimento in simulazione (Più forte = regola della scheda Invecchiamento, una o due volte). Test.
+3. **T2.12** Simulazione: ogni forma contro il mazzo della sua fase, tutte le età, almeno una strategia "ragionevole" oltre alle due estreme (es. si difende solo quando l'intenzione annunciata supera una soglia). Report con turni, vita persa e distanza dagli obiettivi.
+4. **T2.13** **Proporre** nuovi numeri (vita e intenzioni dei nemici, moltiplicatori delle forme in Forme fattura) per entrare negli obiettivi, con la simulazione che lo dimostra. **Non modificare il foglio né i dati**: scrivi la proposta nel diario, la decidiamo con Giovanni.
+
+Se i mazzi di riferimento ti sembrano irrealistici (troppo forti o troppo deboli rispetto a quello che le regole permettono), dillo nel diario invece di correggerli.
