@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "generato_da": "bilanciamento.xlsx",
+  "ancore": {
+    "u": 10,
+    "energia_per_turno": 3,
+    "valore_per_turno": 30,
+    "efficienza": 0.8,
+    "turni_normale": 3,
+    "turni_elite": 5,
+    "turni_tiranno": 8,
+    "vita_persa_min": 0.1,
+    "vita_persa_max": 0.15,
+    "danno_nemico_normale_u": 1.2,
+    "bonus_budget_base": 0,
+    "bonus_budget_comune": 0,
+    "bonus_budget_rara": 0.25,
+    "tolleranza_scostamento": 0.15,
+    "radici_per_carica": 2,
+    "fattura_soglia": 7,
+    "fattura_danno_quota": 0.3,
+    "bonus_budget_neutra": 0.1,
+    "devozione_energia": 1.5,
+    "bonus_budget_unica": 0.4,
+    "generazioni_tiranno": 3,
+    "turno_ultimo_rintocco": 8
+  },
+  "combattimento": {
+    "energia_per_turno": 3
+  },
+  "budget": {
+    "effetti": {
+      "danno": {
+        "energia_per_unita": 0.1
+      },
+      "blocco": {
+        "energia_per_unita": 0.142857
+      },
+      "cura": {
+        "energia_per_unita": 0.2
+      },
+      "pesca": {
+        "energia_per_unita": 0.5
+      },
+      "energia": {
+        "energia_per_unita": 1
+      },
+      "rimuovi_stato": {
+        "energia_per_unita": 0.25
+      },
+      "applica_stato": {
+        "energia_per_unita": 0.5
+      },
+      "scarta": {
+        "energia_per_unita": -0.25
+      },
+      "aggiungi_carta": {
+        "energia_per_unita": 0
+      },
+      "esilia": {
+        "energia_per_unita": 0
+      },
+      "annulla_intenzione": {
+        "energia_per_unita": 1.5
+      },
+      "riprendi_dagli_scarti": {
+        "energia_per_unita": 1.5
+      },
+      "ruba_carta": {
+        "energia_per_unita": 0
+      },
+      "evoca": {
+        "energia_per_unita": 0
+      }
+    },
+    "bersagli": {
+      "nemico": 1,
+      "tutti_nemici": 1.5,
+      "nemico_casuale": 0.85,
+      "se": 1,
+      "culla": 1,
+      "se_o_culla": 1
+    }
+  },
+  "eta": {
+    "infanzia": {
+      "vita": null,
+      "mano": null,
+      "energia": null,
+      "tappe": 1
+    },
+    "giovinezza": {
+      "vita": 100,
+      "mano": 4,
+      "energia": 3,
+      "tappe": 3
+    },
+    "eta_adulta": {
+      "vita": 85,
+      "mano": 5,
+      "energia": 3,
+      "tappe": 3
+    },
+    "vecchiaia": {
+      "vita": 60,
+      "mano": 6,
+      "energia": 3,
+      "tappe": 2
+    }
+  },
+  "culla": {
+    "vita": 35
+  },
+  "testamento": {
+    "quota_perdite": {
+      "giovinezza": 0.3,
+      "eta_adulta": 0.2,
+      "vecchiaia": 0.1,
+      "dopo_il_tiranno": 0
+    }
+  },
+  "invecchiamento": {
+    "livelli": [
+      {
+        "livello": 0,
+        "etichetta": "",
+        "evoluzioni": 0,
+        "tramandabile": true
+      },
+      {
+        "livello": 1,
+        "etichetta": "di famiglia",
+        "evoluzioni": 1,
+        "tramandabile": true
+      },
+      {
+        "livello": 2,
+        "etichetta": "degli avi",
+        "evoluzioni": 2,
+        "tramandabile": false
+      }
+    ],
+    "carte_che_invecchiano": 3,
+    "piu_forte_aumento": 0.3,
+    "tradizione_valore_energia": 0.3
+  },
+  "economia": {
+    "g": 18,
+    "ricompensa_notte_elite_luna_piena": 30,
+    "ricompensa_anima_pezzentella_lasciata_andare": 25,
+    "festa_carta_comune": 45,
+    "festa_carta_rara": 70,
+    "festa_carta_unica_staple": 110,
+    "festa_rimedio": 25,
+    "festa_dimenticare_una_carta": 55,
+    "evento_dono_al_munaciello": 20,
+    "mantenimento_di_uno_spirito_amico_a_generazione": 15,
+    "evento_prova_dell_olio_malocchio": 15,
+    "evento_saldare_il_voto": 40,
+    "evento_puntata_alla_smorfia": 20,
+    "evento_munaciello_amico_regalo": 30,
+    "dote_quota_dei_grani_che_passa_all_erede": 0.5,
+    "grani_attesi_in_una_vita_circa_5_notti_normali_1_elite": 120
+  },
+  "forme": {
+    "base": {
+      "dalla_generazione": 1,
+      "vita": 1,
+      "danno": 1
+    },
+    "toccata": {
+      "dalla_generazione": 3,
+      "vita": 1.3,
+      "danno": 1.15
+    },
+    "divorata": {
+      "dalla_generazione": 5,
+      "vita": 1.6,
+      "danno": 1.3
+    }
+  },
+  "mazzi_base": {
+    "masciare": [
+      {
+        "carta": "scongiuro",
+        "copie": 4
+      },
+      {
+        "carta": "fumo_di_ruta",
+        "copie": 4
+      },
+      {
+        "carta": "ninnananna",
+        "copie": 2
+      }
+    ]
+  }
+}

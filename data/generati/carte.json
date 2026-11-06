@@ -1,0 +1,619 @@
+{
+  "schema": 1,
+  "generato_da": "bilanciamento.xlsx",
+  "carte": [
+    {
+      "id": "scongiuro",
+      "nome": "carta.scongiuro.nome",
+      "tipo": "attacco",
+      "rarita": "base",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "danno",
+          "valore": 10,
+          "bersaglio": "nemico"
+        }
+      ],
+      "personale": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "fumo_di_ruta",
+      "nome": "carta.fumo_di_ruta.nome",
+      "tipo": "difesa",
+      "rarita": "base",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "blocco",
+          "valore": 7,
+          "bersaglio": "se_o_culla"
+        }
+      ],
+      "personale": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "ninnananna",
+      "nome": "carta.ninnananna.nome",
+      "tipo": "difesa",
+      "rarita": "base",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "blocco",
+          "valore": 4,
+          "bersaglio": "se_o_culla"
+        },
+        {
+          "tipo": "cura",
+          "valore": 2,
+          "bersaglio": "culla"
+        }
+      ],
+      "personale": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 0.971429,
+        "valore_atteso": 1,
+        "scostamento": -0.028571,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "affascino",
+      "nome": "carta.affascino.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "rimuovi_stato",
+          "stato": "malocchio",
+          "valore": 2,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "pesca",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "olio_e_acqua",
+      "nome": "carta.olio_e_acqua.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "pesca",
+          "valore": 2,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "radici_profonde",
+      "nome": "carta.radici_profonde.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "applica_stato",
+          "stato": "radici",
+          "valore": 2,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "rimandare_la_fattura",
+      "nome": "carta.rimandare_la_fattura.nome",
+      "tipo": "attacco",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 2,
+      "effetti": [
+        {
+          "tipo": "danno",
+          "valore": 16,
+          "bersaglio": "nemico"
+        },
+        {
+          "tipo": "rimuovi_stato",
+          "stato": "fattura",
+          "valore": 2,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 2.1,
+        "valore_atteso": 2,
+        "scostamento": 0.05,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "lamento_funebre",
+      "nome": "carta.lamento_funebre.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "pesca",
+          "valore": 1,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "applica_stato",
+          "stato": "radici",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "lascito": {
+        "momento": "inizio_combattimento",
+        "effetti": [
+          {
+            "tipo": "applica_stato",
+            "stato": "radici",
+            "valore": 1,
+            "bersaglio": "se"
+          }
+        ]
+      },
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "invocare_gli_avi",
+      "nome": "carta.invocare_gli_avi.nome",
+      "tipo": "attacco",
+      "rarita": "rara",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "danno",
+          "valore": 3,
+          "bersaglio": "nemico"
+        },
+        {
+          "tipo": "applica_stato",
+          "stato": "radici",
+          "valore": 1,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "pesca",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.3,
+        "valore_atteso": 1.25,
+        "scostamento": 0.04,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "il_nome_del_morto",
+      "nome": "carta.il_nome_del_morto.nome",
+      "tipo": "attacco",
+      "rarita": "rara",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "danno",
+          "valore": 4,
+          "bersaglio": "nemico"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 0.4,
+        "valore_atteso": 1.25,
+        "scostamento": -0.68,
+        "esito": "Troppo debole"
+      }
+    },
+    {
+      "id": "erbe_della_masciara",
+      "nome": "carta.erbe_della_masciara.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "cura",
+          "valore": 5,
+          "bersaglio": "se"
+        }
+      ],
+      "lascito": {
+        "momento": "inizio_vita",
+        "effetti": [
+          {
+            "tipo": "vita_max",
+            "valore": 5,
+            "bersaglio": "se"
+          }
+        ]
+      },
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1,
+        "valore_atteso": 1,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "malva",
+      "nome": "carta.malva.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "cura",
+          "valore": 3,
+          "bersaglio": "culla"
+        },
+        {
+          "tipo": "pesca",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "lascito": {
+        "momento": "inizio_vita",
+        "effetti": [
+          {
+            "tipo": "vita_max",
+            "valore": 5,
+            "bersaglio": "culla"
+          }
+        ]
+      },
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.1,
+        "valore_atteso": 1,
+        "scostamento": 0.1,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "ruta",
+      "nome": "carta.ruta.nome",
+      "tipo": "abilita",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "cura",
+          "valore": 3,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "rimuovi_stato",
+          "stato": "malocchio",
+          "valore": 2,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.1,
+        "valore_atteso": 1,
+        "scostamento": 0.1,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "aglio",
+      "nome": "carta.aglio.nome",
+      "tipo": "difesa",
+      "rarita": "comune",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "blocco",
+          "valore": 5,
+          "bersaglio": "se_o_culla"
+        },
+        {
+          "tipo": "rimuovi_stato",
+          "stato": "fattura",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 0.964286,
+        "valore_atteso": 1,
+        "scostamento": -0.035714,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "iperico",
+      "nome": "carta.iperico.nome",
+      "tipo": "abilita",
+      "rarita": "rara",
+      "casata": "masciare",
+      "famiglia": "erbe",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "cura",
+          "valore": 3,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "cura",
+          "valore": 3,
+          "bersaglio": "culla"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.2,
+        "valore_atteso": 1.25,
+        "scostamento": -0.04,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "scirocco",
+      "nome": "carta.scirocco.nome",
+      "tipo": "attacco",
+      "rarita": "unica",
+      "casata": "neutra",
+      "costo": 2,
+      "effetti": [
+        {
+          "tipo": "danno",
+          "valore": 20,
+          "bersaglio": "tutti_nemici"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 3,
+        "valore_atteso": 3,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "pane_e_sale",
+      "nome": "carta.pane_e_sale.nome",
+      "tipo": "abilita",
+      "rarita": "unica",
+      "casata": "neutra",
+      "costo": 0,
+      "effetti": [
+        {
+          "tipo": "pesca",
+          "valore": 2,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "esilia",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1
+      }
+    },
+    {
+      "id": "mezzanotte",
+      "nome": "carta.mezzanotte.nome",
+      "tipo": "abilita",
+      "rarita": "unica",
+      "casata": "neutra",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "annulla_intenzione",
+          "valore": 1,
+          "bersaglio": "nemico"
+        },
+        {
+          "tipo": "esilia",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.5,
+        "valore_atteso": 1.5,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "campana_a_morto",
+      "nome": "carta.campana_a_morto.nome",
+      "tipo": "abilita",
+      "rarita": "unica",
+      "casata": "neutra",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "riprendi_dagli_scarti",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.5,
+        "valore_atteso": 1.5,
+        "scostamento": 0,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "porta_sbarrata",
+      "nome": "carta.porta_sbarrata.nome",
+      "tipo": "difesa",
+      "rarita": "unica",
+      "casata": "neutra",
+      "costo": 1,
+      "effetti": [
+        {
+          "tipo": "blocco",
+          "valore": 11,
+          "bersaglio": "se_o_culla"
+        },
+        {
+          "tipo": "esilia",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1.571429,
+        "valore_atteso": 1.5,
+        "scostamento": 0.047619,
+        "esito": "OK"
+      }
+    },
+    {
+      "id": "dispetto",
+      "nome": "carta.dispetto.nome",
+      "tipo": "negativa",
+      "rarita": "base",
+      "casata": "neutra",
+      "costo": 0,
+      "effetti": [],
+      "di_sistema": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 0
+      }
+    },
+    {
+      "id": "voto_infranto",
+      "nome": "carta.voto_infranto.nome",
+      "tipo": "negativa",
+      "rarita": "base",
+      "casata": "neutra",
+      "costo": 0,
+      "effetti": [],
+      "di_sistema": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 0
+      }
+    },
+    {
+      "id": "ricordo_avo",
+      "nome": "carta.ricordo_avo.nome",
+      "tipo": "abilita",
+      "rarita": "base",
+      "casata": "masciare",
+      "famiglia": "parola",
+      "costo": 0,
+      "effetti": [
+        {
+          "tipo": "pesca",
+          "valore": 1,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "applica_stato",
+          "stato": "radici",
+          "valore": 1,
+          "bersaglio": "se"
+        }
+      ],
+      "di_sistema": true,
+      "invecchiamento": "sistemico",
+      "budget": {
+        "valore_totale": 1
+      }
+    }
+  ]
+}

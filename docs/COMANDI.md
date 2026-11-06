@@ -45,3 +45,19 @@ Per provarla in locale serve un piccolo server (il browser non apre i file `.was
 python3 -m http.server -d build/web 8000
 ```
 e aprire http://localhost:8000.
+
+## Esportazione dei dati dal foglio di calcolo
+Prerequisito, **una volta sola**: un ambiente Python locale con `openpyxl` (il Python di Homebrew non permette `pip install` globale).
+```sh
+python3 -m venv strumenti/.venv
+strumenti/.venv/bin/pip install -r strumenti/requirements.txt
+```
+Poi, ogni volta che il foglio cambia:
+```sh
+strumenti/.venv/bin/python strumenti/esporta.py
+```
+Legge `06-prototipo/bilanciamento.xlsx` nella cartella di design (solo lettura, valori calcolati) e scrive in `data/generati/`:
+`carte.json`, `nemici.json`, `bilanciamento.json` (ancore, età, culla, testamento, invecchiamento, economia, forme della fattura, mazzi base) e `testi_provvisori.csv` (nomi italiani dal foglio, usati dal validatore).
+Per un altro foglio o un'altra cartella: `strumenti/esporta.py percorso.xlsx cartella_uscita`.
+
+Nota: `data_only=True` legge i valori **salvati** nel file. Se il foglio è stato modificato con un programma che non ricalcola le formule al salvataggio, i valori potrebbero essere vecchi: aprire e salvare il foglio con Excel, Numbers o Google Fogli prima di esportare.

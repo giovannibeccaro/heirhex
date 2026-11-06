@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "generato_da": "bilanciamento.xlsx",
+  "nemici": [
+    {
+      "id": "lupenaro",
+      "nome": "nemico.lupenaro.nome",
+      "ruolo": "assalitore",
+      "livello": "normale",
+      "vita": 72,
+      "turni_desiderati": 3,
+      "comportamento": "sequenza",
+      "sequenza": [
+        "morso",
+        "morso",
+        "ululato",
+        "morso_della_luna"
+      ],
+      "intenzioni": [
+        {
+          "id": "morso",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 12,
+              "bersaglio": "giocatore"
+            }
+          ]
+        },
+        {
+          "id": "ululato",
+          "tipo": "difesa",
+          "effetti": [
+            {
+              "tipo": "blocco",
+              "valore": 10,
+              "bersaglio": "se"
+            }
+          ]
+        },
+        {
+          "id": "morso_della_luna",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 22,
+              "bersaglio": "giocatore"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "janara",
+      "nome": "nemico.janara.nome",
+      "ruolo": "predatore_culla",
+      "livello": "normale",
+      "vita": 72,
+      "turni_desiderati": 3,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "artigli_alla_culla",
+          "tipo": "attacco_culla",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 10,
+              "bersaglio": "culla"
+            }
+          ],
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "peso": 3
+        },
+        {
+          "id": "treccia",
+          "tipo": "maleficio",
+          "effetti": [
+            {
+              "tipo": "applica_stato",
+              "stato": "malocchio",
+              "valore": 1,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 2,
+          "peso": 1
+        },
+        {
+          "id": "nella_fessura",
+          "tipo": "difesa",
+          "effetti": [
+            {
+              "tipo": "blocco",
+              "valore": 8,
+              "bersaglio": "se"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 0,
+          "peso": 1
+        }
+      ]
+    },
+    {
+      "id": "pantafica",
+      "nome": "nemico.pantafica.nome",
+      "ruolo": "oppressore",
+      "livello": "normale",
+      "vita": 72,
+      "turni_desiderati": 3,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "schiacciare_il_petto",
+          "tipo": "maleficio",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 6,
+              "bersaglio": "giocatore"
+            },
+            {
+              "tipo": "applica_stato",
+              "stato": "fattura",
+              "valore": 2,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 3,
+          "peso": 2
+        },
+        {
+          "id": "incubo",
+          "tipo": "maleficio",
+          "effetti": [
+            {
+              "tipo": "applica_stato",
+              "stato": "paura",
+              "valore": 2,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 2,
+          "peso": 1
+        },
+        {
+          "id": "peso_sul_cuore",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 10,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "id": "munaciello_offeso",
+      "nome": "nemico.munaciello_offeso.nome",
+      "ruolo": "disturbatore",
+      "livello": "normale",
+      "vita": 72,
+      "turni_desiderati": 3,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "nasconde",
+          "tipo": "sporcare",
+          "effetti": [
+            {
+              "tipo": "aggiungi_carta",
+              "carta": "dispetto",
+              "valore": 1,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 2,
+          "peso": 2
+        },
+        {
+          "id": "sgambetto",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 8,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "peso": 2
+        }
+      ]
+    },
+    {
+      "id": "janara_madre",
+      "nome": "nemico.janara_madre.nome",
+      "ruolo": "tiranno",
+      "livello": "tiranno",
+      "vita": 576,
+      "turni_desiderati": 8,
+      "comportamento": "pesato",
+      "intenzioni": [
+        {
+          "id": "artigli_alla_culla",
+          "tipo": "attacco_culla",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 15,
+              "bersaglio": "culla"
+            }
+          ],
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "peso": 3
+        },
+        {
+          "id": "furto",
+          "tipo": "speciale",
+          "effetti": [
+            {
+              "tipo": "ruba_carta",
+              "da": "mano",
+              "valore": 1,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 2,
+          "peso": 2
+        },
+        {
+          "id": "sabba",
+          "tipo": "speciale",
+          "effetti": [
+            {
+              "tipo": "evoca",
+              "nemico": "janara",
+              "valore": 1,
+              "bersaglio": "se"
+            }
+          ],
+          "max_di_fila": 1,
+          "ricarica": 4,
+          "peso": 1
+        },
+        {
+          "id": "colpo",
+          "tipo": "attacco",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "valore": 14,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "max_di_fila": 2,
+          "ricarica": 0,
+          "peso": 3
+        },
+        {
+          "id": "ultimo_rintocco",
+          "tipo": "speciale",
+          "effetti": [
+            {
+              "tipo": "danno",
+              "letale": true,
+              "ignora_blocco": true,
+              "bersaglio": "giocatore"
+            }
+          ],
+          "non_annullabile": true,
+          "turno": 8
+        }
+      ],
+      "fasi": [
+        {
+          "sotto_quota_vita": 0.5,
+          "comportamento": "pesato",
+          "intenzioni": []
+        }
+      ]
+    }
+  ]
+}

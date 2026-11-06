@@ -6,6 +6,8 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 (da compilare alla fine del piano o quando l'agente si ferma)
 
 ## Domande per Giovanni
+4. **Grani: G = 18 nel foglio, G = 3 in D54.** La scheda Economia ha ancora i valori vecchi (carta comune 45, rara 70…), mentre il registro decisioni dice G = 3 (comune 8, rara 12, unica 18). Ho esportato il foglio così com'è: va aggiornato il foglio?
+5. **Carte con effetti che il foglio non sa esprimere**: *Il nome del morto* (+4 danni per antenato) è esportata con soli 4 danni; *Ricordo di {antenato}* "si esilia dopo l'uso" è scritto solo nelle note. Per il secondo basterebbe aggiungere nel foglio un effetto `esilia` / `se` (come Pane e sale). Per il primo serve un mattoncino nuovo (contatore degli antenati) quando arriverà la stirpe.
 2. **Lingua del codice**: hai chiesto perché è in italiano. Seguo la convenzione di `CLAUDE.md` (identificatori e commenti in italiano, come il design e i dati). Se preferisci l'inglese conviene deciderlo presto: ora il cambio costa poco.
 3. **Forma "divorata"**: lo schema prevede `intenzioni_potenziate: ["morso"]` ma non dice di quanto. Per ora il motore gestisce solo i moltiplicatori globali di vita e danno e le `intenzioni_aggiunte` (cumulative: la divorata ha anche quelle della toccata). Come va potenziata un'intenzione?
 1. **Furto della Janara Madre "dalla mano"**: la mano si scarta a fine turno, quindi nel turno dei nemici è vuota. Per ora la Janara Madre ruba una carta a caso **tra quelle della mano appena scartata** (`ruba_carta` con `da: mano`). Alternative: rubare dal mazzo, oppure rubare all'inizio del tuo turno dopo la pesca. Quale preferisci?
@@ -27,9 +29,17 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Paura**: all'inizio del tuo turno (dopo la pesca) la carta giocabile più costosa in mano costa +1 fino alla fine del turno; a parità di costo tocca la prima in mano. Una carica = un turno. Se il costo si ricalcolasse dopo ogni carta giocata, la Paura renderebbe +1 ogni carta del turno: troppo forte.
 - **Fattura oltre la soglia**: se le cariche superano 7 (es. 5 + 4), si compie una volta e le cariche in eccesso si perdono (il dato dice "rimuovi tutte").
 - **Comportamento pesato senza scelte valide**: se `max_di_fila` e `ricarica` escludono tutto, si ignora prima la ricarica, poi anche il limite di fila (non succede con i dati attuali). Un'intenzione annullata conta comunque come scelta.
+- **I JSON generati sono nel repository**: il gioco ne ha bisogno per funzionare e i cambi del foglio si vedono nei diff. Si rigenerano sempre con lo script, mai a mano.
+- **Soglia della fase del Tiranno (50%)** scritta nello script di esportazione (`TIRANNO_SOGLIA_FASE`): non c'è nel foglio. Potrebbe diventare un'ancora.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.1 — Esportazione dal foglio ✅
+- `strumenti/esporta.py` (Python, `openpyxl` con `data_only=True`; dipendenze in `strumenti/requirements.txt`). Scrive `data/generati/carte.json` (23 carte), `nemici.json` (5 nemici), `bilanciamento.json`, `testi_provvisori.csv`, tutti con `schema: 1`.
+- Traduzioni dal foglio ai dati: colonna "parametro" nel campo giusto per tipo (`stato`, `carta`, `nemico`, `da`); `letale` → `letale` + `ignora_blocco` + intenzione `non_annullabile`; peso `seq 1-2` → `comportamento: sequenza` con l'elenco ordinato; `turno 8` → `turno: 8`; carte dei mazzi base → `personale: true`; rarità base fuori dai mazzi → `di_sistema: true`; Lascito: se la colonna è un momento vale a ogni combattimento, se è un bersaglio vale una volta a inizio vita; Tiranno → una seconda fase sotto il 50% con intenzioni vuote (le riempie il gioco con le carte rubate).
+- Le colonne di controllo del budget finiscono in `budget` (il validatore le usa per gli avvisi).
+- Verifica: lo script gira, i JSON si rileggono senza errori. Istruzioni in `docs/COMANDI.md`.
 
 ### T1.8 — Esito e registro ✅ (fine Tappa 1)
 - `Combattimento.esito` (in corso, vittoria, sconfitta); dopo la fine nessuna azione ha effetto.
