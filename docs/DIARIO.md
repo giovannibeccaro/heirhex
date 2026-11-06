@@ -10,7 +10,7 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **T2.11**: evoluzione "Più forte" come regola del motore (`core/eredita/invecchiamento.gd`), applicata alle carte con livello.
 - **T2.12**: nuova strategia **ragionevole**; simulazione di ogni forma contro il mazzo della sua fase in tutte le età. Oggi la forma base è quasi a posto sui turni, la divorata è molto più difficile degli obiettivi (vita persa fino al 77% contro il Lupenaro).
 - **T2.13**: **proposta di numeri** (sotto, nel registro): nuove vite e danni per i quattro nemici, che portano la forma base negli obiettivi; per le forme la ricerca chiede moltiplicatori 1,0, il che indica un problema nei mazzi di riferimento o nella fonte della difficoltà delle forme. Da decidere insieme.
-- 204 test verdi, validatore a 0 errori. Foglio e dati non toccati dalla proposta.
+- 203 test verdi, validatore a 0 errori. Foglio e dati non toccati dalla proposta.
 
 ## Domande per Giovanni
 ### Tappa 2d (nuove)
