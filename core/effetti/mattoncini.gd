@@ -48,6 +48,8 @@ static func esegui(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) 
 		"ruba_carta":
 			if ctx.sorgente is Nemico:
 				_ruba(c, effetto, ctx.sorgente as Nemico)
+		"applica_modificatore":
+			_applica_modificatore(c, effetto, ctx)
 		"evoca":
 			for i in int(effetto.get("valore", 1)):
 				c.evoca(str(effetto["nemico"]))
@@ -217,3 +219,27 @@ static func _carte_scelte(zona: Array[Carta], effetto: Dictionary, ctx: Contesto
 	for i in mini(n, zona.size()):
 		risultato.append(zona[i])
 	return risultato
+
+
+## Aggiunge un modificatore al sistema unico. bersaglio: "carta_piu_costosa_in_mano"
+## (la prima tra le giocabili con il costo attuale più alto) oppure un combattente.
+static func _applica_modificatore(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto) -> void:
+	var d := {"fonte": "effetto", "proprieta": effetto["proprieta"], "operazione": effetto.get("operazione", "somma"),
+		"valore": effetto.get("valore", 0), "durata": effetto.get("durata", "turno")}
+	var chiave := str(effetto.get("bersaglio", "se"))
+	if chiave == "carta_piu_costosa_in_mano":
+		var scelta: Carta = null
+		for carta in c.stato.mano:
+			if carta.giocabile() and (scelta == null or c.costo_carta(carta) > c.costo_carta(scelta)):
+				scelta = carta
+		if scelta == null:
+			return
+		d["bersaglio"] = {"tipo": "carta", "filtro": {"uid": scelta.uid}}
+		c.stato.modificatori.aggiungi_da_dizionario(d)
+		c.registro.aggiungi(c.stato.turno, "modificatore", {"carta": scelta.id, "uid": scelta.uid, "proprieta": d["proprieta"], "valore": d["valore"]})
+		return
+	for b in bersagli(c, effetto, ctx):
+		var copia := d.duplicate()
+		copia["bersaglio"] = {"tipo": c.tipo_di(b), "filtro": {"uid": (b as Nemico).uid} if b is Nemico else {}}
+		c.stato.modificatori.aggiungi_da_dizionario(copia)
+		c.registro.aggiungi(c.stato.turno, "modificatore", {"a": c.nome_tecnico(b), "proprieta": d["proprieta"], "valore": d["valore"]})

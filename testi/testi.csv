@@ -2,3 +2,12 @@ keys,it,en
 gioco.titolo,Heirhex,Heirhex
 risorsa.energia.nome,Energia,Energy
 stato.fattura.nome,Fattura,Hex
+stato.fattura.testo,"Si accumula. A 7 cariche si compie: perdi il 30% della vita massima. Dura tutta la vita.","Builds up. At 7 stacks it strikes: lose 30% of max life. Lasts a whole life."
+stato.paura.nome,Paura,Fear
+stato.paura.testo,"A inizio turno la carta più costosa in mano costa 1 in più.","At the start of your turn, the most expensive card in hand costs 1 more."
+stato.malocchio.nome,Malocchio,Evil eye
+stato.malocchio.testo,"A inizio turno scarti una carta a caso dalla mano.","At the start of your turn, discard a random card."
+stato.radici.nome,Radici,Roots
+stato.radici.testo,"Le carte ereditate hanno +2 al loro valore per ogni carica.","Inherited cards get +2 value per stack."
+combattimento.giocatore,Tu,You
+combattimento.culla,Culla,Cradle

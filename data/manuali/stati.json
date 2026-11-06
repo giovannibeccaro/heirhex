@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "stati": [
+    {
+      "id": "fattura",
+      "nome": "stato.fattura.nome",
+      "testo": "stato.fattura.testo",
+      "tipo": "soglia",
+      "soglia": 7,
+      "persistente": true,
+      "agganci": [
+        { "quando": "soglia_raggiunta", "effetti": [
+          { "tipo": "danno", "valore": 30, "percentuale": true, "ignora_blocco": true, "bersaglio": "se" },
+          { "tipo": "rimuovi_stato", "stato": "fattura", "valore": "tutte", "bersaglio": "se" }
+        ] }
+      ]
+    },
+    {
+      "id": "paura",
+      "nome": "stato.paura.nome",
+      "testo": "stato.paura.testo",
+      "tipo": "durata",
+      "agganci": [
+        { "quando": "inizio_turno", "effetti": [
+          { "tipo": "applica_modificatore", "bersaglio": "carta_piu_costosa_in_mano",
+            "proprieta": "costo", "operazione": "somma", "valore": 1, "durata": "turno" }
+        ] }
+      ]
+    },
+    {
+      "id": "malocchio",
+      "nome": "stato.malocchio.nome",
+      "testo": "stato.malocchio.testo",
+      "tipo": "durata",
+      "agganci": [
+        { "quando": "inizio_turno", "effetti": [
+          { "tipo": "scarta", "valore": 1, "modo": "casuale" }
+        ] }
+      ]
+    },
+    {
+      "id": "radici",
+      "nome": "stato.radici.nome",
+      "testo": "stato.radici.testo",
+      "tipo": "intensita",
+      "modificatori": [
+        { "bersaglio": { "tipo": "carta", "filtro": { "ereditata": true } },
+          "proprieta": "valore_effetti", "operazione": "somma", "valore": 2, "per_carica": true }
+      ]
+    }
+  ]
+}

@@ -22,9 +22,17 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Più modificatori "imposta"** sulla stessa proprietà: vale l'ultimo aggiunto.
 - **Durata "turno"**: scade alla fine del turno del giocatore.
 - **Effetti a fine combattimento**: quando il combattimento è finito i mattoncini non si eseguono più; l'evento `fine_combattimento` serve agli ascoltatori esterni (la vita, le ricompense), non a effetti di carte o stati.
+- **Paura**: all'inizio del tuo turno (dopo la pesca) la carta giocabile più costosa in mano costa +1 fino alla fine del turno; a parità di costo tocca la prima in mano. Una carica = un turno. Se il costo si ricalcolasse dopo ogni carta giocata, la Paura renderebbe +1 ogni carta del turno: troppo forte.
+- **Fattura oltre la soglia**: se le cariche superano 7 (es. 5 + 4), si compie una volta e le cariche in eccesso si perdono (il dato dice "rimuovi tutte").
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.4 — Stati ✅
+- `data/manuali/stati.json`: **Fattura** (soglia 7, 30% della vita massima ignorando il blocco, si azzera, `persistente`), **Paura** (durata), **Malocchio** (durata: a inizio turno scarta una carta a caso), **Radici** (intensità: +2 per carica a danno, blocco e cura delle carte ereditate). Nessuna regola specifica nel codice: tutto è dato.
+- Nuovo mattoncino `applica_modificatore` (serviva alla Paura: nessuna combinazione degli altri bastava). Bersaglio `carta_piu_costosa_in_mano` oppure un combattente.
+- Testi di nomi e descrizioni degli stati in `testi.csv`.
+- Test: `test/stati/test_stati.gd` (16 test, compresa la soglia della Fattura, l'eccesso di cariche, la Fattura ereditata dalla vita, la Paura a parità di costo).
 
 ### T1.6 — Agganci agli eventi di gioco ✅
 - `core/eventi/eventi_gioco.gd` (`EventiGioco`): eventi `inizio_combattimento`, `fine_combattimento`, `inizio_turno`, `fine_turno`, `carta_giocata`, `soglia_raggiunta`; `ascolta(evento, funzione)` per chi vuole agganciarsi da fuori (interfaccia, vita, future meccaniche).
