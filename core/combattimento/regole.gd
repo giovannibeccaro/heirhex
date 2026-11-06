@@ -20,3 +20,8 @@ static func da_dizionario(d: Dictionary) -> RegoleCombattimento:
 	r.mano_limite = int(d.get("mano_limite", r.mano_limite))
 	r.nemici_max = int(d.get("nemici_max", r.nemici_max))
 	return r
+
+
+## Dai dati esportati (bilanciamento.json, sezione "combattimento").
+static func da_bilanciamento(bilanciamento: Dictionary) -> RegoleCombattimento:
+	return da_dizionario(bilanciamento.get("combattimento", {}))

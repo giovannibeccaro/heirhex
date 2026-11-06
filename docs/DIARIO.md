@@ -35,6 +35,12 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 
 ## Registro dei compiti
 
+### T2.2 — Caricatore dei dati ✅
+- `core/dati/caricatore.gd` (`Caricatore`): legge `data/generati/` (carte, nemici, bilanciamento) e `data/manuali/stati.json`, controlla il campo `schema` (supportato: 1), raccoglie gli errori in `errori` e restituisce `null` se ce n'è almeno uno. Rimette interi i numeri interi (il parser JSON di Godot li legge tutti come decimali).
+- `RegoleCombattimento.da_bilanciamento()`: energia per turno dal foglio.
+- Preset Web: `include_filter="*.json"` (Godot esporta solo le risorse che conosce; i JSON vanno inclusi a mano, altrimenti il gioco esportato non li trova).
+- Test: `test/dati/test_caricatore.gd` (9 test: dati veri, mazzi base esistenti, un combattimento con i dati veri, schema non supportato o mancante, JSON rotto, file mancanti).
+
 ### T2.1 — Esportazione dal foglio ✅
 - `strumenti/esporta.py` (Python, `openpyxl` con `data_only=True`; dipendenze in `strumenti/requirements.txt`). Scrive `data/generati/carte.json` (23 carte), `nemici.json` (5 nemici), `bilanciamento.json`, `testi_provvisori.csv`, tutti con `schema: 1`.
 - Traduzioni dal foglio ai dati: colonna "parametro" nel campo giusto per tipo (`stato`, `carta`, `nemico`, `da`); `letale` → `letale` + `ignora_blocco` + intenzione `non_annullabile`; peso `seq 1-2` → `comportamento: sequenza` con l'elenco ordinato; `turno 8` → `turno: 8`; carte dei mazzi base → `personale: true`; rarità base fuori dai mazzi → `di_sistema: true`; Lascito: se la colonna è un momento vale a ogni combattimento, se è un bersaglio vale una volta a inizio vita; Tiranno → una seconda fase sotto il 50% con intenzioni vuote (le riempie il gioco con le carte rubate).
