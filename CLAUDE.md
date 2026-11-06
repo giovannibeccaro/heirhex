@@ -41,6 +41,7 @@ I numeri vivono in `06-prototipo/bilanciamento.xlsx`. **Non modificare i documen
 ## Convenzioni
 - Identificatori in **italiano senza accenti**, coerenti con il design e con i dati (`stirpe`, `obolo`, `culla`, `applica_stato`). `snake_case` per funzioni e variabili, `PascalCase` per le classi.
 - Tipizzazione statica di GDScript ovunque possibile.
+- **Niente stringhe scritte a mano sparse nel codice per gli identificatori interni** (bersagli, tipi di effetto, stati, eventi di gioco): sono definiti **una sola volta** come `enum` o costanti `StringName` in un file dedicato (es. `core/id.gd`). Nei JSON restano stringhe leggibili; il caricatore dei dati le converte e le valida, così un errore di battitura emerge al caricamento e non a metà partita.
 - Commenti brevi, in italiano.
 
 ## Come lavoriamo

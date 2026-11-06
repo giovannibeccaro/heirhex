@@ -39,13 +39,15 @@ Specifiche: `02-design/combattimento.md`, `02-design/bilanciamento.md`, `02-desi
 | T1.7 | **Nemici:** intenzioni con comportamento pesato (peso, massimo di fila, ricarica) e a sequenza, forme della fattura (moltiplicatori), fasi del Tiranno sotto il 50%, ultimo rintocco al turno 8 (letale, ignora il blocco, non annullabile) | Test per ogni comportamento |
 | T1.8 | **Esito e registro:** vittoria, sconfitta, e un registro di tutte le azioni del combattimento (servirà al debug e agli snapshot) | Test di un combattimento breve completo, con registro leggibile |
 
+| T1.9 | **Identificatori centralizzati:** sposta le stringhe interne (bersagli, tipi di effetto, stati, agganci) in `enum` o costanti `StringName` definite una sola volta; i `match` usano le costanti. Vedi la convenzione in `CLAUDE.md` | Nessun identificatore interno scritto a mano fuori dal file dedicato; test verdi |
+
 ## Tappa 2 — Dati
 Specifiche: `06-prototipo/schemi-dati.md`, foglio `06-prototipo/bilanciamento.xlsx` (nella cartella di design; leggerlo, mai modificarlo).
 
 | Id | Compito | Finito quando |
 | --- | --- | --- |
 | T2.1 | `strumenti/esporta.py`: legge il foglio (valori calcolati, `openpyxl` con `data_only=True`) e scrive `data/generati/carte.json`, `nemici.json`, `bilanciamento.json` con campo `schema` | Lo script gira e produce JSON validi. Istruzioni in `docs/COMANDI.md` |
-| T2.2 | **Caricatore dei dati** in `core/`, con controllo della versione di schema | Test che carica i JSON generati |
+| T2.2 | **Caricatore dei dati** in `core/`, con controllo della versione di schema; converte le stringhe dei JSON negli identificatori di T1.9 e rifiuta valori sconosciuti | Test che carica i JSON generati e test che un valore sconosciuto viene segnalato |
 | T2.3 | **Validatore** (riferimenti a id esistenti, chiavi di testo presenti in `testi.csv`, versioni di schema): script e test | Il validatore passa sui dati attuali; le chiavi di testo mancanti vengono aggiunte a `testi.csv` con il nome provvisorio italiano dal foglio |
 | T2.4 | **Simulazione:** script headless che gioca 1000 combattimenti con il mazzo base delle Masciare contro ciascun nemico normale, con una strategia semplice (gioca le carte che fanno più danni, difende se l'intenzione è un attacco). Misura turni medi e vita persa | Rapporto in `docs/report-simulazione.md`, confrontato con le ancore (3 turni, 10-15% di vita persa). Non correggere i numeri: solo riportare |
 

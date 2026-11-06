@@ -61,3 +61,13 @@ Legge `06-prototipo/bilanciamento.xlsx` nella cartella di design (solo lettura, 
 Per un altro foglio o un'altra cartella: `strumenti/esporta.py percorso.xlsx cartella_uscita`.
 
 Nota: `data_only=True` legge i valori **salvati** nel file. Se il foglio è stato modificato con un programma che non ricalcola le formule al salvataggio, i valori potrebbero essere vecchi: aprire e salvare il foglio con Excel, Numbers o Google Fogli prima di esportare.
+
+## Validatore dei dati
+```sh
+strumenti/valida.sh              # controlla e basta
+strumenti/valida.sh --correggi   # aggiunge a testi.csv le chiavi mancanti
+```
+Controlla: versioni di schema, riferimenti a id esistenti (stati, carte, nemici, intenzioni delle sequenze, mazzi base), tipi di effetto e bersagli noti, eventi e filtri dei modificatori, chiavi di testo presenti in `testi/testi.csv`. Le carte fuori budget sono **avvisi**, non errori. Uscita `0` = nessun errore.
+Con `--correggi` le chiavi mancanti vengono aggiunte con il nome italiano provvisorio del foglio (`data/generati/testi_provvisori.csv`) e la colonna inglese vuota, da tradurre.
+Ordine consigliato dopo aver cambiato il foglio: `esporta.py` → `valida.sh --correggi` → `test.sh`.
+La logica sta in `core/dati/validatore.gd` (`Validatore`), così il gioco potrà eseguirla anche all'avvio in modalità debug.

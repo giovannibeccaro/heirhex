@@ -4,6 +4,14 @@ extends RefCounted
 ## Un effetto è un dizionario: { tipo, valore, bersaglio, ... } (schemi-dati.md, sezione Effetto).
 ## Funzioni statiche: il combattimento si passa a ogni chiamata (niente riferimenti circolari).
 
+## Tipi di effetto eseguibili in combattimento (il validatore controlla i dati con questo elenco).
+const TIPI := ["danno", "blocco", "cura", "pesca", "energia", "applica_stato", "rimuovi_stato",
+	"aggiungi_carta", "scarta", "esilia", "annulla_intenzione", "riprendi_dagli_scarti",
+	"ruba_carta", "evoca", "applica_modificatore"]
+## Valori ammessi per "bersaglio".
+const BERSAGLI := ["se", "giocatore", "culla", "se_o_culla", "nemico", "tutti_nemici",
+	"nemico_casuale", "mano", "carta_piu_costosa_in_mano"]
+
 
 static func esegui_lista(c: Combattimento, effetti: Array, ctx: ContestoEffetto) -> void:
 	for effetto in effetti:

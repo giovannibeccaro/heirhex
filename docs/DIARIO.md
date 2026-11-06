@@ -31,9 +31,17 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Comportamento pesato senza scelte valide**: se `max_di_fila` e `ricarica` escludono tutto, si ignora prima la ricarica, poi anche il limite di fila (non succede con i dati attuali). Un'intenzione annullata conta comunque come scelta.
 - **I JSON generati sono nel repository**: il gioco ne ha bisogno per funzionare e i cambi del foglio si vedono nei diff. Si rigenerano sempre con lo script, mai a mano.
 - **Soglia della fase del Tiranno (50%)** scritta nello script di esportazione (`TIRANNO_SOGLIA_FASE`): non c'è nel foglio. Potrebbe diventare un'ancora.
+- **Validatore in GDScript, non in Python**: il design vuole il validatore anche all'avvio del gioco in modalità debug; scritto in `core/` serve a entrambi. Lo script da terminale è solo un involucro.
+- **Coerenza tra `stati.json` e le ancore** (Radici +2, Fattura 7 e 30%) non controllata: i valori sono scritti due volte (foglio e stati). Si potrebbe far leggere agli stati i valori delle ancore; per ora è un rischio noto.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.3 — Validatore ✅
+- `core/dati/validatore.gd` (`Validatore`): riferimenti (stati, carte, nemici evocati, intenzioni delle sequenze, mazzi base), tipi di effetto e bersagli (elenchi in `Mattoncini.TIPI` e `Mattoncini.BERSAGLI`, un'unica fonte), effetti fuori combattimento ammessi solo nel Lascito, eventi degli agganci, filtri e durate dei modificatori, chiavi di testo. Budget fuori soglia = avviso.
+- `strumenti/valida.gd` + `strumenti/valida.sh [--correggi]`: con `--correggi` aggiunge le chiavi mancanti a `testi.csv` con il nome provvisorio del foglio.
+- Eseguito sui dati attuali: aggiunte 28 chiavi (23 carte, 5 nemici); ora **0 errori, 1 avviso** (*Il nome del morto* troppo debole, già noto). Le traduzioni inglesi sono vuote.
+- Test: `test/dati/test_validatore.gd` (11 test, compreso "i dati attuali sono validi").
 
 ### T2.2 — Caricatore dei dati ✅
 - `core/dati/caricatore.gd` (`Caricatore`): legge `data/generati/` (carte, nemici, bilanciamento) e `data/manuali/stati.json`, controlla il campo `schema` (supportato: 1), raccoglie gli errori in `errori` e restituisce `null` se ce n'è almeno uno. Rimette interi i numeri interi (il parser JSON di Godot li legge tutti come decimali).
