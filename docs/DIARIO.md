@@ -15,6 +15,13 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 
 ## Registro dei compiti
 
+### T0.2 — GUT ✅
+- GUT **9.7.1** (prima versione con le correzioni per Godot 4.7) copiato in `addons/gut`, plugin attivato in `project.godot`.
+- `.gutconfig.json`: test in `res://test/` e sottocartelle, prefisso `test_`.
+- `strumenti/test.sh`: importa le risorse ed esegue i test headless; uscita 1 se un test fallisce (verificato con un test rosso temporaneo).
+- `test/test_esempio.gd` passa. Comandi spiegati in `docs/COMANDI.md`.
+- Nota Godot: dalla 4.4 ogni script ha un file `.uid` accanto (identificatore stabile della risorsa): vanno committati.
+
 ### T0.1 — Struttura delle cartelle ✅
 - Create `core/`, `ui/`, `data/generati/`, `data/manuali/`, `testi/`, `strumenti/`, `test/`, `docs/`, ognuna con un README breve.
 - `.gitignore`: aggiunti `strumenti/.venv/` e `__pycache__/`.
