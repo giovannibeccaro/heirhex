@@ -76,9 +76,12 @@ func _valida_nemico(id: String, n: Dictionary) -> void:
 		_valida_intenzioni(dove + " (fase)", f.get("intenzioni", []))
 	for forma in n.get("forme", {}):
 		_valida_intenzioni("%s (forma %s)" % [dove, forma], n["forme"][forma].get("intenzioni_aggiunte", []))
-		for potenziata in n["forme"][forma].get("intenzioni_potenziate", []):
+		var potenziate: Array = n["forme"][forma].get("intenzioni_potenziate", [])
+		for potenziata in potenziate:
 			if not ids.has(str(potenziata)):
 				errori.append("%s: la forma %s potenzia l'intenzione inesistente '%s'" % [dove, forma, potenziata])
+		if potenziate.size() > 1:
+			avvisi.append("%s: forma %s con %d intenzioni potenziate (D62: al massimo una)" % [dove, forma, potenziate.size()])
 
 
 func _valida_intenzioni(dove: String, intenzioni: Array) -> Array:

@@ -56,10 +56,17 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Push su GitHub**: il primo push falliva con HTTP 400 (pacchetto grande per GUT); risolto con `git config http.postBuffer 524288000`, solo nella configurazione locale del repository.
 - **Nomi dei campi dello schema scritti nel codice** (`effetto["valore"]`, `d.get("vita")`, le chiavi del riepilogo e del registro): li considero lo schema dei dati, non identificatori interni, e non li ho spostati in `Id`. Spostarli renderebbe il codice molto meno leggibile (`effetto[Id.VALORE]`). Sono invece in `Id` tutti i **valori** che quei campi possono assumere. Se preferisci centralizzare anche i nomi dei campi, è un lavoro meccanico.
 - **Test con stringhe letterali**: i test scrivono effetti e impostazioni come stringhe (`{"tipo": "danno"}`), come fanno i JSON; il motore li accetta perché converte sempre con `StringName(...)`.
-- **Quale intenzione potenzia la forma divorata**: il foglio dà il moltiplicatore (1,5) ma non dice quale intenzione. Se il nemico ha nei dati `forme.divorata.intenzioni_potenziate`, uso quelle; altrimenti (oggi tutti i nemici) l'intenzione con più danno tra le sue, esclusi i colpi letali; a parità vince la prima. Per la Janara Madre risulta *Assalto alla casa* (19), di poco sopra *Colpo* (18).
+- ~~**Quale intenzione potenzia la forma divorata**: l'intenzione con più danno~~ — superata da D62 (T2.8): ora la indica il foglio.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.8 — Intenzione potenziata dai dati ✅ (Tappa 2c, D62, D63)
+- `esporta.py` legge la colonna O "Potenziata in divorata" (`sì` o vuoto; altro = errore) e scrive `forme.divorata.intenzioni_potenziate` nel nemico. Dal foglio: Lupenaro `morso_della_luna`, Janara `assalto_alla_casa`, Pantafica `peso_sul_cuore`, Munaciello `sgambetto`; la Janara Madre nessuna.
+- Il motore **non indovina più**: senza il dato nessuna intenzione è potenziata. Tolta la funzione che sceglieva l'intenzione con più danno.
+- Il caricatore controlla che il campo sia un elenco di id; il validatore che gli id esistano e avvisa se sono più di uno (D62: al massimo uno per nemico).
+- Riesportazione: cambiano solo l'Ululato (10 → 6, D63) e le intenzioni potenziate. Validatore a 0 errori.
+- Test: i valori divorati calcolati dal motore coincidono con la colonna J del foglio (Morso della luna 55, Assalto alla casa 25, Peso sul cuore 25, Sgambetto 20); più test sul dato mancante e sui controlli. 179 test verdi.
 
 ### T2.7 — Simulazione rifatta ✅ (fine Tappa 2b)
 - `docs/report-simulazione.md` rigenerato con i dati nuovi (1000 combattimenti per nemico e per scenario) e con la sezione **Prima / dopo** (turni medi, vita persa, casa persa) composta dal report precedente.

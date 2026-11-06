@@ -106,6 +106,9 @@ static func _nemico(dove: String, n: Dictionary, errori: PackedStringArray) -> v
 			errori.append("%s: forma sconosciuta '%s'" % [dove, forma])
 			continue
 		_intenzioni("%s (forma %s)" % [dove, forma], forme[forma].get("intenzioni_aggiunte", []), errori)
+		var potenziate: Variant = forme[forma].get("intenzioni_potenziate", [])
+		if not (potenziate is Array) or (potenziate as Array).any(func(x: Variant) -> bool: return not (x is String)):
+			errori.append("%s: forma %s, intenzioni_potenziate deve essere un elenco di id" % [dove, forma])
 
 
 static func _stato(dove: String, s: Dictionary, errori: PackedStringArray) -> void:

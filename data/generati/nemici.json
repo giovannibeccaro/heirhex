@@ -34,7 +34,7 @@
           "effetti": [
             {
               "tipo": "blocco",
-              "valore": 10,
+              "valore": 6,
               "bersaglio": "se"
             }
           ]
@@ -50,7 +50,14 @@
             }
           ]
         }
-      ]
+      ],
+      "forme": {
+        "divorata": {
+          "intenzioni_potenziate": [
+            "morso_della_luna"
+          ]
+        }
+      }
     },
     {
       "id": "janara",
@@ -104,7 +111,14 @@
           "ricarica": 0,
           "peso": 1
         }
-      ]
+      ],
+      "forme": {
+        "divorata": {
+          "intenzioni_potenziate": [
+            "assalto_alla_casa"
+          ]
+        }
+      }
     },
     {
       "id": "pantafica",
@@ -164,7 +178,14 @@
           "ricarica": 0,
           "peso": 2
         }
-      ]
+      ],
+      "forme": {
+        "divorata": {
+          "intenzioni_potenziate": [
+            "peso_sul_cuore"
+          ]
+        }
+      }
     },
     {
       "id": "munaciello_offeso",
@@ -204,7 +225,14 @@
           "ricarica": 0,
           "peso": 2
         }
-      ]
+      ],
+      "forme": {
+        "divorata": {
+          "intenzioni_potenziate": [
+            "sgambetto"
+          ]
+        }
+      }
     },
     {
       "id": "janara_madre",

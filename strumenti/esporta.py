@@ -130,6 +130,16 @@ def righe(foglio, intestazione=1):
         yield {titoli[i]: riga[i] for i in range(min(len(titoli), len(riga))) if titoli[i]}
 
 
+def si_no(v, dove):
+    """Colonne sì/no: "sì" (o "si") = vero, vuoto = falso; altro = errore."""
+    t = testo(v).lower()
+    if t in ("", "no"):
+        return False
+    if t in ("sì", "si"):
+        return True
+    raise ErroreFoglio(f"{dove}: valore '{v}' non valido (atteso 'sì' o vuoto)")
+
+
 def effetto(tipo, bersaglio, parametro, valore, dove):
     """Costruisce un mattoncino dalle colonne del foglio."""
     tipo = testo(tipo)
@@ -221,7 +231,8 @@ def leggi_intenzioni(wb):
         elenco = per_nemico.setdefault(nid, [])
         intenzione = next((i for i in elenco if i["id"] == iid), None)
         if intenzione is None:
-            intenzione = {"id": iid, "tipo": testo(r["Tipo"]), "effetti": [], "_peso": testo(r.get("Peso"))}
+            intenzione = {"id": iid, "tipo": testo(r["Tipo"]), "effetti": [], "_peso": testo(r.get("Peso")),
+                          "_potenziata": si_no(r.get("Potenziata in divorata"), dove)}
             for campo, colonna in (("max_di_fila", "Max di fila"), ("ricarica", "Ricarica (turni)")):
                 v = numero(r.get(colonna))
                 if v is not None:
@@ -249,7 +260,10 @@ def leggi_nemici(wb, nomi):
         }
         proprie = intenzioni.pop(nid, [])
         sequenza = []
+        potenziate = []
         for i in proprie:
+            if i.pop("_potenziata"):
+                potenziate.append(i["id"])
             peso = i.pop("_peso")
             m_seq = re.fullmatch(r"seq\s+(\d+)(?:\s*-\s*(\d+))?", peso)
             m_turno = re.fullmatch(r"turno\s+(\d+)", peso)
@@ -268,6 +282,9 @@ def leggi_nemici(wb, nomi):
         else:
             nemico["comportamento"] = "pesato"
         nemico["intenzioni"] = proprie
+        if potenziate:
+            # D62: l'intenzione potenziata nella forma divorata (× intenzione_potenziata di Forme fattura)
+            nemico["forme"] = {"divorata": {"intenzioni_potenziate": potenziate}}
         if nemico["livello"] == "tiranno":
             nemico["fasi"] = [{"sotto_quota_vita": TIRANNO_SOGLIA_FASE, "comportamento": "pesato", "intenzioni": []}]
         nemici.append(nemico)

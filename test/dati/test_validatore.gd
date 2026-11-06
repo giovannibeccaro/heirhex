@@ -101,3 +101,15 @@ func test_avviso_di_budget() -> void:
 	var v := Validatore.new()
 	assert_true(v.valida(c, _testi()), "un avviso non è un errore")
 	assert_eq(v.avvisi.size(), 1)
+
+
+func test_intenzione_potenziata_inesistente_o_doppia() -> void:
+	var c := _catalogo_minimo()
+	c.nemici["n"]["forme"] = {"divorata": {"intenzioni_potenziate": ["boh"]}}
+	assert_string_contains(_errori(c), "potenzia l'intenzione inesistente 'boh'")
+	c = _catalogo_minimo()
+	c.nemici["n"]["intenzioni"].append({"id": "y", "effetti": []})
+	c.nemici["n"]["forme"] = {"divorata": {"intenzioni_potenziate": ["x", "y"]}}
+	var v := Validatore.new()
+	assert_true(v.valida(c, _testi()))
+	assert_string_contains("\n".join(v.avvisi), "al massimo una")

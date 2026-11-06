@@ -62,15 +62,12 @@ func _applica_forma(n: Nemico, forma: StringName) -> void:
 			break
 
 
-## D60: nella forma divorata un'intenzione ha i valori in punti moltiplicati (oltre ai moltiplicatori globali).
-## Quali: "intenzioni_potenziate" nei dati del nemico; se mancano, la sua intenzione con più danno.
+## D60, D62: nella forma divorata le intenzioni indicate dai dati del nemico
+## ("forme.divorata.intenzioni_potenziate") hanno i valori in punti moltiplicati, oltre ai
+## moltiplicatori globali. Senza il dato nessuna intenzione è potenziata.
 ## Il valore resta decimale: si arrotonda una volta sola, con i modificatori (valore_effetto).
 func _potenzia_intenzioni(n: Nemico, dati_forma: Dictionary, moltiplicatore: float) -> void:
 	var ids: Array = dati_forma.get("intenzioni_potenziate", [])
-	if ids.is_empty():
-		var piu_forte := IntelligenzaNemici.intenzione_piu_dannosa(n.dati.get("intenzioni", []))
-		if not piu_forte.is_empty():
-			ids = [piu_forte["id"]]
 	for i in n.intenzioni_base.size():
 		var intenzione: Dictionary = n.intenzioni_base[i]
 		if not ids.has(intenzione.get("id")):

@@ -163,3 +163,34 @@ func test_elenchi_di_id_senza_doppioni() -> void:
 		for valore in elenco:
 			assert_false(visti.has(valore), str(valore))
 			visti[valore] = true
+
+
+# --- D62: intenzione potenziata letta dai dati ------------------------------------
+
+func test_intenzioni_potenziate_lette_dai_dati_veri() -> void:
+	var catalogo := Caricatore.new().carica()
+	var trovate := 0
+	for id in catalogo.nemici:
+		var potenziate: Array = catalogo.nemici[id].get("forme", {}).get("divorata", {}).get("intenzioni_potenziate", [])
+		assert_true(potenziate.size() <= 1, "al massimo una per nemico: " + id)
+		trovate += potenziate.size()
+	assert_gt(trovate, 0, "il foglio indica almeno un'intenzione potenziata")
+
+
+## I valori divorati calcolati dal motore coincidono con la colonna J "Valore divorata" del foglio.
+func test_valori_divorati_come_nel_foglio() -> void:
+	var catalogo := Caricatore.new().carica()
+	var attesi := {"lupenaro": ["morso_della_luna", 55], "janara": ["assalto_alla_casa", 25],
+		"pantafica": ["peso_sul_cuore", 25], "munaciello_offeso": ["sgambetto", 20]}
+	for id in attesi:
+		var c := Combattimento.new(catalogo, {"nemici": [{"id": id, "forma": "divorata"}], "mazzo": []})
+		var n := c.stato.nemici[0]
+		var intenzione := IntelligenzaNemici.cerca(n.intenzioni_base, attesi[id][0])
+		var bersaglio: Combattente = c.stato.casa if attesi[id][0] == "assalto_alla_casa" else c.stato.giocatore
+		assert_eq(c.valore_effetto(intenzione["effetti"][0], ContestoEffetto.new(n), bersaglio), attesi[id][1], id)
+
+
+func test_intenzioni_potenziate_non_valide() -> void:
+	var c := Catalogo.new()
+	c.nemici = {"n": {"id": "n", "intenzioni": [], "forme": {"divorata": {"intenzioni_potenziate": "morso"}}}}
+	assert_string_contains("\n".join(Caricatore.normalizza(c)), "intenzioni_potenziate deve essere un elenco")

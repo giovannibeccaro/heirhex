@@ -90,22 +90,6 @@ static func _registra(n: Nemico, i: Dictionary, turno: int) -> Dictionary:
 	return i
 
 
-## L'intenzione con più danno totale (esclusi i colpi letali); {} se nessuna fa danno.
-## A parità vince la prima nell'elenco.
-static func intenzione_piu_dannosa(intenzioni: Array) -> Dictionary:
-	var migliore := {}
-	var danno_migliore := 0.0
-	for i: Dictionary in intenzioni:
-		var danno := 0.0
-		for e: Dictionary in i.get("effetti", []):
-			if StringName(e.get("tipo", "")) == Id.DANNO and not bool(e.get("letale", false)):
-				danno += float(e.get("valore", 0))
-		if danno > danno_migliore:
-			migliore = i
-			danno_migliore = danno
-	return migliore
-
-
 static func cerca(intenzioni: Array, id: String) -> Dictionary:
 	for i in intenzioni:
 		if str(i["id"]) == id:

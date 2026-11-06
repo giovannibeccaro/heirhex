@@ -86,7 +86,8 @@ func _valore_intenzione(c: Combattimento, n: Nemico, id: String) -> int:
 	return c.valore_effetto(intenzione["effetti"][0], ContestoEffetto.new(n), c.stato.giocatore)
 
 
-func test_divorata_potenzia_l_intenzione_piu_dannosa() -> void:
+func test_divorata_potenzia_l_intenzione_indicata_dai_dati() -> void:
+	# Il lupo di prova ha forme.divorata.intenzioni_potenziate = ["morso_grosso"]
 	var c := _nuovo([{"id": "lupo", "forma": "divorata"}])
 	var n := c.stato.nemici[0]
 	assert_eq(_valore_intenzione(c, n, "morso_grosso"), 43, "22 × 1,5 × 1,3 = 42,9")
@@ -95,14 +96,22 @@ func test_divorata_potenzia_l_intenzione_piu_dannosa() -> void:
 	assert_eq(c.registro.conta(Id.R_INTENZIONE_POTENZIATA), 1)
 
 
-func test_divorata_con_intenzioni_potenziate_nei_dati() -> void:
+func test_divorata_con_un_altra_intenzione_indicata() -> void:
 	var catalogo := Aiuti.catalogo()
-	var lupo: Dictionary = catalogo.nemici["lupo"]
-	lupo["forme"]["divorata"]["intenzioni_potenziate"] = ["morso"]
+	catalogo.nemici["lupo"]["forme"]["divorata"]["intenzioni_potenziate"] = ["morso"]
 	var c := Combattimento.new(catalogo, Aiuti.impostazioni({"nemici": [{"id": "lupo", "forma": "divorata"}], "mazzo": []}))
 	var n := c.stato.nemici[0]
 	assert_eq(_valore_intenzione(c, n, "morso"), 23, "12 × 1,5 × 1,3 = 23,4")
 	assert_eq(_valore_intenzione(c, n, "morso_grosso"), 29, "22 × 1,3")
+
+
+func test_divorata_senza_dato_non_potenzia_nulla() -> void:
+	# D62: il motore non indovina più quale intenzione potenziare
+	var catalogo := Aiuti.catalogo()
+	catalogo.nemici["lupo"]["forme"]["divorata"].erase("intenzioni_potenziate")
+	var c := Combattimento.new(catalogo, Aiuti.impostazioni({"nemici": [{"id": "lupo", "forma": "divorata"}], "mazzo": []}))
+	assert_eq(_valore_intenzione(c, c.stato.nemici[0], "morso_grosso"), 29, "solo × 1,3")
+	assert_eq(c.registro.conta(Id.R_INTENZIONE_POTENZIATA), 0)
 
 
 func test_divorata_potenziata_in_combattimento() -> void:
@@ -118,16 +127,6 @@ func test_toccata_non_potenzia() -> void:
 	var c := _nuovo([{"id": "lupo", "forma": "toccata"}])
 	assert_eq(_valore_intenzione(c, c.stato.nemici[0], "morso_grosso"), 25, "22 × 1,15")
 	assert_eq(c.registro.conta(Id.R_INTENZIONE_POTENZIATA), 0)
-
-
-func test_intenzione_piu_dannosa() -> void:
-	var intenzioni := [
-		{"id": "a", "effetti": [{"tipo": "danno", "valore": 10}]},
-		{"id": "b", "effetti": [{"tipo": "danno", "valore": 6}, {"tipo": "danno", "valore": 6}]},
-		{"id": "letale", "effetti": [{"tipo": "danno", "letale": true}]},
-		{"id": "c", "effetti": [{"tipo": "blocco", "valore": 50}]}]
-	assert_eq(IntelligenzaNemici.intenzione_piu_dannosa(intenzioni)["id"], "b")
-	assert_eq(IntelligenzaNemici.intenzione_piu_dannosa([intenzioni[3]]), {})
 
 
 func test_le_forme_aggiungono_intenzioni() -> void:
