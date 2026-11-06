@@ -1,6 +1,6 @@
 class_name Combattente
 extends RefCounted
-## Chi può subire danni in combattimento: il giocatore, la culla, un nemico.
+## Chi può subire danni in combattimento: il giocatore, la casa, un nemico.
 
 var id: String
 var nome: String          ## chiave di testo

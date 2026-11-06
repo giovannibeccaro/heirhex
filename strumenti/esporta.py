@@ -293,7 +293,7 @@ def leggi_bilanciamento(wb, mazzi_base):
     b["budget"] = {"effetti": budget, "bersagli": moltiplicatori}
 
     eta = {}
-    culla = None
+    casa = None
     perdite = {}
     for riga in wb["Età"].iter_rows(min_row=2, values_only=True):
         nome = testo(riga[0])
@@ -301,12 +301,12 @@ def leggi_bilanciamento(wb, mazzi_base):
             if nome not in eta:  # la seconda tabella (danno della Fattura) si ricalcola: si salta
                 eta[nome] = {"vita": numero(riga[1]), "mano": numero(riga[2]),
                              "energia": numero(riga[3]), "tappe": numero(riga[4])}
-        elif nome == "culla":
-            culla = numero(riga[1])
+        elif nome == "casa":
+            casa = numero(riga[1])
         if isinstance(riga[3], str) and chiave_da_etichetta(riga[3]) and numero(riga[4]) is not None:
             perdite[chiave_da_etichetta(riga[3])] = numero(riga[4])
     b["eta"] = eta
-    b["culla"] = {"vita": culla}
+    b["casa"] = {"vita": casa}
     b["testamento"] = {"quota_perdite": perdite}
 
     inv = wb["Invecchiamento"]

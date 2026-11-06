@@ -14,8 +14,7 @@ func test_creazione_dello_stato() -> void:
 	assert_eq(s.giocatore.vita, 100)
 	assert_eq(s.giocatore.vita_max, 100)
 	assert_eq(s.giocatore.blocco, 0)
-	assert_eq(s.culla.vita, 35)
-	assert_true(s.culla.attiva)
+	assert_eq(s.casa.vita, 35)
 	assert_eq(s.mazzo.size(), 10)
 	assert_eq(s.mano.size(), 0)
 	assert_eq(s.scarti.size(), 0)
@@ -50,9 +49,11 @@ func test_vita_parziale_e_stati_iniziali() -> void:
 	assert_eq(c.stato.mazzo[0].livello, 1)
 
 
-func test_culla_inattiva_in_giovinezza() -> void:
-	var c := Combattimento.new(Aiuti.catalogo(), Aiuti.impostazioni({"culla": {}}))
-	assert_false(c.stato.culla.attiva)
+func test_casa_sempre_presente_con_la_vita_del_bilanciamento() -> void:
+	# D59: la casa c'è in tutte le età; senza impostazioni prende la vita dal bilanciamento.
+	var c := Combattimento.new(Aiuti.catalogo(), Aiuti.impostazioni({"casa": {}}))
+	assert_eq(c.stato.casa.vita_max, 35)
+	assert_eq(c.stato.casa.vita, 35)
 
 
 func test_stesso_seme_stesso_mazzo() -> void:

@@ -40,7 +40,7 @@ func test_sequenza_esegue_davvero() -> void:
 # --- pesato -------------------------------------------------------------------
 
 func test_pesato_rispetta_max_di_fila_e_ricarica() -> void:
-	var c := _nuovo(["strega"], {"culla": {"vita": 99999, "attiva": true}})
+	var c := _nuovo(["strega"], {"casa": {"vita": 99999}})
 	var viste := _intenzioni(c, 300)
 	for i in range(2, viste.size()):
 		assert_false(viste[i] == "graffio" and viste[i - 1] == "graffio" and viste[i - 2] == "graffio", "graffio al massimo 2 di fila")
@@ -57,8 +57,8 @@ func test_pesato_rispetta_max_di_fila_e_ricarica() -> void:
 
 
 func test_pesato_deterministico() -> void:
-	var a := _intenzioni(_nuovo(["strega"], {"seme": 3, "culla": {"vita": 9999, "attiva": true}}), 30)
-	var b := _intenzioni(_nuovo(["strega"], {"seme": 3, "culla": {"vita": 9999, "attiva": true}}), 30)
+	var a := _intenzioni(_nuovo(["strega"], {"seme": 3, "casa": {"vita": 9999}}), 30)
+	var b := _intenzioni(_nuovo(["strega"], {"seme": 3, "casa": {"vita": 9999}}), 30)
 	assert_eq(a, b)
 
 

@@ -57,6 +57,13 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 
 ## Registro dei compiti
 
+### T2.5 — La culla diventa la casa ✅ (Tappa 2b, D59)
+- Rinominati in codice, dati, testi, test e strumenti: `Culla` → `Casa` (`core/combattimento/casa.gd`), `culla` → `casa`, `se_o_culla` → `se_o_casa`, `attacco_culla` → `attacco_casa`, `predatore_culla` → `predatore_casa`. Testo: "Casa" / "Home".
+- La casa è presente **in tutte le età**: tolta la proprietà `attiva` e ogni controllo "culla inattiva". Stesse regole: a 0 un tratto negativo (massimo uno per combattimento) e torna a metà. Senza valori nelle impostazioni prende la vita dal bilanciamento (35).
+- Dati rigenerati dal foglio: il foglio usava già i nomi nuovi, quindi per togliere "culla" dai JSON l'unico modo corretto era riesportare. **Con la riesportazione sono arrivati anche i numeri nuovi** (vita 54, danni +25%, G = 3, *Ricordo* con `esilia`): il compito T2.6 completa il lavoro (forma divorata e test).
+- Rimossi 2 test sulla culla inattiva, aggiunto un test sulla casa sempre presente. 162 test verdi; validatore a 0 errori.
+- "culla" resta solo nei documenti storici (diario, risposte, piano) e nel vecchio report di simulazione, che T2.7 riscrive.
+
 ### T2.4 — Simulazione ✅ (fine Tappa 2)
 - `core/simulazione/giocatore_automatico.gd` (`GiocatoreAutomatico`): la strategia semplice del piano (difende se l'intenzione è un attacco, altrimenti gioca la carta con più danni sul nemico più debole), più una variante "solo attacco" come riferimento. Test in `test/simulazione/`.
 - `strumenti/simula.gd`: 1000 combattimenti per nemico normale e per età (giovinezza ed età adulta), mazzo base delle Masciare, dati veri. 16 secondi in tutto.

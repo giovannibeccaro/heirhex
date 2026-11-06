@@ -4,7 +4,7 @@ extends RefCounted
 
 var sorgente: Combattente          ## chi esegue (giocatore, nemico, portatore dello stato)
 var carta: Carta = null            ## la carta giocata, se l'effetto viene da una carta
-var scelte: Dictionary = {}        ## scelte del giocatore (nemico bersaglio, se o culla, carte…)
+var scelte: Dictionary = {}        ## scelte del giocatore (nemico bersaglio, se o casa, carte…)
 var esilia_carta: bool = false     ## un effetto ha chiesto di esiliare la carta giocata
 
 

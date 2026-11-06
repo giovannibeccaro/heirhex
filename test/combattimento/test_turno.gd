@@ -88,16 +88,16 @@ func test_carta_non_in_mano() -> void:
 func test_blocco_dimezzato_a_inizio_turno() -> void:
 	var c := _nuovo({"nemici": ["manichino"], "mazzo": ["riparo", "riparo", "riparo", "riparo", "riparo"]})
 	c.gioca_carta(c.stato.mano[0].uid)
-	c.gioca_carta(c.stato.mano[0].uid, {"se_o_culla": "culla"})
-	c.gioca_carta(c.stato.mano[0].uid, {"se_o_culla": "culla"})
+	c.gioca_carta(c.stato.mano[0].uid, {"se_o_casa": "casa"})
+	c.gioca_carta(c.stato.mano[0].uid, {"se_o_casa": "casa"})
 	assert_eq(c.stato.giocatore.blocco, 7)
-	assert_eq(c.stato.culla.blocco, 14)
+	assert_eq(c.stato.casa.blocco, 14)
 	c.termina_turno()
 	assert_eq(c.stato.giocatore.blocco, 3, "7 dimezzato per difetto")
-	assert_eq(c.stato.culla.blocco, 7)
+	assert_eq(c.stato.casa.blocco, 7)
 	c.termina_turno()
 	assert_eq(c.stato.giocatore.blocco, 1)
-	assert_eq(c.stato.culla.blocco, 3)
+	assert_eq(c.stato.casa.blocco, 3)
 
 
 func test_quota_del_blocco_configurabile() -> void:

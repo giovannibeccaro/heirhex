@@ -17,7 +17,7 @@ var esito: Esito = Esito.IN_CORSO
 ##   mazzo: Array di id oppure { id, ereditata, livello }
 ##   nemici: Array di id oppure { id, forma, quota_vita, intenzioni_fase }
 ##   giocatore: { vita, vita_max, stati }
-##   culla: { vita, vita_max, attiva }
+##   casa: { vita, vita_max }
 ##   mano: carte pescate a inizio turno (età)
 ##   modificatori: Array di modificatori (dizionari) attivi in questo combattimento
 ##   agganci: Array di { quando, effetti } eseguiti dal giocatore (lasciti, amuleti…)
@@ -25,7 +25,7 @@ func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattim
 	var casuale := Casuale.new(int(impostazioni.get("seme", 0)))
 	stato = StatoCombattimento.new(catalogo, casuale, regole)
 	_prepara_giocatore(impostazioni.get("giocatore", {}))
-	_prepara_culla(impostazioni.get("culla", {}))
+	_prepara_casa(impostazioni.get("casa", {}))
 	_vita_iniziale = stato.giocatore.vita
 	stato.mano_dimensione = int(impostazioni.get("mano", 5))
 	for m in impostazioni.get("modificatori", []):
@@ -66,10 +66,12 @@ func _prepara_giocatore(d: Dictionary) -> void:
 	stato.giocatore.stati = (d.get("stati", {}) as Dictionary).duplicate()
 
 
-func _prepara_culla(d: Dictionary) -> void:
-	var vita_max := int(d.get("vita_max", d.get("vita", 1)))
-	stato.culla = Culla.new(vita_max, bool(d.get("attiva", false)))
-	stato.culla.vita = int(d.get("vita", vita_max))
+## La casa c'è sempre (D59); senza valori prende la vita dal bilanciamento.
+func _prepara_casa(d: Dictionary) -> void:
+	var predefinita := int(stato.catalogo.bilanciamento.get("casa", {}).get("vita", 1))
+	var vita_max := int(d.get("vita_max", d.get("vita", predefinita)))
+	stato.casa = Casa.new(vita_max)
+	stato.casa.vita = int(d.get("vita", vita_max))
 
 
 func _crea_carta(voce: Variant) -> Carta:
@@ -108,7 +110,7 @@ func inizia() -> void:
 	_inizia_turno_giocatore()
 
 
-## Gioca una carta dalla mano. scelte: { nemico: uid, se_o_culla: "se"|"culla", ... }.
+## Gioca una carta dalla mano. scelte: { nemico: uid, se_o_casa: "se"|"casa", ... }.
 ## Restituisce false (senza cambiare nulla) se la carta non si può giocare.
 func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
 	if finito():
@@ -177,8 +179,8 @@ func riepilogo() -> Dictionary:
 		"vita_iniziale": _vita_iniziale,
 		"vita_persa": _vita_iniziale - g.vita,
 		"stati_persistenti": persistenti,
-		"culla_vita": stato.culla.vita,
-		"tratti_negativi": stato.culla.tratti_negativi,
+		"casa_vita": stato.casa.vita,
+		"tratti_negativi": stato.casa.tratti_negativi,
 		"giocate": stato.giocate.duplicate(),
 		"giocate_per_carta": giocate_per_carta,
 		"carte_rubate": stato.rubate.map(func(x: Carta) -> String: return x.id),
@@ -242,8 +244,8 @@ func valore_effetto(effetto: Dictionary, ctx: ContestoEffetto, bersaglio: Combat
 func tipo_di(c: Combattente) -> String:
 	if c is Nemico:
 		return "nemico"
-	if c == stato.culla:
-		return "culla"
+	if c == stato.casa:
+		return "casa"
 	return "giocatore"
 
 
@@ -352,7 +354,7 @@ func _inizia_turno_giocatore() -> void:
 	stato.turno += 1
 	registro.aggiungi(stato.turno, "inizio_turno", {"chi": "giocatore"})
 	_riduci_blocco(stato.giocatore)
-	_riduci_blocco(stato.culla)
+	_riduci_blocco(stato.casa)
 	stato.energia = maxi(0, roundi(calcola(stato.regole.energia_per_turno, "energia", "giocatore", stato.giocatore)))
 	var mano := roundi(calcola(stato.mano_dimensione, "mano", "giocatore", stato.giocatore))
 	pesca(maxi(0, mano - stato.mano.size()))
@@ -407,12 +409,12 @@ func _rimescola_scarti() -> void:
 func _a_zero(c: Combattente) -> void:
 	if c == stato.giocatore:
 		_termina(Esito.SCONFITTA)
-	elif c == stato.culla:
-		# Tratto negativo all'erede (massimo uno per combattimento), poi la culla torna a metà.
-		if stato.culla.tratti_negativi == 0:
-			stato.culla.tratti_negativi = 1
-		stato.culla.vita = maxi(1, roundi(stato.culla.vita_max / 2.0))
-		registro.aggiungi(stato.turno, "culla_a_zero", {"tratti_negativi": stato.culla.tratti_negativi, "vita": stato.culla.vita})
+	elif c == stato.casa:
+		# Tratto negativo all'erede (massimo uno per combattimento), poi la casa torna a metà.
+		if stato.casa.tratti_negativi == 0:
+			stato.casa.tratti_negativi = 1
+		stato.casa.vita = maxi(1, roundi(stato.casa.vita_max / 2.0))
+		registro.aggiungi(stato.turno, "casa_a_zero", {"tratti_negativi": stato.casa.tratti_negativi, "vita": stato.casa.vita})
 	elif c is Nemico:
 		registro.aggiungi(stato.turno, "morte", {"nemico": nome_tecnico(c)})
 		(c as Nemico).intenzione = {}

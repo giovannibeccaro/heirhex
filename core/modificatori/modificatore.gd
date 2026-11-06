@@ -8,7 +8,7 @@ const OPERAZIONI := ["somma", "moltiplica", "imposta"]
 
 var id: String = ""
 var fonte: String = ""
-var bersaglio_tipo: String = ""     ## giocatore, culla, carta, nemico, ...
+var bersaglio_tipo: String = ""     ## giocatore, casa, carta, nemico, ...
 var filtro: Dictionary = {}
 var proprieta: String = ""
 var operazione: String = "somma"

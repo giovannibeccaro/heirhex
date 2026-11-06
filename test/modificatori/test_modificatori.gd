@@ -45,7 +45,7 @@ func test_moltiplicazioni_e_somme_si_cumulano() -> void:
 
 
 func test_solo_la_proprieta_e_il_bersaglio_giusti() -> void:
-	var s := _sistema([_mod("mano", "somma", 1), _mod("energia", "somma", 1, "combattimento", "culla")])
+	var s := _sistema([_mod("mano", "somma", 1), _mod("energia", "somma", 1, "combattimento", "casa")])
 	assert_eq(_calcola(s, 3), 3.0)
 
 

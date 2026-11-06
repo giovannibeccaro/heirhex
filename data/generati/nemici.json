@@ -7,7 +7,7 @@
       "nome": "nemico.lupenaro.nome",
       "ruolo": "assalitore",
       "livello": "normale",
-      "vita": 72,
+      "vita": 54,
       "turni_desiderati": 3,
       "comportamento": "sequenza",
       "sequenza": [
@@ -23,7 +23,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 12,
+              "valore": 15,
               "bersaglio": "giocatore"
             }
           ]
@@ -45,7 +45,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 22,
+              "valore": 28,
               "bersaglio": "giocatore"
             }
           ]
@@ -55,20 +55,20 @@
     {
       "id": "janara",
       "nome": "nemico.janara.nome",
-      "ruolo": "predatore_culla",
+      "ruolo": "predatore_casa",
       "livello": "normale",
-      "vita": 72,
+      "vita": 54,
       "turni_desiderati": 3,
       "comportamento": "pesato",
       "intenzioni": [
         {
-          "id": "artigli_alla_culla",
-          "tipo": "attacco_culla",
+          "id": "assalto_alla_casa",
+          "tipo": "attacco_casa",
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 10,
-              "bersaglio": "culla"
+              "valore": 13,
+              "bersaglio": "casa"
             }
           ],
           "max_di_fila": 2,
@@ -111,7 +111,7 @@
       "nome": "nemico.pantafica.nome",
       "ruolo": "oppressore",
       "livello": "normale",
-      "vita": 72,
+      "vita": 54,
       "turni_desiderati": 3,
       "comportamento": "pesato",
       "intenzioni": [
@@ -121,7 +121,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 6,
+              "valore": 8,
               "bersaglio": "giocatore"
             },
             {
@@ -156,7 +156,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 10,
+              "valore": 13,
               "bersaglio": "giocatore"
             }
           ],
@@ -171,7 +171,7 @@
       "nome": "nemico.munaciello_offeso.nome",
       "ruolo": "disturbatore",
       "livello": "normale",
-      "vita": 72,
+      "vita": 54,
       "turni_desiderati": 3,
       "comportamento": "pesato",
       "intenzioni": [
@@ -196,7 +196,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 8,
+              "valore": 10,
               "bersaglio": "giocatore"
             }
           ],
@@ -211,18 +211,18 @@
       "nome": "nemico.janara_madre.nome",
       "ruolo": "tiranno",
       "livello": "tiranno",
-      "vita": 576,
+      "vita": 432,
       "turni_desiderati": 8,
       "comportamento": "pesato",
       "intenzioni": [
         {
-          "id": "artigli_alla_culla",
-          "tipo": "attacco_culla",
+          "id": "assalto_alla_casa",
+          "tipo": "attacco_casa",
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 15,
-              "bersaglio": "culla"
+              "valore": 19,
+              "bersaglio": "casa"
             }
           ],
           "max_di_fila": 2,
@@ -265,7 +265,7 @@
           "effetti": [
             {
               "tipo": "danno",
-              "valore": 14,
+              "valore": 18,
               "bersaglio": "giocatore"
             }
           ],

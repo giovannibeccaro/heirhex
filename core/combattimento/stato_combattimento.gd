@@ -10,7 +10,7 @@ var modificatori := SistemaModificatori.new()
 var agganci: Array = []
 
 var giocatore: Combattente
-var culla: Culla
+var casa: Casa
 var nemici: Array[Nemico] = []
 
 var mazzo: Array[Carta] = []   ## l'ultima carta è la cima (si pesca da lì)

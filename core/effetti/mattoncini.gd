@@ -9,7 +9,7 @@ const TIPI := ["danno", "blocco", "cura", "pesca", "energia", "applica_stato", "
 	"aggiungi_carta", "scarta", "esilia", "annulla_intenzione", "riprendi_dagli_scarti",
 	"ruba_carta", "evoca", "applica_modificatore"]
 ## Valori ammessi per "bersaglio".
-const BERSAGLI := ["se", "giocatore", "culla", "se_o_culla", "nemico", "tutti_nemici",
+const BERSAGLI := ["se", "giocatore", "casa", "se_o_casa", "nemico", "tutti_nemici",
 	"nemico_casuale", "mano", "carta_piu_costosa_in_mano"]
 
 
@@ -78,13 +78,12 @@ static func bersagli(c: Combattimento, effetto: Dictionary, ctx: ContestoEffetto
 			risultato.append(ctx.sorgente)
 		"giocatore":
 			risultato.append(s.giocatore)
-		"culla":
-			if s.culla.attiva:
-				risultato.append(s.culla)
-		"se_o_culla":
-			var scelta := str(ctx.scelte.get("se_o_culla", "se"))
-			if scelta == "culla" and s.culla.attiva:
-				risultato.append(s.culla)
+		"casa":
+			risultato.append(s.casa)
+		"se_o_casa":
+			var scelta := str(ctx.scelte.get("se_o_casa", "se"))
+			if scelta == "casa":
+				risultato.append(s.casa)
 			else:
 				risultato.append(ctx.sorgente)
 		"nemico":

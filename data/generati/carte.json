@@ -38,7 +38,7 @@
         {
           "tipo": "blocco",
           "valore": 7,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         }
       ],
       "personale": true,
@@ -62,12 +62,12 @@
         {
           "tipo": "blocco",
           "valore": 4,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         },
         {
           "tipo": "cura",
           "valore": 2,
-          "bersaglio": "culla"
+          "bersaglio": "casa"
         }
       ],
       "personale": true,
@@ -326,7 +326,7 @@
         {
           "tipo": "cura",
           "valore": 3,
-          "bersaglio": "culla"
+          "bersaglio": "casa"
         },
         {
           "tipo": "pesca",
@@ -340,7 +340,7 @@
           {
             "tipo": "vita_max",
             "valore": 5,
-            "bersaglio": "culla"
+            "bersaglio": "casa"
           }
         ]
       },
@@ -393,7 +393,7 @@
         {
           "tipo": "blocco",
           "valore": 5,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         },
         {
           "tipo": "rimuovi_stato",
@@ -427,7 +427,7 @@
         {
           "tipo": "cura",
           "valore": 3,
-          "bersaglio": "culla"
+          "bersaglio": "casa"
         }
       ],
       "invecchiamento": "sistemico",
@@ -544,7 +544,7 @@
         {
           "tipo": "blocco",
           "valore": 11,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         },
         {
           "tipo": "esilia",
@@ -605,6 +605,11 @@
         {
           "tipo": "applica_stato",
           "stato": "radici",
+          "valore": 1,
+          "bersaglio": "se"
+        },
+        {
+          "tipo": "esilia",
           "valore": 1,
           "bersaglio": "se"
         }

@@ -50,14 +50,13 @@ func _initialize() -> void:
 func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemico: String, eta: String, quanti: int, difende: bool = true) -> Dictionary:
 	var b := catalogo.bilanciamento
 	var dati_eta: Dictionary = b["eta"][eta]
-	var culla_attiva := eta != "giovinezza"
 	var vita := int(dati_eta["vita"])
-	var t := {"vittorie": 0, "turni": [], "turni_vittorie": [], "vita_persa": [], "culla_persa": [], "tratti": 0, "fattura": [], "interrotti": 0}
+	var t := {"vittorie": 0, "turni": [], "turni_vittorie": [], "vita_persa": [], "casa_persa": [], "tratti": 0, "fattura": [], "interrotti": 0}
 	for seme in range(1, quanti + 1):
 		var c := Combattimento.new(catalogo, {
 			"seme": seme, "mazzo": mazzo, "nemici": [nemico],
 			"giocatore": {"vita": vita, "vita_max": vita},
-			"culla": {"vita": int(b["culla"]["vita"]), "attiva": culla_attiva},
+			"casa": {"vita": int(b["casa"]["vita"])},
 			"mano": int(dati_eta["mano"]),
 		}, regole)
 		GiocatoreAutomatico.gioca_combattimento(c, 50, difende)
@@ -69,7 +68,7 @@ func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemi
 			t["turni_vittorie"].append(r["turni"])
 		t["turni"].append(r["turni"])
 		t["vita_persa"].append(float(r["vita_persa"]) / float(r["vita_max"]))
-		t["culla_persa"].append(int(b["culla"]["vita"]) - int(r["culla_vita"]) if culla_attiva else 0)
+		t["casa_persa"].append(int(b["casa"]["vita"]) - int(r["casa_vita"]))
 		t["tratti"] += int(r["tratti_negativi"])
 		t["fattura"].append(int(r["stati_persistenti"].get("fattura", 0)))
 	return t
@@ -87,17 +86,17 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 	r.append("")
 	r.append("## Come")
 	r.append("- Mazzo base della casata **%s** (%d carte), %d combattimenti per nemico e per età (semi da 1 a %d), forma base dei nemici." % [casata, carte, quanti, quanti])
-	r.append("- Età: vita e carte in mano dal foglio (scheda Età); culla (%d) attiva dall'età adulta; vita piena a inizio combattimento." % int(b["culla"]["vita"]))
-	r.append("- Strategia (`core/simulazione/giocatore_automatico.gd`): se un'intenzione visibile farà danni a te o alla culla oltre il blocco, gioca la carta che blocca di più (prima te, poi la culla); altrimenti la carta che fa più danni, sul nemico con meno vita; poi il resto.")
+	r.append("- Età: vita e carte in mano dal foglio (scheda Età); casa (%d) in tutte le età; vita piena a inizio combattimento." % int(b["casa"]["vita"]))
+	r.append("- Strategia (`core/simulazione/giocatore_automatico.gd`): se un'intenzione visibile farà danni a te o alla casa oltre il blocco, gioca la carta che blocca di più (prima te, poi la casa); altrimenti la carta che fa più danni, sul nemico con meno vita; poi il resto.")
 	r.append("- Ancore di confronto (scheda Ancore): **%d turni** per un combattimento normale, **%d-%d%%** di vita persa." % [int(turni_obiettivo), int(min_vita), int(max_vita)])
 	r.append("- Tempo di calcolo: %.1f s." % secondi)
-	var titoli := {"giovinezza": "Giovinezza (vita 100, mano 4, senza culla)", "eta_adulta": "Età adulta (vita 85, mano 5, culla)",
+	var titoli := {"giovinezza": "Giovinezza (vita 100, mano 4)", "eta_adulta": "Età adulta (vita 85, mano 5)",
 		"senza_difesa": "Riferimento: età adulta, strategia che attacca soltanto"}
 	for eta in ETA + ["senza_difesa"]:
 		r.append("")
 		r.append("## " + str(titoli[eta]))
 		r.append("")
-		r.append("| Nemico | Vittorie | Turni medi | Turni (min–max) | Vita persa media | Vita persa (10°–90° perc.) | Rispetto alle ancore | Culla persa media | Tratti negativi | Fattura a fine combattimento |")
+		r.append("| Nemico | Vittorie | Turni medi | Turni (min–max) | Vita persa media | Vita persa (10°–90° perc.) | Rispetto alle ancore | Casa persa media | Tratti negativi | Fattura a fine combattimento |")
 		r.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
 		for id in nemici:
 			var t: Dictionary = risultati[eta][id]
@@ -109,7 +108,7 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 			r.append("| %s | %.1f%% | %.2f | %d–%d | %.1f%% | %.1f%%–%.1f%% | %s | %.1f | %.1f%% | %.2f |" % [
 				id, 100.0 * t["vittorie"] / quanti, turni_medi, _min(t["turni"]), _max(t["turni"]),
 				vita_media, _percentile(t["vita_persa"], 0.1) * 100.0, _percentile(t["vita_persa"], 0.9) * 100.0,
-				", ".join(giudizio), _media(t["culla_persa"]), 100.0 * t["tratti"] / quanti, _media(t["fattura"])])
+				", ".join(giudizio), _media(t["casa_persa"]), 100.0 * t["tratti"] / quanti, _media(t["fattura"])])
 	r.append("")
 	r.append("Legenda: \"turni nella norma\" = media entro ±0,5 dall'ancora; \"vita nella norma\" = media nella fascia delle ancore.")
 	r.append("")

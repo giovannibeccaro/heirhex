@@ -38,7 +38,7 @@ static func controlla_soglia(c: Combattimento, chi: Combattente, id_stato: Strin
 static func modificatori(c: Combattimento) -> Array[Modificatore]:
 	var risultato: Array[Modificatore] = []
 	var s := c.stato
-	var combattenti: Array[Combattente] = [s.giocatore, s.culla]
+	var combattenti: Array[Combattente] = [s.giocatore, s.casa]
 	combattenti.append_array(s.nemici)
 	for chi in combattenti:
 		if chi.stati.is_empty() or not chi.e_vivo():

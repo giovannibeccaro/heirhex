@@ -139,46 +139,39 @@ func test_blocco_a_se() -> void:
 	assert_eq(g.blocco, 7)
 
 
-func test_blocco_alla_culla() -> void:
+func test_blocco_alla_casa() -> void:
 	_prepara()
-	_dal_giocatore({"tipo": "blocco", "valore": 7, "bersaglio": "culla"})
-	assert_eq(c.stato.culla.blocco, 7)
+	_dal_giocatore({"tipo": "blocco", "valore": 7, "bersaglio": "casa"})
+	assert_eq(c.stato.casa.blocco, 7)
 	assert_eq(g.blocco, 0)
 
 
 func test_blocco_a_scelta() -> void:
 	_prepara()
-	_dal_giocatore({"tipo": "blocco", "valore": 7, "bersaglio": "se_o_culla"}, {"se_o_culla": "culla"})
-	_dal_giocatore({"tipo": "blocco", "valore": 5, "bersaglio": "se_o_culla"}, {"se_o_culla": "se"})
-	_dal_giocatore({"tipo": "blocco", "valore": 2, "bersaglio": "se_o_culla"})
-	assert_eq(c.stato.culla.blocco, 7)
+	_dal_giocatore({"tipo": "blocco", "valore": 7, "bersaglio": "se_o_casa"}, {"se_o_casa": "casa"})
+	_dal_giocatore({"tipo": "blocco", "valore": 5, "bersaglio": "se_o_casa"}, {"se_o_casa": "se"})
+	_dal_giocatore({"tipo": "blocco", "valore": 2, "bersaglio": "se_o_casa"})
+	assert_eq(c.stato.casa.blocco, 7)
 	assert_eq(g.blocco, 7, "senza scelta il blocco va a te")
-
-
-func test_blocco_a_scelta_con_culla_inattiva_va_a_te() -> void:
-	_prepara({"culla": {}})
-	_dal_giocatore({"tipo": "blocco", "valore": 7, "bersaglio": "se_o_culla"}, {"se_o_culla": "culla"})
-	assert_eq(g.blocco, 7)
-	assert_eq(c.stato.culla.blocco, 0)
 
 
 func test_le_riserve_di_blocco_sono_separate() -> void:
 	_prepara()
 	_dal_giocatore({"tipo": "blocco", "valore": 20, "bersaglio": "se"})
-	_dal_nemico({"tipo": "danno", "valore": 10, "bersaglio": "culla"})
-	assert_eq(c.stato.culla.vita, 25, "il blocco del giocatore non protegge la culla")
+	_dal_nemico({"tipo": "danno", "valore": 10, "bersaglio": "casa"})
+	assert_eq(c.stato.casa.vita, 25, "il blocco del giocatore non protegge la casa")
 	assert_eq(g.blocco, 20)
 
 
-# --- culla --------------------------------------------------------------------
+# --- casa --------------------------------------------------------------------
 
-func test_culla_a_zero_tratto_negativo_e_torna_a_meta() -> void:
+func test_casa_a_zero_tratto_negativo_e_torna_a_meta() -> void:
 	_prepara()
-	_dal_nemico({"tipo": "danno", "valore": 50, "bersaglio": "culla"})
-	assert_eq(c.stato.culla.tratti_negativi, 1)
-	assert_eq(c.stato.culla.vita, 18)
-	_dal_nemico({"tipo": "danno", "valore": 50, "bersaglio": "culla"})
-	assert_eq(c.stato.culla.tratti_negativi, 1, "massimo un tratto per combattimento")
+	_dal_nemico({"tipo": "danno", "valore": 50, "bersaglio": "casa"})
+	assert_eq(c.stato.casa.tratti_negativi, 1)
+	assert_eq(c.stato.casa.vita, 18)
+	_dal_nemico({"tipo": "danno", "valore": 50, "bersaglio": "casa"})
+	assert_eq(c.stato.casa.tratti_negativi, 1, "massimo un tratto per combattimento")
 	assert_false(c.finito(), "il combattimento continua")
 
 
@@ -190,10 +183,10 @@ func test_cura_non_supera_la_vita_massima() -> void:
 	assert_eq(g.vita, 100)
 
 
-func test_cura_alla_culla() -> void:
-	_prepara({"culla": {"vita": 20, "vita_max": 35, "attiva": true}})
-	_dal_giocatore({"tipo": "cura", "valore": 3, "bersaglio": "culla"})
-	assert_eq(c.stato.culla.vita, 23)
+func test_cura_alla_casa() -> void:
+	_prepara({"casa": {"vita": 20, "vita_max": 35}})
+	_dal_giocatore({"tipo": "cura", "valore": 3, "bersaglio": "casa"})
+	assert_eq(c.stato.casa.vita, 23)
 
 
 # --- pesca --------------------------------------------------------------------

@@ -28,7 +28,7 @@ static func impostazioni(extra: Dictionary = {}) -> Dictionary:
 		"mazzo": ["colpo", "colpo", "colpo", "colpo", "riparo", "riparo", "riparo", "riparo", "pesca_due", "colpo_grosso"],
 		"nemici": ["fantoccio"],
 		"giocatore": {"vita": 100},
-		"culla": {"vita": 35, "attiva": true},
+		"casa": {"vita": 35},
 		"mano": 5,
 	}
 	base.merge(extra, true)

@@ -5,13 +5,13 @@
     "u": 10,
     "energia_per_turno": 3,
     "valore_per_turno": 30,
-    "efficienza": 0.8,
+    "efficienza": 0.6,
     "turni_normale": 3,
     "turni_elite": 5,
     "turni_tiranno": 8,
     "vita_persa_min": 0.1,
     "vita_persa_max": 0.15,
-    "danno_nemico_normale_u": 1.2,
+    "danno_nemico_normale_u": 1.5,
     "bonus_budget_base": 0,
     "bonus_budget_comune": 0,
     "bonus_budget_rara": 0.25,
@@ -78,8 +78,8 @@
       "tutti_nemici": 1.5,
       "nemico_casuale": 0.85,
       "se": 1,
-      "culla": 1,
-      "se_o_culla": 1
+      "casa": 1,
+      "se_o_casa": 1
     }
   },
   "eta": {
@@ -108,7 +108,7 @@
       "tappe": 2
     }
   },
-  "culla": {
+  "casa": {
     "vita": 35
   },
   "testamento": {
@@ -145,22 +145,22 @@
     "tradizione_valore_energia": 0.3
   },
   "economia": {
-    "g": 18,
-    "ricompensa_notte_elite_luna_piena": 30,
-    "ricompensa_anima_pezzentella_lasciata_andare": 25,
-    "festa_carta_comune": 45,
-    "festa_carta_rara": 70,
-    "festa_carta_unica_staple": 110,
-    "festa_rimedio": 25,
-    "festa_dimenticare_una_carta": 55,
-    "evento_dono_al_munaciello": 20,
-    "mantenimento_di_uno_spirito_amico_a_generazione": 15,
-    "evento_prova_dell_olio_malocchio": 15,
-    "evento_saldare_il_voto": 40,
-    "evento_puntata_alla_smorfia": 20,
-    "evento_munaciello_amico_regalo": 30,
+    "g": 3,
+    "ricompensa_notte_elite_luna_piena": 5,
+    "ricompensa_anima_pezzentella_lasciata_andare": 5,
+    "festa_carta_comune": 8,
+    "festa_carta_rara": 12,
+    "festa_carta_unica_staple": 18,
+    "festa_rimedio": 5,
+    "festa_dimenticare_una_carta": 9,
+    "evento_dono_al_munaciello": 3,
+    "mantenimento_di_uno_spirito_amico_a_generazione": 2,
+    "evento_prova_dell_olio_malocchio": 2,
+    "evento_saldare_il_voto": 7,
+    "evento_puntata_alla_smorfia": 3,
+    "evento_munaciello_amico_regalo": 5,
     "dote_quota_dei_grani_che_passa_all_erede": 0.5,
-    "grani_attesi_in_una_vita_circa_5_notti_normali_1_elite": 120
+    "grani_attesi_in_una_vita_circa_5_notti_normali_1_elite": 20
   },
   "forme": {
     "base": {
@@ -177,6 +177,11 @@
       "dalla_generazione": 5,
       "vita": 1.6,
       "danno": 1.3
+    },
+    "Divorata: moltiplicatore dell'intenzione potenziata": {
+      "dalla_generazione": null,
+      "vita": null,
+      "danno": 1.5
     }
   },
   "mazzi_base": {

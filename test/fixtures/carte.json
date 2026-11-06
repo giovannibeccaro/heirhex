@@ -39,7 +39,7 @@
         {
           "tipo": "blocco",
           "valore": 7,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         }
       ]
     },
@@ -112,7 +112,7 @@
         {
           "tipo": "blocco",
           "valore": 11,
-          "bersaglio": "se_o_culla"
+          "bersaglio": "se_o_casa"
         }
       ]
     }

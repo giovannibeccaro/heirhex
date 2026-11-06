@@ -10,7 +10,7 @@ stato.malocchio.testo,"A inizio turno scarti una carta a caso dalla mano.","At t
 stato.radici.nome,Radici,Roots
 stato.radici.testo,"Le carte ereditate hanno +2 al loro valore per ogni carica.","Inherited cards get +2 value per stack."
 combattimento.giocatore,Tu,You
-combattimento.culla,Culla,Cradle
+combattimento.casa,Casa,Home
 carta.scongiuro.nome,Scongiuro,
 carta.fumo_di_ruta.nome,Fumo di ruta,
 carta.ninnananna.nome,Ninnananna,

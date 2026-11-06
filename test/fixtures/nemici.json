@@ -184,14 +184,14 @@
     {
       "id": "strega",
       "nome": "test.strega",
-      "ruolo": "predatore_culla",
+      "ruolo": "predatore_casa",
       "livello": "normale",
       "vita": 72,
       "comportamento": "pesato",
       "intenzioni": [
         {
           "id": "graffio",
-          "tipo": "attacco_culla",
+          "tipo": "attacco_casa",
           "peso": 3,
           "max_di_fila": 2,
           "ricarica": 0,
@@ -199,7 +199,7 @@
             {
               "tipo": "danno",
               "valore": 10,
-              "bersaglio": "culla"
+              "bersaglio": "casa"
             }
           ]
         },
