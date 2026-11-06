@@ -18,9 +18,18 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Culla inattiva** (giovinezza): gli effetti che la bersagliano non fanno nulla e il blocco "a te o alla culla" va a te. Presumo che i nemici che puntano alla culla compaiano solo dall'età adulta (`eta_comparsa`).
 - **Culla a 0**: torna a metà della vita massima arrotondata (35 → 18). Se torna a 0 nello stesso combattimento torna di nuovo a metà, senza un secondo tratto.
 - **Bersaglio "nemico" non scelto**: il motore usa il primo nemico vivo; una scelta che punta a un nemico morto rende la carta non giocabile (la carta resta in mano, nessun costo).
+- **Ordine dei compiti**: T1.5 (modificatori) e T1.6 (agganci) prima di T1.4 (stati), perché Radici e Paura sono modificatori e Malocchio e Fattura reagiscono ad agganci. Un commit per compito resta.
+- **Più modificatori "imposta"** sulla stessa proprietà: vale l'ultimo aggiunto.
+- **Durata "turno"**: scade alla fine del turno del giocatore.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.5 — Modificatori ✅ (fatto prima di T1.4: Radici e Paura ne hanno bisogno)
+- `core/modificatori/modificatore.gd` (`Modificatore`) e `sistema_modificatori.gd` (`SistemaModificatori`): un'unica forma `{fonte, bersaglio {tipo, filtro}, proprieta, operazione, valore, durata}`; ordine fisso somma → moltiplica → imposta; durate ordinate (la fine del combattimento toglie anche quelli del turno; restano `vita` e `stirpe`).
+- Filtri supportati: carte (`ereditata`, `uid`, `id`, `tag`, `rarita`, `tipo`, `famiglia`, `casata`), nemici (`uid`, `id`, `ruolo`, `livello`). Un filtro sconosciuto non corrisponde mai.
+- Nel combattimento: `costo` (minimo 0), `valore_effetti` (solo danno, blocco, cura), `danno_subito`, `energia`, `mano`. I modificatori passano in `impostazioni.modificatori`.
+- Test: `test/modificatori/test_modificatori.gd` (17 test).
 
 ### T1.3 — Mattoncini ✅
 - `core/effetti/mattoncini.gd`: danno (nemico, tutti, casuale, `percentuale`, `ignora_blocco`), blocco (se, culla, `se_o_culla` scelto con `scelte.se_o_culla`), cura, pesca, energia, applica_stato, rimuovi_stato (numero o `"tutte"`), aggiungi_carta (`dove`: mazzo/mano/scarti), scarta (`modo`: scelta/casuale), esilia (`bersaglio`: se = la carta giocata, mano = carte scelte), annulla_intenzione (rispetta `non_annullabile`), riprendi_dagli_scarti, ruba_carta (`da`: mano/mazzo), evoca (`nemico`, limite di nemici in campo).

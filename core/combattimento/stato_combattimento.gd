@@ -5,6 +5,7 @@ extends RefCounted
 var casuale: Casuale
 var regole: RegoleCombattimento
 var catalogo: Catalogo
+var modificatori := SistemaModificatori.new()
 
 var giocatore: Combattente
 var culla: Culla

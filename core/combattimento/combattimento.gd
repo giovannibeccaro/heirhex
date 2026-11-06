@@ -17,12 +17,15 @@ var esito: Esito = Esito.IN_CORSO
 ##   giocatore: { vita, vita_max, stati }
 ##   culla: { vita, vita_max, attiva }
 ##   mano: carte pescate a inizio turno (età)
+##   modificatori: Array di modificatori (dizionari) attivi in questo combattimento
 func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattimento = null) -> void:
 	var casuale := Casuale.new(int(impostazioni.get("seme", 0)))
 	stato = StatoCombattimento.new(catalogo, casuale, regole)
 	_prepara_giocatore(impostazioni.get("giocatore", {}))
 	_prepara_culla(impostazioni.get("culla", {}))
 	stato.mano_dimensione = int(impostazioni.get("mano", 5))
+	for m in impostazioni.get("modificatori", []):
+		stato.modificatori.aggiungi_da_dizionario(m)
 	for voce in impostazioni.get("mazzo", []):
 		stato.mazzo.append(_crea_carta(voce))
 	for voce in impostazioni.get("nemici", []):
@@ -100,6 +103,7 @@ func termina_turno() -> void:
 	if finito():
 		return
 	registro.aggiungi(stato.turno, "fine_turno", {"chi": "giocatore"})
+	stato.modificatori.scadenza("turno")
 	stato.ultima_mano = stato.mano.duplicate()
 	while not stato.mano.is_empty():
 		stato.scarti.append(stato.mano.pop_front())
@@ -114,16 +118,47 @@ func finito() -> bool:
 
 # === Valori calcolati (li usa anche l'interfaccia) =============================
 
+## Effetti "in punti": i modificatori di valore_effetti agiscono solo su questi.
+const EFFETTI_IN_PUNTI := ["danno", "blocco", "cura"]
+
+
 func costo_carta(carta: Carta) -> int:
-	return maxi(0, carta.costo_base())
+	return maxi(0, roundi(calcola(carta.costo_base(), "costo", "carta", carta)))
 
 
-## Valore finale di un effetto (con percentuale e modificatori), per un bersaglio.
+## Calcola una proprietà con tutti i modificatori attivi (anche quelli degli stati).
+func calcola(base: float, proprieta: String, tipo_oggetto: String, oggetto: Variant) -> float:
+	return stato.modificatori.calcola(base, proprieta, tipo_oggetto, oggetto, modificatori_extra())
+
+
+## Modificatori che non stanno nella lista ma nascono dallo stato (es. gli stati con cariche).
+func modificatori_extra() -> Array[Modificatore]:
+	return []
+
+
+## Valore finale di un effetto (percentuale, modificatori della fonte e del bersaglio).
 func valore_effetto(effetto: Dictionary, ctx: ContestoEffetto, bersaglio: Combattente = null) -> int:
+	var tipo := str(effetto.get("tipo", ""))
 	var base := float(effetto.get("valore", 0))
 	if bool(effetto.get("percentuale", false)) and bersaglio != null:
 		base = bersaglio.vita_max * base / 100.0
+	if tipo in EFFETTI_IN_PUNTI and not bool(effetto.get("percentuale", false)):
+		if ctx.carta != null:
+			base = calcola(base, "valore_effetti", "carta", ctx.carta)
+		elif ctx.sorgente is Nemico:
+			base = calcola(base, "valore_effetti", "nemico", ctx.sorgente)
+	if tipo == "danno" and bersaglio != null:
+		base = calcola(base, "danno_subito", tipo_di(bersaglio), bersaglio)
 	return maxi(0, roundi(base))
+
+
+## Tipo di bersaglio dei modificatori per un combattente.
+func tipo_di(c: Combattente) -> String:
+	if c is Nemico:
+		return "nemico"
+	if c == stato.culla:
+		return "culla"
+	return "giocatore"
 
 
 ## Il nemico scelto dal giocatore; se manca la scelta, il primo vivo.
@@ -231,8 +266,9 @@ func _inizia_turno_giocatore() -> void:
 	registro.aggiungi(stato.turno, "inizio_turno", {"chi": "giocatore"})
 	_riduci_blocco(stato.giocatore)
 	_riduci_blocco(stato.culla)
-	stato.energia = stato.regole.energia_per_turno
-	pesca(maxi(0, stato.mano_dimensione - stato.mano.size()))
+	stato.energia = maxi(0, roundi(calcola(stato.regole.energia_per_turno, "energia", "giocatore", stato.giocatore)))
+	var mano := roundi(calcola(stato.mano_dimensione, "mano", "giocatore", stato.giocatore))
+	pesca(maxi(0, mano - stato.mano.size()))
 
 
 func _turno_dei_nemici() -> void:
@@ -291,6 +327,7 @@ func _termina(e: Esito) -> void:
 	if finito():
 		return
 	esito = e
+	stato.modificatori.scadenza("combattimento")
 	registro.aggiungi(stato.turno, "fine_combattimento", {"esito": Esito.keys()[e].to_lower()})
 
 
