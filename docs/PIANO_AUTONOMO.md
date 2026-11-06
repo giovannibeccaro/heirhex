@@ -68,3 +68,14 @@ Leggi prima `docs/RISPOSTE.md`: contiene le risposte di Giovanni alle domande de
 | T2.7 | **Rifai la simulazione** e aggiorna `docs/report-simulazione.md` con una tabella **prima / dopo** (turni medi, vita persa, casa persa) e le osservazioni. Obiettivo indicativo per le Masciare: circa 4 turni, 10-15% di vita persa. Non correggere i numeri: solo misurare | Report aggiornato con il confronto |
 
 Alla fine: diario aggiornato con riassunto e domande, push del ramo, nessun merge.
+
+## Tappa 2c — Risposte alla Tappa 2b (2026-11-06)
+Fonte: `docs/RISPOSTE.md` (D62-D64). Ramo **`autonomo/risposte-2b`**, creato da `autonomo/correzioni-revisione` (il merge su `main` richiesto da Giovanni è bloccato dalla regola `git merge` in `.claude/settings.json`: lo fa lui).
+
+| Id | Compito | Finito quando |
+| --- | --- | --- |
+| T2.8 | **Intenzione potenziata dai dati** (D62): l'esportatore legge la colonna O "Potenziata in divorata" della scheda Intenzioni e scrive `forme.divorata.intenzioni_potenziate`; il motore non indovina più (senza dato, nessun potenziamento); caricatore e validatore controllano il campo. Ululato a 6 (D63), dal foglio | Dati riesportati, validatore verde, test sul campo letto dai dati |
+| T2.9 | **Simulazione rifatta** con confronto con la Tappa 2b e uno scenario con la forma divorata: il Morso della luna divorato (55) è letale? | Report aggiornato, risposta nel diario |
+
+### Nota per la tappa della vita (D64)
+Pantafica e Munaciello non si misurano sul singolo combattimento: il loro costo sta in Fattura, Paura, Malocchio e Dispetto. Quando esisterà la vita (tappa 4), la simulazione deve misurarli **su una vita intera** (es. Fattura accumulata, carte sporche nel mazzo, vita persa complessiva).
