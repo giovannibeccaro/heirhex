@@ -79,3 +79,13 @@ Fonte: `docs/RISPOSTE.md` (D62-D64). Ramo **`autonomo/risposte-2b`**, creato da 
 
 ### Nota per la tappa della vita (D64)
 Pantafica e Munaciello non si misurano sul singolo combattimento: il loro costo sta in Fattura, Paura, Malocchio e Dispetto. Quando esisterà la vita (tappa 4), la simulazione deve misurarli **su una vita intera** (es. Fattura accumulata, carte sporche nel mazzo, vita persa complessiva).
+
+## Tappa 2d — Taratura contro i mazzi di riferimento (2026-11-06)
+Fonte: `docs/RISPOSTE.md` (D65). Ramo **`autonomo/taratura-2d`**, creato da `main`.
+
+| Id | Compito | Finito quando |
+| --- | --- | --- |
+| T2.10 | Esportare i mazzi di riferimento (scheda "Mazzi di riferimento") e gli obiettivi delle forme (Forme fattura, F-J); schema, caricatore e validatore aggiornati | Dati riesportati, validatore verde, test |
+| T2.11 | Invecchiamento delle carte dei mazzi di riferimento in simulazione (Più forte, una o due volte) | Test |
+| T2.12 | Simulazione: ogni forma contro il mazzo della sua fase, tutte le età, una strategia "ragionevole" oltre alle due estreme; distanza dagli obiettivi | Report |
+| T2.13 | **Proposta** di nuovi numeri (vite, intenzioni, moltiplicatori delle forme) dimostrata dalla simulazione. Non modificare foglio né dati | Proposta nel diario |

@@ -113,3 +113,36 @@ func test_intenzione_potenziata_inesistente_o_doppia() -> void:
 	var v := Validatore.new()
 	assert_true(v.valida(c, _testi()))
 	assert_string_contains("\n".join(v.avvisi), "al massimo una")
+
+
+func _con_mazzi() -> Catalogo:
+	var c := _catalogo_minimo()
+	c.bilanciamento["invecchiamento"] = {"livelli": [{"livello": 0}, {"livello": 1}, {"livello": 2}]}
+	c.bilanciamento["mazzi_riferimento"] = {"inizio": {"generazione": 1, "carte": [{"carta": "a", "copie": 2, "livello": 1}]}}
+	c.bilanciamento["forme"] = {"base": {"vita": 1, "danno": 1, "mazzo_riferimento": "inizio",
+		"obiettivi": {"turni_min": 4, "turni_max": 4, "vita_persa_min": 0.08, "vita_persa_max": 0.12}}}
+	return c
+
+
+func test_mazzi_di_riferimento_validi() -> void:
+	assert_eq(_errori(_con_mazzi()), "")
+
+
+func test_mazzo_di_riferimento_con_carta_o_livello_sbagliati() -> void:
+	var c := _con_mazzi()
+	c.bilanciamento["mazzi_riferimento"]["inizio"]["carte"].append({"carta": "zzz", "copie": 1, "livello": 0})
+	c.bilanciamento["mazzi_riferimento"]["inizio"]["carte"].append({"carta": "a", "copie": 1, "livello": 3})
+	var e := _errori(c)
+	assert_string_contains(e, "carta inesistente 'zzz'")
+	assert_string_contains(e, "livello non valido 3")
+
+
+func test_ogni_forma_ha_un_mazzo_e_gli_obiettivi() -> void:
+	var c := _con_mazzi()
+	c.bilanciamento["forme"]["toccata"] = {"vita": 1.3, "danno": 1.15}
+	var e := _errori(c)
+	assert_string_contains(e, "forma toccata: manca il mazzo di riferimento")
+	assert_string_contains(e, "forma toccata: mancano gli obiettivi")
+	c = _con_mazzi()
+	c.bilanciamento["forme"]["base"]["mazzo_riferimento"] = "fine"
+	assert_string_contains(_errori(c), "mazzo di riferimento inesistente 'fine'")

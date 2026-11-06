@@ -150,7 +150,7 @@ func test_il_caricatore_rifiuta_dati_con_identificatori_sbagliati() -> void:
 	DirAccess.make_dir_recursive_absolute(CARTELLA_PROVA + "man/")
 	_scrivi("gen/carte.json", '{"schema": 1, "carte": [{"id": "a", "tipo": "attacco", "effetti": [{"tipo": "danno", "bersaglio": "lune"}]}]}')
 	_scrivi("gen/nemici.json", '{"schema": 1, "nemici": []}')
-	_scrivi("gen/bilanciamento.json", '{"schema": 1}')
+	_scrivi("gen/bilanciamento.json", '{"schema": 2}')
 	_scrivi("man/stati.json", '{"schema": 1, "stati": []}')
 	var caricatore := Caricatore.new()
 	assert_null(caricatore.carica(CARTELLA_PROVA + "gen/", CARTELLA_PROVA + "man/"))
@@ -194,3 +194,25 @@ func test_intenzioni_potenziate_non_valide() -> void:
 	var c := Catalogo.new()
 	c.nemici = {"n": {"id": "n", "intenzioni": [], "forme": {"divorata": {"intenzioni_potenziate": "morso"}}}}
 	assert_string_contains("\n".join(Caricatore.normalizza(c)), "intenzioni_potenziate deve essere un elenco")
+
+
+# --- T2.10: mazzi di riferimento e obiettivi delle forme (D65) ---------------------
+
+func test_mazzi_di_riferimento_e_obiettivi_dai_dati_veri() -> void:
+	var b := Caricatore.new().carica().bilanciamento
+	var mazzi: Dictionary = b["mazzi_riferimento"]
+	assert_gt(mazzi.size(), 0)
+	for forma in b["forme"]:
+		var f: Dictionary = b["forme"][forma]
+		assert_true(mazzi.has(f["mazzo_riferimento"]), forma)
+		assert_true(f["obiettivi"]["turni_min"] <= f["obiettivi"]["turni_max"], forma)
+		assert_true(f["obiettivi"]["vita_persa_min"] <= f["obiettivi"]["vita_persa_max"], forma)
+	for fase in mazzi:
+		for voce in mazzi[fase]["carte"]:
+			assert_typeof(voce["livello"], TYPE_INT, voce["carta"])
+
+
+func test_bilanciamento_con_lo_schema_vecchio_rifiutato() -> void:
+	var caricatore := Caricatore.new()
+	caricatore.leggi(_scrivi("bil1.json", '{"schema": 1}'), Caricatore.SCHEMI_BILANCIAMENTO)
+	assert_string_contains(caricatore.errori[0], "schema 1 non supportato")

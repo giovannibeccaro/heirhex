@@ -64,9 +64,16 @@ git push origin main
 - **Nomi dei campi dello schema scritti nel codice** (`effetto["valore"]`, `d.get("vita")`, le chiavi del riepilogo e del registro): li considero lo schema dei dati, non identificatori interni, e non li ho spostati in `Id`. Spostarli renderebbe il codice molto meno leggibile (`effetto[Id.VALORE]`). Sono invece in `Id` tutti i **valori** che quei campi possono assumere. Se preferisci centralizzare anche i nomi dei campi, è un lavoro meccanico.
 - **Test con stringhe letterali**: i test scrivono effetti e impostazioni come stringhe (`{"tipo": "danno"}`), come fanno i JSON; il motore li accetta perché converte sempre con `StringName(...)`.
 - ~~**Quale intenzione potenzia la forma divorata**: l'intenzione con più danno~~ — superata da D62 (T2.8): ora la indica il foglio.
+- **Obiettivo di vita persa**: le risposte dicono che le Ancore (righe 8-9) sono passate a 8-12%, ma nel foglio le righe "Vita persa obiettivo" (9-10) dicono ancora 10% e 15%. Per la taratura uso gli obiettivi per forma della scheda Forme fattura (base 8-12%), che sono più precisi; le Ancore restano esportate così come sono.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.10 — Mazzi di riferimento e obiettivi delle forme ✅ (Tappa 2d, D65)
+- `esporta.py`: nuova sezione `mazzi_riferimento` in `bilanciamento.json` (`{fase: {generazione, carte: [{carta, copie, livello}]}}`; il livello si legge come numero o con l'etichetta della scheda Invecchiamento: "di famiglia" = 1, "degli avi" = 2) e, per ogni forma, `obiettivi` (turni e vita persa, min e max) e `mazzo_riferimento`. Le righe di nota della scheda Forme fattura vengono saltate.
+- **`bilanciamento.json` passa allo schema 2**; il caricatore ha ora le versioni supportate per file (`SCHEMI_BILANCIAMENTO = [2]`) e rifiuta lo schema 1.
+- Validatore: carte dei mazzi esistenti, livelli tra 0 e il livello massimo della scheda Invecchiamento, copie positive, ogni forma con un mazzo esistente e obiettivi coerenti (minimo ≤ massimo). 0 errori sui dati attuali.
+- Test: 5 nuovi (caricatore e validatore). 184 test verdi.
 
 ### T2.9 — Simulazione rifatta, con la forma divorata ✅ (fine Tappa 2c)
 - `strumenti/simula.gd`: nuovo scenario "Forma divorata" (tutti i nemici normali, giovinezza / età adulta / vecchiaia, strategia prudente e solo attacco) che misura dal registro il danno subito a ogni esecuzione dell'intenzione potenziata e quante sconfitte chiude.

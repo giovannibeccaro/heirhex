@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "generato_da": "bilanciamento.xlsx",
   "ancore": {
     "u": 10,
@@ -166,17 +166,38 @@
     "base": {
       "dalla_generazione": 1,
       "vita": 1,
-      "danno": 1
+      "danno": 1,
+      "obiettivi": {
+        "turni_min": 4,
+        "turni_max": 4,
+        "vita_persa_min": 0.08,
+        "vita_persa_max": 0.12
+      },
+      "mazzo_riferimento": "inizio"
     },
     "toccata": {
       "dalla_generazione": 3,
       "vita": 1.3,
-      "danno": 1.15
+      "danno": 1.15,
+      "obiettivi": {
+        "turni_min": 4,
+        "turni_max": 5,
+        "vita_persa_min": 0.1,
+        "vita_persa_max": 0.15
+      },
+      "mazzo_riferimento": "meta"
     },
     "divorata": {
       "dalla_generazione": 5,
       "vita": 1.6,
       "danno": 1.3,
+      "obiettivi": {
+        "turni_min": 4,
+        "turni_max": 5,
+        "vita_persa_min": 0.12,
+        "vita_persa_max": 0.18
+      },
+      "mazzo_riferimento": "fine",
       "intenzione_potenziata": 1.5
     }
   },
@@ -195,5 +216,152 @@
         "copie": 2
       }
     ]
+  },
+  "mazzi_riferimento": {
+    "inizio": {
+      "generazione": 1,
+      "carte": [
+        {
+          "carta": "scongiuro",
+          "copie": 4,
+          "livello": 0
+        },
+        {
+          "carta": "fumo_di_ruta",
+          "copie": 4,
+          "livello": 0
+        },
+        {
+          "carta": "ninnananna",
+          "copie": 2,
+          "livello": 0
+        }
+      ]
+    },
+    "meta": {
+      "generazione": 3,
+      "carte": [
+        {
+          "carta": "scongiuro",
+          "copie": 3,
+          "livello": 0
+        },
+        {
+          "carta": "fumo_di_ruta",
+          "copie": 4,
+          "livello": 0
+        },
+        {
+          "carta": "ninnananna",
+          "copie": 2,
+          "livello": 0
+        },
+        {
+          "carta": "rimandare_la_fattura",
+          "copie": 1,
+          "livello": 1
+        },
+        {
+          "carta": "aglio",
+          "copie": 1,
+          "livello": 1
+        },
+        {
+          "carta": "radici_profonde",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "invocare_gli_avi",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "erbe_della_masciara",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "scirocco",
+          "copie": 1,
+          "livello": 0
+        }
+      ]
+    },
+    "fine": {
+      "generazione": 5,
+      "carte": [
+        {
+          "carta": "scongiuro",
+          "copie": 2,
+          "livello": 0
+        },
+        {
+          "carta": "fumo_di_ruta",
+          "copie": 3,
+          "livello": 0
+        },
+        {
+          "carta": "ninnananna",
+          "copie": 2,
+          "livello": 0
+        },
+        {
+          "carta": "rimandare_la_fattura",
+          "copie": 1,
+          "livello": 2
+        },
+        {
+          "carta": "rimandare_la_fattura",
+          "copie": 1,
+          "livello": 1
+        },
+        {
+          "carta": "aglio",
+          "copie": 1,
+          "livello": 1
+        },
+        {
+          "carta": "invocare_gli_avi",
+          "copie": 1,
+          "livello": 1
+        },
+        {
+          "carta": "radici_profonde",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "erbe_della_masciara",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "iperico",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "olio_e_acqua",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "scirocco",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "porta_sbarrata",
+          "copie": 1,
+          "livello": 0
+        },
+        {
+          "carta": "ricordo_avo",
+          "copie": 1,
+          "livello": 0
+        }
+      ]
+    }
   }
 }

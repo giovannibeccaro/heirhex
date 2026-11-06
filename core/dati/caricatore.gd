@@ -3,7 +3,10 @@ extends RefCounted
 ## Legge i file di dati (JSON) e costruisce il Catalogo.
 ## Controlla la versione di schema di ogni file: un file con uno schema non supportato non si carica.
 
+## Versioni di schema supportate per file. bilanciamento.json: 2 dalla Tappa 2d
+## (mazzi di riferimento e obiettivi delle forme, D65).
 const SCHEMI_SUPPORTATI := [1]
+const SCHEMI_BILANCIAMENTO := [2]
 
 const GENERATI := "res://data/generati/"
 const MANUALI := "res://data/manuali/"
@@ -17,7 +20,7 @@ func carica(cartella_generati: String = GENERATI, cartella_manuali: String = MAN
 	var catalogo := Catalogo.new()
 	var carte := leggi(cartella_generati + "carte.json")
 	var nemici := leggi(cartella_generati + "nemici.json")
-	var bilanciamento := leggi(cartella_generati + "bilanciamento.json")
+	var bilanciamento := leggi(cartella_generati + "bilanciamento.json", SCHEMI_BILANCIAMENTO)
 	var stati := leggi(cartella_manuali + "stati.json")
 	if not errori.is_empty():
 		return null
@@ -134,7 +137,7 @@ static func modificatore(dove: String, m: Dictionary, errori: PackedStringArray)
 
 
 ## Legge un file JSON e controlla lo schema. In caso di problemi aggiunge un errore e restituisce {}.
-func leggi(percorso: String) -> Dictionary:
+func leggi(percorso: String, supportati: Array = SCHEMI_SUPPORTATI) -> Dictionary:
 	if not FileAccess.file_exists(percorso):
 		errori.append("File mancante: " + percorso)
 		return {}
@@ -149,8 +152,8 @@ func leggi(percorso: String) -> Dictionary:
 	if not dati.has("schema"):
 		errori.append(percorso + ": manca il campo schema")
 		return {}
-	if not (int(dati["schema"]) in SCHEMI_SUPPORTATI):
-		errori.append("%s: schema %s non supportato (supportati: %s)" % [percorso, str(_interi(dati["schema"])), str(SCHEMI_SUPPORTATI)])
+	if not (int(dati["schema"]) in supportati):
+		errori.append("%s: schema %s non supportato (supportati: %s)" % [percorso, str(_interi(dati["schema"])), str(supportati)])
 		return {}
 	return _interi(dati)
 

@@ -114,10 +114,34 @@ func _valida_bilanciamento(b: Dictionary) -> void:
 	for casata in b.get("mazzi_base", {}):
 		for voce in b["mazzi_base"][casata]:
 			_rif_carta("mazzo base " + str(casata), str(voce.get("carta", "")))
+	var mazzi: Dictionary = b.get("mazzi_riferimento", {})
+	var livello_max := 0
+	for l in b.get("invecchiamento", {}).get("livelli", []):
+		livello_max = maxi(livello_max, int(l.get("livello", 0)))
+	for fase in mazzi:
+		for voce in mazzi[fase].get("carte", []):
+			var dove := "mazzo di riferimento " + str(fase)
+			_rif_carta(dove, str(voce.get("carta", "")))
+			var livello := int(voce.get("livello", -1))
+			if livello < 0 or livello > livello_max:
+				errori.append("%s: livello non valido %s per '%s' (0-%d)" % [dove, str(voce.get("livello")), voce.get("carta", ""), livello_max])
+			if int(voce.get("copie", 0)) <= 0:
+				errori.append("%s: copie non valide per '%s'" % [dove, voce.get("carta", "")])
 	for forma in b.get("forme", {}):
+		var f: Dictionary = b["forme"][forma]
 		for campo in ["vita", "danno"]:
-			if not b["forme"][forma].has(campo):
+			if not f.has(campo):
 				errori.append("forma %s: manca il moltiplicatore %s" % [forma, campo])
+		# D65: ogni forma si misura contro il mazzo della sua fase
+		if not f.has("mazzo_riferimento"):
+			errori.append("forma %s: manca il mazzo di riferimento" % forma)
+		elif not mazzi.has(str(f["mazzo_riferimento"])):
+			errori.append("forma %s: mazzo di riferimento inesistente '%s'" % [forma, f["mazzo_riferimento"]])
+		var o: Dictionary = f.get("obiettivi", {})
+		if o.is_empty():
+			errori.append("forma %s: mancano gli obiettivi" % forma)
+		elif float(o.get("turni_min", 0)) > float(o.get("turni_max", 0)) or float(o.get("vita_persa_min", 0)) > float(o.get("vita_persa_max", 0)):
+			errori.append("forma %s: obiettivi con il minimo oltre il massimo" % forma)
 
 
 # --- pezzi comuni --------------------------------------------------------------------

@@ -21,6 +21,8 @@ from pathlib import Path
 import openpyxl
 
 SCHEMA = 1
+# bilanciamento.json passa allo schema 2: mazzi di riferimento e obiettivi delle forme (D65)
+SCHEMA_BILANCIAMENTO = 2
 
 RADICE = Path(__file__).resolve().parent.parent
 FOGLIO_PREDEFINITO = Path(
@@ -294,6 +296,36 @@ def leggi_nemici(wb, nomi):
     return nemici
 
 
+def leggi_mazzi_riferimento(wb, livelli):
+    """Mazzi medi per fase (D65): { fase: { generazione, carte: [ {carta, copie, livello} ] } }.
+    Il livello si scrive come numero o con l'etichetta della scheda Invecchiamento."""
+    per_etichetta = {}
+    for l in livelli:
+        per_etichetta[str(l["livello"])] = l["livello"]
+        if l["etichetta"]:
+            per_etichetta[l["etichetta"]] = l["livello"]
+    mazzi = {}
+    for r in righe(wb["Mazzi di riferimento"]):
+        carta = testo(r.get("Carta (id)"))
+        if not carta:
+            continue  # righe di nota
+        fase = testo(r["Fase"])
+        dove = f"Mazzi di riferimento/{fase}/{carta}"
+        etichetta = testo(r.get("Livello")) or "0"
+        if etichetta.endswith(".0"):
+            etichetta = etichetta[:-2]
+        if etichetta not in per_etichetta:
+            raise ErroreFoglio(f"{dove}: livello '{etichetta}' sconosciuto (ammessi: {sorted(per_etichetta)})")
+        copie = numero(r.get("Copie"))
+        if not isinstance(copie, int) or copie <= 0:
+            raise ErroreFoglio(f"{dove}: copie non valide '{r.get('Copie')}'")
+        mazzo = mazzi.setdefault(fase, {"generazione": numero(r.get("Generazione")), "carte": []})
+        if numero(r.get("Generazione")) != mazzo["generazione"]:
+            raise ErroreFoglio(f"{dove}: generazione diversa dalle altre righe della fase")
+        mazzo["carte"].append({"carta": carta, "copie": copie, "livello": per_etichetta[etichetta]})
+    return mazzi
+
+
 def leggi_bilanciamento(wb, mazzi_base):
     b = {}
     ancore = {}
@@ -334,6 +366,7 @@ def leggi_bilanciamento(wb, mazzi_base):
 
     inv = wb["Invecchiamento"]
     livelli = []
+    # etichetta del livello -> numero ("" e "0" = livello 0)
     altri = {}
     for riga in inv.iter_rows(min_row=2, values_only=True):
         if isinstance(riga[0], (int, float)):
@@ -355,10 +388,26 @@ def leggi_bilanciamento(wb, mazzi_base):
     extra = []
     for r in righe(wb["Forme fattura"]):
         etichetta = testo(r["Forma"])
+        altre = [v for k, v in r.items() if k != "Forma" and testo(v) != ""]
+        if not altre:
+            continue  # riga di nota
         if numero(r.get("Dalla generazione")) is not None:
             forme[etichetta] = {"dalla_generazione": numero(r["Dalla generazione"]),
                                 "vita": numero(r["Moltiplicatore vita"]),
                                 "danno": numero(r["Moltiplicatore danno"])}
+            # D65: obiettivi della forma contro il mazzo di riferimento della sua fase
+            obiettivi = {
+                "turni_min": numero(r.get("Turni obiettivo (min)")),
+                "turni_max": numero(r.get("Turni obiettivo (max)")),
+                "vita_persa_min": numero(r.get("Vita persa obiettivo (min)")),
+                "vita_persa_max": numero(r.get("Vita persa obiettivo (max)")),
+            }
+            if any(v is not None for v in obiettivi.values()):
+                if any(v is None for v in obiettivi.values()):
+                    raise ErroreFoglio(f"Forme fattura/{etichetta}: obiettivi incompleti")
+                forme[etichetta]["obiettivi"] = obiettivi
+            if testo(r.get("Mazzo di riferimento")):
+                forme[etichetta]["mazzo_riferimento"] = testo(r["Mazzo di riferimento"])
         elif etichetta in FORME_EXTRA:
             extra.append((etichetta, numero(r.get("Moltiplicatore danno"))))
         else:
@@ -370,6 +419,8 @@ def leggi_bilanciamento(wb, mazzi_base):
         forme[forma][campo] = valore
     b["forme"] = forme
     b["mazzi_base"] = mazzi_base
+    if "Mazzi di riferimento" in wb.sheetnames:
+        b["mazzi_riferimento"] = leggi_mazzi_riferimento(wb, livelli)
     return b
 
 
@@ -393,7 +444,7 @@ def esporta(foglio, uscita):
     origine = {"schema": SCHEMA, "generato_da": foglio.name}
     scrivi_json(uscita / "carte.json", {**origine, "carte": carte})
     scrivi_json(uscita / "nemici.json", {**origine, "nemici": nemici})
-    scrivi_json(uscita / "bilanciamento.json", {**origine, **bilanciamento})
+    scrivi_json(uscita / "bilanciamento.json", {**origine, "schema": SCHEMA_BILANCIAMENTO, **bilanciamento})
     # Nomi provvisori italiani: il validatore li usa per le chiavi mancanti in testi.csv
     with open(uscita / "testi_provvisori.csv", "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
