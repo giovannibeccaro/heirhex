@@ -1,6 +1,8 @@
 extends SceneTree
 ## Simulazione di bilanciamento (D65, vedi docs/COMANDI.md):
 ##   godot --headless --path . -s res://strumenti/simula.gd [-- --combattimenti 1000]
+##   … -- --proposta res://docs/proposta-taratura.json --report res://docs/report-proposta.md
+## Con --proposta i numeri proposti si applicano solo in memoria (foglio e dati non cambiano).
 ## Ogni forma della fattura contro il mazzo di riferimento della sua fase, in tutte le età,
 ## con tre strategie; confronto con gli obiettivi della forma (scheda Forme fattura).
 ## Scrive docs/report-simulazione.md. Non cambia nessun numero: misura e riporta.
@@ -24,6 +26,10 @@ func _initialize() -> void:
 			printerr(e)
 		quit(1)
 		return
+	var proposta := _argomento(argomenti, "--proposta", "")
+	var percorso_report := _argomento(argomenti, "--report", REPORT if proposta == "" else "res://docs/report-proposta.md")
+	if proposta != "":
+		Simulatore.applica_proposta(catalogo, JSON.parse_string(FileAccess.get_file_as_string(proposta)))
 	var regole := RegoleCombattimento.da_bilanciamento(catalogo.bilanciamento)
 	var nemici := []
 	for id in catalogo.nemici:
@@ -41,10 +47,12 @@ func _initialize() -> void:
 	var secondi := (Time.get_ticks_msec() - inizio) / 1000.0
 	var testo := report(catalogo, nemici, risultati, quanti)
 	testo = testo.replace("{SECONDI}", "%.0f" % secondi)
-	var f := FileAccess.open(REPORT, FileAccess.WRITE)
+	if proposta != "":
+		testo = testo.replace("## Come\n", "## Come\n- **Con la proposta di `%s`**, applicata solo in memoria: foglio e dati non sono cambiati.\n" % proposta)
+	var f := FileAccess.open(percorso_report, FileAccess.WRITE)
 	f.store_string(testo)
 	f.close()
-	print("Report scritto in %s (%.0f s)" % [REPORT, secondi])
+	print("Report scritto in %s (%.0f s)" % [percorso_report, secondi])
 	quit(0)
 
 

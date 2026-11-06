@@ -77,4 +77,11 @@ La logica sta in `core/dati/validatore.gd` (`Validatore`), così il gioco potrà
 godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000
 ```
 D65: ogni forma della fattura contro il mazzo di riferimento della sua fase, tre età, tre strategie (ragionevole, prudente, aggressiva), con la distanza dagli obiettivi della scheda Forme fattura.
+
+## Taratura (proposte di numeri)
+```sh
+godot --headless --path . -s res://strumenti/taratura.gd -- --combattimenti 150
+godot --headless --path . -s res://strumenti/simula.gd -- --combattimenti 1000 --proposta res://docs/proposta-taratura.json
+```
+Il primo cerca vite, danni e moltiplicatori delle forme che portano i nemici negli obiettivi (circa 7 minuti) e scrive `docs/proposta-taratura.json`. Il secondo verifica la proposta e scrive `docs/report-proposta.md`. **Nessuno dei due modifica il foglio o i dati**: la proposta si applica solo in memoria. Se va bene, i numeri si cambiano nel foglio e si riesporta.
 Gioca i combattimenti con il mazzo base della casata contro ogni nemico normale (giovinezza ed età adulta, più una variante di riferimento che attacca soltanto) con la strategia semplice di `core/simulazione/giocatore_automatico.gd`, e riscrive `docs/report-simulazione.md` (la sezione Osservazioni va poi riscritta a mano). C'è anche uno scenario con tutti i nemici in forma divorata (tre età, due strategie) che misura il colpo dell'intenzione potenziata. Circa un minuto con 1000 combattimenti.

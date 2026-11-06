@@ -1,0 +1,53 @@
+{
+  "forme": {
+    "divorata": {
+      "danno": 0.95,
+      "intenzione_potenziata": 1.5,
+      "vita": 1.0
+    },
+    "toccata": {
+      "danno": 1.0,
+      "vita": 1.0
+    }
+  },
+  "nemici": {
+    "janara": {
+      "intenzioni": {},
+      "moltiplicatore_danni": 1.0,
+      "vita": 51
+    },
+    "lupenaro": {
+      "intenzioni": {
+        "morso": {
+          "danno": 11
+        },
+        "morso_della_luna": {
+          "danno": 20
+        }
+      },
+      "moltiplicatore_danni": 0.7,
+      "vita": 64
+    },
+    "munaciello_offeso": {
+      "intenzioni": {
+        "sgambetto": {
+          "danno": 14
+        }
+      },
+      "moltiplicatore_danni": 1.35,
+      "vita": 61
+    },
+    "pantafica": {
+      "intenzioni": {
+        "peso_sul_cuore": {
+          "danno": 12
+        },
+        "schiacciare_il_petto": {
+          "danno": 7
+        }
+      },
+      "moltiplicatore_danni": 0.9,
+      "vita": 70
+    }
+  }
+}

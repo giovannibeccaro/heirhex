@@ -113,3 +113,30 @@ static func distanza(valore: float, minimo: float, massimo: float) -> float:
 	if valore > massimo:
 		return valore - massimo
 	return 0.0
+
+
+# --- proposte di taratura (solo in memoria) ------------------------------------------
+
+## Applica a un catalogo (in memoria, mai ai file) una proposta di numeri:
+## { nemici: { id: { vita, intenzioni: { id_intenzione: { danno: valore } } } },
+##   forme: { forma: { vita, danno, intenzione_potenziata } } }
+## "danno" imposta il valore di tutti gli effetti di danno (non letali) dell'intenzione.
+static func applica_proposta(catalogo: Catalogo, proposta: Dictionary) -> void:
+	var nemici: Dictionary = proposta.get("nemici", {})
+	for id in nemici:
+		var n: Dictionary = catalogo.nemici[id]
+		var p: Dictionary = nemici[id]
+		if p.has("vita"):
+			n["vita"] = int(p["vita"])
+		var intenzioni: Dictionary = p.get("intenzioni", {})
+		for id_intenzione in intenzioni:
+			var intenzione := IntelligenzaNemici.cerca(n["intenzioni"], str(id_intenzione))
+			assert(not intenzione.is_empty(), "Intenzione sconosciuta: %s/%s" % [id, id_intenzione])
+			for e: Dictionary in intenzione["effetti"]:
+				if StringName(e.get("tipo", "")) == Id.DANNO and not bool(e.get("letale", false)) and intenzioni[id_intenzione].has("danno"):
+					e["valore"] = int(intenzioni[id_intenzione]["danno"])
+	var forme: Dictionary = proposta.get("forme", {})
+	for forma in forme:
+		var f: Dictionary = catalogo.bilanciamento["forme"][forma]
+		for campo in forme[forma]:
+			f[campo] = forme[forma][campo]

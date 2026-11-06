@@ -18,3 +18,9 @@ Compiti (un commit ciascuno, ramo nuovo da `main`):
 4. **T2.13** **Proporre** nuovi numeri (vita e intenzioni dei nemici, moltiplicatori delle forme in Forme fattura) per entrare negli obiettivi, con la simulazione che lo dimostra. **Non modificare il foglio né i dati**: scrivi la proposta nel diario, la decidiamo con Giovanni.
 
 Se i mazzi di riferimento ti sembrano irrealistici (troppo forti o troppo deboli rispetto a quello che le regole permettono), dillo nel diario invece di correggerli.
+
+## Velocità delle simulazioni (richiesta di Giovanni)
+- Nel lavoro di tutti i giorni usa **200 combattimenti per riga** (rende il default di `simula.gd` 200). Bastano per le medie di turni e vita persa: l'errore è intorno a ±1 punto percentuale.
+- **1000** solo per confermare una proposta finale (T2.13), e solo sulle righe che la riguardano.
+- Fai girare solo gli scenari che servono al compito corrente (aggiungi un'opzione per scegliere scenario, forma ed età). Il report resta completo quando si conferma.
+- Scrivi nel diario quanto tempo ha richiesto ogni esecuzione.

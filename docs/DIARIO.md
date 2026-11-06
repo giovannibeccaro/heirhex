@@ -3,23 +3,23 @@
 Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al più vecchio.
 
 ## Riassunto per Giovanni
-*Tappa 2c completata il 2026-11-06. Ramo `autonomo/risposte-2b` (creato da `autonomo/correzioni-revisione`), pushato su GitHub.*
+*Tappa 2d completata il 2026-11-07. Ramo `autonomo/taratura-2d` (creato da `main` dopo il tuo merge), pushato su GitHub, nessun merge.*
 
-**Merge su `main` non fatto**: me l'hai chiesto, ma `.claude/settings.json` vieta `git merge` (e il push su `main`), e non ho aggirato la regola. Per farlo tu (avanzamento rapido, senza conflitti; porta su `main` le tappe 0, 1, 2, 2b e 2c):
-```sh
-git switch main
-git merge --ff-only autonomo/risposte-2b
-git push origin main
-```
-
-**Cosa è cambiato (Tappa 2c)**
-- **T2.8** (D62, D63): l'intenzione potenziata della forma divorata ora viene dalla colonna O del foglio; il motore non la indovina più. Ululato a 6. I valori divorati calcolati dal motore coincidono con la colonna J del foglio (test).
-- **T2.9**: simulazione rifatta con il confronto con la Tappa 2b e uno scenario con la forma divorata. Risposta sul Morso della luna nel registro qui sotto.
-- Piano aggiornato con la Tappa 2c e la nota D64 (Pantafica e Munaciello si misurano su una vita intera).
-- 179 test verdi, validatore a 0 errori.
+**Cosa è cambiato (Tappa 2d, D65)**
+- **T2.10**: esportati i mazzi di riferimento e gli obiettivi delle forme (`bilanciamento.json` allo schema 2); validatore: carte, livelli, ogni forma con mazzo e obiettivi.
+- **T2.11**: evoluzione "Più forte" come regola del motore (`core/eredita/invecchiamento.gd`), applicata alle carte con livello.
+- **T2.12**: nuova strategia **ragionevole**; simulazione di ogni forma contro il mazzo della sua fase in tutte le età. Oggi la forma base è quasi a posto sui turni, la divorata è molto più difficile degli obiettivi (vita persa fino al 77% contro il Lupenaro).
+- **T2.13**: **proposta di numeri** (sotto, nel registro): nuove vite e danni per i quattro nemici, che portano la forma base negli obiettivi; per le forme la ricerca chiede moltiplicatori 1,0, il che indica un problema nei mazzi di riferimento o nella fonte della difficoltà delle forme. Da decidere insieme.
+- 204 test verdi, validatore a 0 errori. Foglio e dati non toccati dalla proposta.
 
 ## Domande per Giovanni
-### Tappa 2c (nuove)
+### Tappa 2d (nuove)
+1. **Proposta T2.13 sui nemici** (forma base): la applichiamo al foglio? Cambia le vite (Lupenaro 64, Janara 51, Pantafica 70, Munaciello 61) e i danni (Lupenaro più deboli, Munaciello più forte).
+2. **Forme**: la ricerca vuole toccata e divorata a 1,0. Preferisci (a) tenere i mazzi di riferimento e spostare la difficoltà delle forme su intenzioni nuove e stati, o (b) rivedere i mazzi "meta" e "fine" (secondo me deboli: 3 carte invecchiate alla generazione 5)?
+3. **Janara**: colpisce solo la casa, quindi l'obiettivo di vita persa non la misura. Le diamo un obiettivo sulla casa (es. punti di casa persi per combattimento)?
+4. **Ancore**: le righe "Vita persa obiettivo" del foglio dicono ancora 10-15%, non 8-12%. Vanno aggiornate o valgono solo gli obiettivi per forma?
+
+### Tappa 2c (risposte in `docs/RISPOSTE.md`, D65: chiusa)
 1. **Morso della luna divorato**: non uccide a vita piena, ma contro il Lupenaro divorato chiude quasi ogni combattimento in vecchiaia con il mazzo base. Lo verifichiamo con un mazzo realistico di generazione 5 quando esisterà la stirpe, o vuoi già ora un limite (es. un colpo potenziato non supera una quota della vita massima)?
 
 ### Tappa 2b (risposte in `docs/RISPOSTE.md`, D62-D64: chiuse)
@@ -72,6 +72,38 @@ git push origin main
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T2.13 — Proposta di nuovi numeri ✅ (Tappa 2d, D65) — DA DECIDERE CON GIOVANNI
+**Niente è stato cambiato nel foglio né nei dati.** Strumenti: `strumenti/taratura.gd` (ricerca, 150 combattimenti per età per prova, circa 7 minuti) scrive `docs/proposta-taratura.json`; `simula.gd --proposta` la verifica con 1000 combattimenti per riga in `docs/report-proposta.md`. La proposta si applica solo in memoria (`Simulatore.applica_proposta`).
+
+Metodo: strategia ragionevole, media su giovinezza, età adulta e vecchiaia. (1) Forma base contro il mazzo "inizio": per ogni nemico la vita che dà 4 turni e un moltiplicatore dei suoi danni che dà il 10% di vita persa. (2) Toccata e divorata contro i loro mazzi: moltiplicatori della forma (uguali per tutti i nemici) cercati a coordinate, entro 1,0-1,6 (toccata) e 1,0-2,0 (divorata) per la vita.
+
+**Proposta — nemici** (scheda Nemici, colonna F "Override turni": vita = 18 × turni; scheda Intenzioni, colonna G "Fattore": valore = fattore × 10)
+| Nemico | Vita | Override turni | Intenzioni |
+| --- | --- | --- | --- |
+| Lupenaro | 54 → **64** | 3,56 | Morso 15 → **11** (fattore 1,1); Morso della luna 28 → **20** (2,0); Ululato invariato |
+| Janara | 54 → **51** | 2,83 | invariate (colpisce solo la casa: la vita persa non la misura) |
+| Pantafica | 54 → **70** | 3,89 | Schiacciare il petto 8 → **7** (0,7); Peso sul cuore 13 → **12** (1,2) |
+| Munaciello offeso | 54 → **61** | 3,39 | Sgambetto 10 → **14** (1,4) |
+
+**Proposta — forme** (scheda Forme fattura)
+| Forma | Vita | Danno | Intenzione potenziata |
+| --- | --- | --- | --- |
+| Toccata | 1,3 → **1,0** | 1,15 → **1,0** | – |
+| Divorata | 1,6 → **1,0** | 1,3 → **0,95** | 1,5 (invariato) |
+
+**Cosa dimostra la simulazione** (`docs/report-proposta.md`, strategia ragionevole, media sulle età):
+| Forma | Lupenaro | Janara | Pantafica | Munaciello | Obiettivo |
+| --- | --- | --- | --- | --- | --- |
+| Base | 4,02 t / 11,2% ✅ | 4,10 t ✅ / casa 1,2 | 4,03 t / 10,8% ✅ | 4,21 t / 10,2% ✅ | 3,5-4,5 t, 8-12% |
+| Toccata | 3,83 t / 15,3% | 3,88 t / casa 3,2 | 4,14 t / 16,7% | 3,74 t / 11,7% | 4-5 t, 10-15% |
+| Divorata | 3,70 t / 13,9% | 3,76 t / casa 8,5 | 4,30 t / 18,2% | 3,93 t / 16,3% | 4-5 t, 12-18% |
+(Prima della proposta: base 3,5-4,5 t con vita persa 0-18%; toccata fino a 35%; divorata 24-77% e 5,3-6,2 turni.) Toccata e divorata restano appena fuori (turni 0,1-0,3 sotto 4; Pantafica 1-2 punti sopra): con moltiplicatori uguali per tutti i nemici non si fa di meglio, perché la Pantafica cresce peggio degli altri (ha la Fattura). Il Morso della luna divorato con la proposta vale 28 e non chiude più combattimenti (0%).
+
+**Attenzione: la proposta sulle forme è un sintomo, non una soluzione.** Le forme vogliono moltiplicatori 1,0, il minimo della ricerca, cioè nessuna crescita di vita e danni. Il motivo sono i mazzi di riferimento: la loro potenza offensiva quasi non cresce ("inizio" 4,0 danni per carta, "meta" 4,9, "fine" 4,8), mentre crescono le difese. Due letture possibili, da scegliere:
+1. **I mazzi di riferimento sono giusti**, e allora la difficoltà delle forme deve venire da intenzioni nuove (le `intenzioni_aggiunte` della toccata, oggi assenti nei dati) e dagli stati, non da vita e danni; questo è coerente con la nota D65 nel foglio ("la difficoltà cresce con la forma dello scontro, non con la durata").
+2. **I mazzi "meta" e "fine" sono troppo deboli** (3 carte invecchiate alla generazione 5, dopo fino a 12 invecchiamenti): con mazzi più forti le forme tornerebbero a chiedere moltiplicatori sopra 1. In questo caso conviene non toccare le forme finché la simulazione di una vita intera non dirà che mazzi si formano davvero.
+La parte sui nemici (forma base) è invece solida: dipende solo dal mazzo base, che è noto.
 
 ### T2.12 — Simulazione contro i mazzi di riferimento ✅ (Tappa 2d, D65)
 - `GiocatoreAutomatico`: tre strategie (enum `Strategia`). Nuova **ragionevole**: gioca prima le carte che preparano (pesca, Radici); si difende solo da un colpo oltre il 15% della vita massima o letale, e blocca solo finché il danno resta sopra quella soglia; attacca subito se può uccidere il nemico nel turno.

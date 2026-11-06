@@ -131,3 +131,17 @@ func test_obiettivo_di_turni_esatto_con_tolleranza() -> void:
 	assert_eq(o["turni_min"], 3.5)
 	assert_eq(o["turni_max"], 4.5)
 	assert_eq(catalogo.bilanciamento["forme"]["base"]["obiettivi"]["turni_min"], 4, "i dati non cambiano")
+
+
+func test_proposta_applicata_solo_in_memoria() -> void:
+	var catalogo := Caricatore.new().carica()
+	var id: String = catalogo.nemici.keys()[0]
+	var intenzione: Dictionary = catalogo.nemici[id]["intenzioni"].filter(func(i: Dictionary) -> bool:
+		return i["effetti"].any(func(e: Dictionary) -> bool: return e["tipo"] == Id.DANNO))[0]
+	Simulatore.applica_proposta(catalogo, {"nemici": {id: {"vita": 40, "intenzioni": {intenzione["id"]: {"danno": 7}}}},
+		"forme": {"toccata": {"vita": 1.2}}})
+	assert_eq(catalogo.nemici[id]["vita"], 40)
+	assert_eq(IntelligenzaNemici.cerca(catalogo.nemici[id]["intenzioni"], intenzione["id"])["effetti"][0]["valore"], 7)
+	assert_eq(catalogo.bilanciamento["forme"]["toccata"]["vita"], 1.2)
+	var di_nuovo := Caricatore.new().carica()
+	assert_ne(di_nuovo.nemici[id]["vita"], 40, "i file non cambiano")
