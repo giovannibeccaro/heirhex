@@ -32,3 +32,8 @@ renderer/rendering_method.mobile="gl_compatibility"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://testi/testi.it.translation", "res://testi/testi.en.translation")
+locale/fallback="it"

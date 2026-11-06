@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://x2bkhovkrxmx"
+
+[deps]
+
+files=["res://testi/testi.it.translation", "res://testi/testi.en.translation"]
+
+source_file="res://testi/testi.csv"
+dest_files=["res://testi/testi.it.translation", "res://testi/testi.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

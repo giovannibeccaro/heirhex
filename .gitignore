@@ -8,3 +8,6 @@
 # Ambiente Python locale degli strumenti
 strumenti/.venv/
 __pycache__/
+
+# Traduzioni generate da Godot importando testi/testi.csv
+*.translation
