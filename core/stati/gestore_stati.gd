@@ -9,29 +9,29 @@ extends RefCounted
 
 
 ## Fa reagire gli stati di chi è interessato dall'evento.
-static func reagisci(c: Combattimento, evento: String, dati: Dictionary) -> void:
+static func reagisci(c: Combattimento, evento: StringName, dati: Dictionary) -> void:
 	for chi in _interessati(c, dati):
 		for id_stato in chi.stati.keys():
 			if not chi.ha_stato(id_stato) or not chi.e_vivo():
 				continue
-			if evento == EventiGioco.SOGLIA_RAGGIUNTA and str(dati.get("stato", "")) != id_stato:
+			if evento == Id.SOGLIA_RAGGIUNTA and StringName(dati.get("stato", "")) != StringName(id_stato):
 				continue
 			var definizione := c.stato.catalogo.stato(id_stato)
 			for aggancio in definizione.get("agganci", []):
-				if str(aggancio.get("quando", "")) == evento:
-					c.registro.aggiungi(c.stato.turno, "aggancio_stato", {"stato": id_stato, "evento": evento, "chi": c.nome_tecnico(chi)})
+				if StringName(aggancio.get("quando", "")) == evento:
+					c.registro.aggiungi(c.stato.turno, Id.R_AGGANCIO_STATO, {"stato": id_stato, "evento": evento, "chi": c.nome_tecnico(chi)})
 					Mattoncini.esegui_lista(c, aggancio.get("effetti", []), ContestoEffetto.new(chi))
-		if evento == EventiGioco.FINE_TURNO:
+		if evento == Id.FINE_TURNO:
 			_scala_durate(c, chi)
 
 
 ## Dopo che sono state aggiunte cariche: controlla la soglia.
-static func controlla_soglia(c: Combattimento, chi: Combattente, id_stato: String) -> void:
+static func controlla_soglia(c: Combattimento, chi: Combattente, id_stato: StringName) -> void:
 	var definizione := c.stato.catalogo.stato(id_stato)
-	if str(definizione.get("tipo", "")) != "soglia":
+	if StringName(definizione.get("tipo", "")) != Id.SOGLIA:
 		return
 	if chi.cariche(id_stato) >= int(definizione.get("soglia", 0)):
-		c.emetti(EventiGioco.SOGLIA_RAGGIUNTA, {"chi": chi, "stato": id_stato})
+		c.emetti(Id.SOGLIA_RAGGIUNTA, {"chi": chi, "stato": id_stato})
 
 
 ## Modificatori portati dagli stati di tutti i combattenti.
@@ -50,12 +50,12 @@ static func modificatori(c: Combattimento) -> Array[Modificatore]:
 					m.valore *= chi.cariche(id_stato)
 				m.fonte = "stato." + str(id_stato)
 				# "se" = chi porta lo stato
-				if m.bersaglio_tipo == "se":
+				if m.bersaglio_tipo == Id.SE:
 					m.bersaglio_tipo = c.tipo_di(chi)
 					if chi is Nemico:
-						m.filtro = {"uid": (chi as Nemico).uid}
+						m.filtro = {Id.UID: (chi as Nemico).uid}
 				# Le carte appartengono al giocatore: solo i suoi stati le modificano
-				if m.bersaglio_tipo == "carta" and chi != s.giocatore:
+				if m.bersaglio_tipo == Id.CARTA and chi != s.giocatore:
 					continue
 				risultato.append(m)
 	return risultato
@@ -63,7 +63,7 @@ static func modificatori(c: Combattimento) -> Array[Modificatore]:
 
 static func _scala_durate(c: Combattimento, chi: Combattente) -> void:
 	for id_stato in chi.stati.keys():
-		if str(c.stato.catalogo.stato(id_stato).get("tipo", "")) == "durata":
+		if StringName(c.stato.catalogo.stato(id_stato).get("tipo", "")) == Id.DURATA:
 			c.rimuovi_stato(chi, id_stato, 1)
 
 

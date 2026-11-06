@@ -85,3 +85,81 @@ func test_file_mancante() -> void:
 	var caricatore := Caricatore.new()
 	assert_null(caricatore.carica("user://non_esiste/", "user://non_esiste/"))
 	assert_eq(caricatore.errori.size(), 4)
+
+
+# --- T1.9: identificatori convertiti e controllati al caricamento -------------------
+
+func _catalogo(carta_effetti: Array, stato_extra: Dictionary = {}) -> Catalogo:
+	var c := Catalogo.new()
+	c.carte = {"a": {"id": "a", "tipo": "attacco", "effetti": carta_effetti}}
+	var s := {"id": "s", "tipo": "durata"}
+	s.merge(stato_extra, true)
+	c.stati = {"s": s}
+	return c
+
+
+func test_gli_identificatori_diventano_stringname() -> void:
+	var c := _catalogo([{"tipo": "danno", "valore": 10, "bersaglio": "nemico"}])
+	assert_eq(Caricatore.normalizza(c).size(), 0)
+	var e: Dictionary = c.carte["a"]["effetti"][0]
+	assert_typeof(e["tipo"], TYPE_STRING_NAME)
+	assert_eq(e["tipo"], Id.DANNO)
+	assert_eq(e["bersaglio"], Id.NEMICO)
+	assert_typeof(c.carte["a"]["tipo"], TYPE_STRING_NAME)
+
+
+func test_dati_veri_convertiti() -> void:
+	var catalogo := Caricatore.new().carica()
+	for id in catalogo.carte:
+		for e in catalogo.carte[id]["effetti"]:
+			assert_typeof(e["tipo"], TYPE_STRING_NAME, id)
+
+
+func test_rifiuta_un_tipo_di_effetto_sconosciuto() -> void:
+	var errori := Caricatore.normalizza(_catalogo([{"tipo": "dano", "valore": 10}]))
+	assert_eq(errori.size(), 1)
+	assert_string_contains(errori[0], "tipo sconosciuto 'dano'")
+
+
+func test_rifiuta_un_bersaglio_sconosciuto() -> void:
+	var errori := Caricatore.normalizza(_catalogo([{"tipo": "danno", "bersaglio": "culla"}]))
+	assert_string_contains("\n".join(errori), "bersaglio sconosciuto 'culla'")
+
+
+func test_rifiuta_zone_e_modi_sconosciuti() -> void:
+	var errori := Caricatore.normalizza(_catalogo([{"tipo": "aggiungi_carta", "carta": "a", "dove": "tasca"},
+		{"tipo": "scarta", "modo": "forse"}, {"tipo": "rimuovi_stato", "stato": "s", "valore": "molte"}]))
+	var testo := "\n".join(errori)
+	assert_string_contains(testo, "dove sconosciuto 'tasca'")
+	assert_string_contains(testo, "modo sconosciuto 'forse'")
+	assert_string_contains(testo, "valore sconosciuto 'molte'")
+
+
+func test_rifiuta_evento_e_modificatore_sconosciuti() -> void:
+	var errori := Caricatore.normalizza(_catalogo([], {
+		"agganci": [{"quando": "alba", "effetti": []}],
+		"modificatori": [{"bersaglio": {"tipo": "carta", "filtro": {"colore": 1}}, "proprieta": "fortuna", "operazione": "dividi", "durata": "sempre"}]}))
+	var testo := "\n".join(errori)
+	for atteso in ["quando sconosciuto 'alba'", "filtro sconosciuto 'colore'", "proprieta sconosciuto 'fortuna'",
+			"operazione sconosciuto 'dividi'", "durata sconosciuto 'sempre'"]:
+		assert_string_contains(testo, atteso)
+
+
+func test_il_caricatore_rifiuta_dati_con_identificatori_sbagliati() -> void:
+	DirAccess.make_dir_recursive_absolute(CARTELLA_PROVA + "gen/")
+	DirAccess.make_dir_recursive_absolute(CARTELLA_PROVA + "man/")
+	_scrivi("gen/carte.json", '{"schema": 1, "carte": [{"id": "a", "tipo": "attacco", "effetti": [{"tipo": "danno", "bersaglio": "lune"}]}]}')
+	_scrivi("gen/nemici.json", '{"schema": 1, "nemici": []}')
+	_scrivi("gen/bilanciamento.json", '{"schema": 1}')
+	_scrivi("man/stati.json", '{"schema": 1, "stati": []}')
+	var caricatore := Caricatore.new()
+	assert_null(caricatore.carica(CARTELLA_PROVA + "gen/", CARTELLA_PROVA + "man/"))
+	assert_string_contains(caricatore.errori[0], "bersaglio sconosciuto 'lune'")
+
+
+func test_elenchi_di_id_senza_doppioni() -> void:
+	for elenco in [Id.EFFETTI_COMBATTIMENTO, Id.BERSAGLI, Id.EVENTI, Id.PROPRIETA, Id.FILTRI, Id.DURATE]:
+		var visti := {}
+		for valore in elenco:
+			assert_false(visti.has(valore), str(valore))
+			visti[valore] = true

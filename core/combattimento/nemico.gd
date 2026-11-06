@@ -4,7 +4,7 @@ extends Combattente
 
 var uid: int
 var dati: Dictionary
-var forma: String = "base"            ## base, toccata, divorata (forme della fattura)
+var forma: StringName = Id.BASE      ## Id.FORME (forme della fattura)
 var intenzione: Dictionary = {}       ## intenzione mostrata per il prossimo turno
 var intenzione_annullata: bool = false
 var carte_rubate: Array[int] = []     ## uid delle carte rubate in questo combattimento
@@ -36,10 +36,10 @@ func intenzioni_attive() -> Array:
 	return intenzioni_base if fase == 0 else fasi[fase - 1].get("intenzioni", [])
 
 
-func comportamento_attivo() -> String:
+func comportamento_attivo() -> StringName:
 	if fase == 0:
-		return str(dati.get("comportamento", "pesato"))
-	return str(fasi[fase - 1].get("comportamento", "pesato"))
+		return StringName(dati.get("comportamento", Id.PESATO))
+	return StringName(fasi[fase - 1].get("comportamento", Id.PESATO))
 
 
 func sequenza_attiva() -> Array:

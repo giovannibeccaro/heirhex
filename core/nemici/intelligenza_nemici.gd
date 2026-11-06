@@ -15,7 +15,7 @@ static func scegli(n: Nemico, turno: int, casuale: Casuale) -> Dictionary:
 	if pool.is_empty():
 		return {}
 	var scelta: Dictionary
-	if n.comportamento_attivo() == "sequenza":
+	if n.comportamento_attivo() == Id.SEQUENZA:
 		scelta = _da_sequenza(n, pool)
 	else:
 		scelta = _pesata(n, pool, turno, casuale)

@@ -40,20 +40,21 @@ func _init(catalogo: Catalogo, impostazioni: Dictionary, regole: RegoleCombattim
 
 ## Forma della fattura: moltiplicatori di vita e danno (bilanciamento) come modificatori,
 ## più le intenzioni aggiunte dal nemico (le forme sono cumulative: divorata include toccata).
-func _applica_forma(n: Nemico, forma: String) -> void:
+func _applica_forma(n: Nemico, forma: StringName) -> void:
+	assert(forma in Id.FORME, "Forma sconosciuta: " + forma)
 	n.forma = forma
-	if forma == "base":
+	if forma == Id.BASE:
 		return
 	var moltiplicatori: Dictionary = stato.catalogo.bilanciamento.get("forme", {}).get(forma, {})
-	var filtro := {"uid": n.uid}
-	for coppia in [["vita_max", "vita"], ["valore_effetti", "danno"]]:
+	# Nel bilanciamento: "vita" moltiplica la vita massima, "danno" i valori delle intenzioni
+	for coppia in [[Id.VITA_MAX, "vita"], [Id.VALORE_EFFETTI, "danno"]]:
 		if moltiplicatori.has(coppia[1]):
-			stato.modificatori.aggiungi_da_dizionario({"fonte": "forma." + forma, "bersaglio": {"tipo": "nemico", "filtro": filtro},
-				"proprieta": coppia[0], "operazione": "moltiplica", "valore": moltiplicatori[coppia[1]], "durata": "combattimento"})
-	n.vita_max = roundi(calcola(n.vita_max, "vita_max", "nemico", n))
+			stato.modificatori.aggiungi(Modificatore.crea(Id.NEMICO, coppia[0], Id.MOLTIPLICA,
+				float(moltiplicatori[coppia[1]]), Id.COMBATTIMENTO, {Id.UID: n.uid}, "forma." + forma))
+	n.vita_max = roundi(calcola(n.vita_max, Id.VITA_MAX, Id.NEMICO, n))
 	n.vita = n.vita_max
 	var forme_dati: Dictionary = n.dati.get("forme", {})
-	for nome_forma in ["toccata", "divorata"]:
+	for nome_forma in Id.FORME:
 		n.intenzioni_base.append_array(forme_dati.get(nome_forma, {}).get("intenzioni_aggiunte", []))
 		if nome_forma == forma:
 			break
@@ -61,7 +62,7 @@ func _applica_forma(n: Nemico, forma: String) -> void:
 
 func _prepara_giocatore(d: Dictionary) -> void:
 	var vita_max := int(d.get("vita_max", d.get("vita", 100)))
-	stato.giocatore = Combattente.new("giocatore", vita_max, "combattimento.giocatore")
+	stato.giocatore = Combattente.new(Id.GIOCATORE, vita_max, "combattimento.giocatore")
 	stato.giocatore.vita = int(d.get("vita", vita_max))
 	stato.giocatore.stati = (d.get("stati", {}) as Dictionary).duplicate()
 
@@ -83,7 +84,7 @@ func _crea_carta(voce: Variant) -> Carta:
 func _crea_nemico(voce: Variant) -> Nemico:
 	var d: Dictionary = voce if voce is Dictionary else {"id": str(voce)}
 	var n := stato.nuovo_nemico(str(d["id"]))
-	_applica_forma(n, str(d.get("forma", "base")))
+	_applica_forma(n, StringName(d.get("forma", Id.BASE)))
 	# Intenzioni generate da fuori (es. carte rubate dal Tiranno) per l'ultima fase
 	if d.has("intenzioni_fase") and not n.fasi.is_empty():
 		var ultima: Dictionary = n.fasi.back()
@@ -99,10 +100,10 @@ func _crea_nemico(voce: Variant) -> Nemico:
 
 ## Avvia il combattimento: i nemici mostrano l'intenzione e inizia il primo turno.
 func inizia() -> void:
-	registro.aggiungi(0, "inizio_combattimento", {"nemici": stato.nemici.map(func(n: Nemico) -> String: return n.id)})
-	emetti(EventiGioco.INIZIO_COMBATTIMENTO, {"chi": stato.giocatore})
+	registro.aggiungi(0, Id.INIZIO_COMBATTIMENTO, {"nemici": stato.nemici.map(func(n: Nemico) -> String: return n.id)})
+	emetti(Id.INIZIO_COMBATTIMENTO, {"chi": stato.giocatore})
 	for n in stato.nemici.duplicate():
-		emetti(EventiGioco.INIZIO_COMBATTIMENTO, {"chi": n})
+		emetti(Id.INIZIO_COMBATTIMENTO, {"chi": n})
 	if finito():
 		return
 	for n in stato.nemici_vivi():
@@ -121,13 +122,13 @@ func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
 	var costo := costo_carta(carta)
 	if costo > stato.energia:
 		return false
-	if _serve_nemico(carta) and scelte.has("nemico"):
-		var scelto := stato.nemico_per_uid(int(scelte["nemico"]))
+	if _serve_nemico(carta) and scelte.has(Id.NEMICO):
+		var scelto := stato.nemico_per_uid(int(scelte[Id.NEMICO]))
 		if scelto == null or not scelto.e_vivo():
 			return false
 	stato.energia -= costo
 	stato.mano.erase(carta)
-	registro.aggiungi(stato.turno, "carta_giocata", {"carta": carta.id, "uid": carta.uid, "costo": costo})
+	registro.aggiungi(stato.turno, Id.CARTA_GIOCATA, {"carta": carta.id, "uid": carta.uid, "costo": costo})
 	var ctx := ContestoEffetto.new(stato.giocatore, carta, scelte)
 	Mattoncini.esegui_lista(self, carta.effetti(), ctx)
 	if ctx.esilia_carta or carta.esilia_dopo_uso():
@@ -135,7 +136,7 @@ func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
 	else:
 		stato.scarti.append(carta)
 	stato.giocate[carta.uid] = int(stato.giocate.get(carta.uid, 0)) + 1
-	emetti(EventiGioco.CARTA_GIOCATA, {"chi": stato.giocatore, "carta": carta})
+	emetti(Id.CARTA_GIOCATA, {"chi": stato.giocatore, "carta": carta})
 	return true
 
 
@@ -143,8 +144,8 @@ func gioca_carta(uid: int, scelte: Dictionary = {}) -> bool:
 func termina_turno() -> void:
 	if finito():
 		return
-	registro.aggiungi(stato.turno, "fine_turno", {"chi": "giocatore"})
-	emetti(EventiGioco.FINE_TURNO, {"chi": stato.giocatore})
+	registro.aggiungi(stato.turno, Id.FINE_TURNO, {"chi": Id.GIOCATORE})
+	emetti(Id.FINE_TURNO, {"chi": stato.giocatore})
 	if finito():
 		return
 	stato.ultima_mano = stato.mano.duplicate()
@@ -157,6 +158,11 @@ func termina_turno() -> void:
 
 func finito() -> bool:
 	return esito != Esito.IN_CORSO
+
+
+## L'esito come testo tecnico ("in_corso", "vittoria", "sconfitta"), per registro e riepilogo.
+func nome_esito() -> String:
+	return Esito.keys()[esito].to_lower()
 
 
 ## Cosa serve alla vita dopo il combattimento (e agli snapshot).
@@ -172,7 +178,7 @@ func riepilogo() -> Dictionary:
 		if volte > 0:
 			giocate_per_carta[carta.id] = int(giocate_per_carta.get(carta.id, 0)) + volte
 	return {
-		"esito": Esito.keys()[esito].to_lower(),
+		"esito": nome_esito(),
 		"turni": stato.turno,
 		"vita": g.vita,
 		"vita_max": g.vita_max,
@@ -190,16 +196,12 @@ func riepilogo() -> Dictionary:
 
 # === Valori calcolati (li usa anche l'interfaccia) =============================
 
-## Effetti "in punti": i modificatori di valore_effetti agiscono solo su questi.
-const EFFETTI_IN_PUNTI := ["danno", "blocco", "cura"]
-
-
 func costo_carta(carta: Carta) -> int:
-	return maxi(0, roundi(calcola(carta.costo_base(), "costo", "carta", carta)))
+	return maxi(0, roundi(calcola(carta.costo_base(), Id.COSTO, Id.CARTA, carta)))
 
 
 ## Calcola una proprietà con tutti i modificatori attivi (anche quelli degli stati).
-func calcola(base: float, proprieta: String, tipo_oggetto: String, oggetto: Variant) -> float:
+func calcola(base: float, proprieta: StringName, tipo_oggetto: StringName, oggetto: Variant) -> float:
 	return stato.modificatori.calcola(base, proprieta, tipo_oggetto, oggetto, modificatori_extra())
 
 
@@ -210,49 +212,49 @@ func modificatori_extra() -> Array[Modificatore]:
 
 ## Emette un evento di gioco: reagiscono gli stati, i modificatori a tempo, gli agganci esterni,
 ## poi chi si è registrato con eventi.ascolta().
-func emetti(evento: String, dati: Dictionary) -> void:
+func emetti(evento: StringName, dati: Dictionary) -> void:
 	GestoreStati.reagisci(self, evento, dati)
 	var chi: Variant = dati.get("chi")
-	if evento == EventiGioco.FINE_TURNO and chi == stato.giocatore:
-		stato.modificatori.scadenza("turno")
-	elif evento == EventiGioco.FINE_COMBATTIMENTO:
-		stato.modificatori.scadenza("combattimento")
+	if evento == Id.FINE_TURNO and chi == stato.giocatore:
+		stato.modificatori.scadenza(Id.TURNO)
+	elif evento == Id.FINE_COMBATTIMENTO:
+		stato.modificatori.scadenza(Id.COMBATTIMENTO)
 	if chi == null or chi == stato.giocatore:
 		for aggancio in stato.agganci:
-			if str(aggancio.get("quando", "")) == evento and not finito():
+			if StringName(aggancio.get("quando", "")) == evento and not finito():
 				Mattoncini.esegui_lista(self, aggancio.get("effetti", []), ContestoEffetto.new(stato.giocatore))
 	eventi.emetti(evento, dati)
 
 
 ## Valore finale di un effetto (percentuale, modificatori della fonte e del bersaglio).
 func valore_effetto(effetto: Dictionary, ctx: ContestoEffetto, bersaglio: Combattente = null) -> int:
-	var tipo := str(effetto.get("tipo", ""))
+	var tipo := StringName(effetto.get("tipo", ""))
 	var base := float(effetto.get("valore", 0))
 	if bool(effetto.get("percentuale", false)) and bersaglio != null:
 		base = bersaglio.vita_max * base / 100.0
-	if tipo in EFFETTI_IN_PUNTI and not bool(effetto.get("percentuale", false)):
+	if tipo in Id.EFFETTI_IN_PUNTI and not bool(effetto.get("percentuale", false)):
 		if ctx.carta != null:
-			base = calcola(base, "valore_effetti", "carta", ctx.carta)
+			base = calcola(base, Id.VALORE_EFFETTI, Id.CARTA, ctx.carta)
 		elif ctx.sorgente is Nemico:
-			base = calcola(base, "valore_effetti", "nemico", ctx.sorgente)
-	if tipo == "danno" and bersaglio != null:
-		base = calcola(base, "danno_subito", tipo_di(bersaglio), bersaglio)
+			base = calcola(base, Id.VALORE_EFFETTI, Id.NEMICO, ctx.sorgente)
+	if tipo == Id.DANNO and bersaglio != null:
+		base = calcola(base, Id.DANNO_SUBITO, tipo_di(bersaglio), bersaglio)
 	return maxi(0, roundi(base))
 
 
 ## Tipo di bersaglio dei modificatori per un combattente.
-func tipo_di(c: Combattente) -> String:
+func tipo_di(c: Combattente) -> StringName:
 	if c is Nemico:
-		return "nemico"
+		return Id.NEMICO
 	if c == stato.casa:
-		return "casa"
-	return "giocatore"
+		return Id.CASA
+	return Id.GIOCATORE
 
 
 ## Il nemico scelto dal giocatore; se manca la scelta, il primo vivo.
 func nemico_scelto(scelte: Dictionary) -> Nemico:
-	if scelte.has("nemico"):
-		var n := stato.nemico_per_uid(int(scelte["nemico"]))
+	if scelte.has(Id.NEMICO):
+		var n := stato.nemico_per_uid(int(scelte[Id.NEMICO]))
 		return n if n != null and n.e_vivo() else null
 	var vivi := stato.nemici_vivi()
 	return vivi[0] if not vivi.is_empty() else null
@@ -273,7 +275,7 @@ func pesca(n: int) -> int:
 		stato.mano.append(stato.mazzo.pop_back())
 		pescate += 1
 	if pescate > 0:
-		registro.aggiungi(stato.turno, "pesca", {"carte": pescate})
+		registro.aggiungi(stato.turno, Id.PESCA, {"carte": pescate})
 	return pescate
 
 
@@ -286,7 +288,7 @@ func infliggi_danno(bersaglio: Combattente, valore: int, ignora_blocco: bool, so
 		bersaglio.blocco -= assorbito
 	var subito := mini(valore - assorbito, bersaglio.vita)
 	bersaglio.vita -= subito
-	registro.aggiungi(stato.turno, "danno", {"da": nome_tecnico(sorgente), "a": nome_tecnico(bersaglio),
+	registro.aggiungi(stato.turno, Id.DANNO, {"da": nome_tecnico(sorgente), "a": nome_tecnico(bersaglio),
 		"valore": valore, "assorbito": assorbito, "subito": subito, "vita": bersaglio.vita})
 	if bersaglio.vita <= 0:
 		_a_zero(bersaglio)
@@ -297,19 +299,19 @@ func cura(bersaglio: Combattente, valore: int) -> void:
 		return
 	var curata := mini(valore, bersaglio.vita_max - bersaglio.vita)
 	bersaglio.vita += curata
-	registro.aggiungi(stato.turno, "cura", {"a": nome_tecnico(bersaglio), "valore": valore, "curata": curata, "vita": bersaglio.vita})
+	registro.aggiungi(stato.turno, Id.CURA, {"a": nome_tecnico(bersaglio), "valore": valore, "curata": curata, "vita": bersaglio.vita})
 
 
-func applica_stato(bersaglio: Combattente, id_stato: String, cariche: int) -> void:
+func applica_stato(bersaglio: Combattente, id_stato: StringName, cariche: int) -> void:
 	if cariche <= 0 or not bersaglio.e_vivo():
 		return
 	bersaglio.stati[id_stato] = bersaglio.cariche(id_stato) + cariche
-	registro.aggiungi(stato.turno, "stato_applicato", {"a": nome_tecnico(bersaglio), "stato": id_stato, "cariche": cariche, "totale": bersaglio.cariche(id_stato)})
+	registro.aggiungi(stato.turno, Id.R_STATO_APPLICATO, {"a": nome_tecnico(bersaglio), "stato": id_stato, "cariche": cariche, "totale": bersaglio.cariche(id_stato)})
 	GestoreStati.controlla_soglia(self, bersaglio, id_stato)
 
 
 ## Toglie cariche di uno stato; quante < 0 = tutte.
-func rimuovi_stato(bersaglio: Combattente, id_stato: String, quante: int) -> void:
+func rimuovi_stato(bersaglio: Combattente, id_stato: StringName, quante: int) -> void:
 	var prima := bersaglio.cariche(id_stato)
 	if prima <= 0:
 		return
@@ -318,25 +320,25 @@ func rimuovi_stato(bersaglio: Combattente, id_stato: String, quante: int) -> voi
 		bersaglio.stati.erase(id_stato)
 	else:
 		bersaglio.stati[id_stato] = dopo
-	registro.aggiungi(stato.turno, "stato_rimosso", {"a": nome_tecnico(bersaglio), "stato": id_stato, "tolte": prima - dopo, "totale": dopo})
+	registro.aggiungi(stato.turno, Id.R_STATO_RIMOSSO, {"a": nome_tecnico(bersaglio), "stato": id_stato, "tolte": prima - dopo, "totale": dopo})
 
 
 func annulla_intenzione(n: Nemico) -> void:
 	if n.intenzione.is_empty() or bool(n.intenzione.get("non_annullabile", false)):
-		registro.aggiungi(stato.turno, "annullamento_fallito", {"nemico": nome_tecnico(n)})
+		registro.aggiungi(stato.turno, Id.R_ANNULLAMENTO_FALLITO, {"nemico": nome_tecnico(n)})
 		return
 	n.intenzione_annullata = true
-	registro.aggiungi(stato.turno, "intenzione_annullata", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
+	registro.aggiungi(stato.turno, Id.R_INTENZIONE_ANNULLATA, {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
 
 
 ## Fa entrare un nuovo nemico (rispetta il limite di nemici in campo). Restituisce il nemico o null.
-func evoca(id_nemico: String) -> Nemico:
+func evoca(id_nemico: StringName) -> Nemico:
 	if stato.nemici_vivi().size() >= stato.regole.nemici_max:
-		registro.aggiungi(stato.turno, "evocazione_fallita", {"nemico": id_nemico})
+		registro.aggiungi(stato.turno, Id.R_EVOCAZIONE_FALLITA, {"nemico": id_nemico})
 		return null
 	var n := stato.nuovo_nemico(id_nemico)
 	stato.nemici.append(n)
-	registro.aggiungi(stato.turno, "evocato", {"nemico": nome_tecnico(n)})
+	registro.aggiungi(stato.turno, Id.R_EVOCATO, {"nemico": nome_tecnico(n)})
 	_rivela_intenzione(n, stato.turno + 1)
 	return n
 
@@ -345,21 +347,21 @@ func aggiungi_blocco(bersaglio: Combattente, valore: int) -> void:
 	if valore <= 0:
 		return
 	bersaglio.blocco += valore
-	registro.aggiungi(stato.turno, "blocco", {"a": nome_tecnico(bersaglio), "valore": valore, "totale": bersaglio.blocco})
+	registro.aggiungi(stato.turno, Id.BLOCCO, {"a": nome_tecnico(bersaglio), "valore": valore, "totale": bersaglio.blocco})
 
 
 # === Ciclo del turno ===========================================================
 
 func _inizia_turno_giocatore() -> void:
 	stato.turno += 1
-	registro.aggiungi(stato.turno, "inizio_turno", {"chi": "giocatore"})
+	registro.aggiungi(stato.turno, Id.INIZIO_TURNO, {"chi": Id.GIOCATORE})
 	_riduci_blocco(stato.giocatore)
 	_riduci_blocco(stato.casa)
-	stato.energia = maxi(0, roundi(calcola(stato.regole.energia_per_turno, "energia", "giocatore", stato.giocatore)))
-	var mano := roundi(calcola(stato.mano_dimensione, "mano", "giocatore", stato.giocatore))
+	stato.energia = maxi(0, roundi(calcola(stato.regole.energia_per_turno, Id.ENERGIA, Id.GIOCATORE, stato.giocatore)))
+	var mano := roundi(calcola(stato.mano_dimensione, Id.MANO, Id.GIOCATORE, stato.giocatore))
 	pesca(maxi(0, mano - stato.mano.size()))
 	# Dopo la pesca, così gli stati che agiscono sulla mano (es. scartare) trovano le carte
-	emetti(EventiGioco.INIZIO_TURNO, {"chi": stato.giocatore})
+	emetti(Id.INIZIO_TURNO, {"chi": stato.giocatore})
 
 
 func _turno_dei_nemici() -> void:
@@ -369,20 +371,20 @@ func _turno_dei_nemici() -> void:
 		if not n.e_vivo():
 			continue
 		_riduci_blocco(n)
-		emetti(EventiGioco.INIZIO_TURNO, {"chi": n})
+		emetti(Id.INIZIO_TURNO, {"chi": n})
 		if finito():
 			return
 		if not n.e_vivo():
 			continue
 		if n.intenzione_annullata:
 			n.intenzione_annullata = false
-			registro.aggiungi(stato.turno, "intenzione_saltata", {"nemico": nome_tecnico(n)})
+			registro.aggiungi(stato.turno, Id.R_INTENZIONE_SALTATA, {"nemico": nome_tecnico(n)})
 		elif not n.intenzione.is_empty():
-			registro.aggiungi(stato.turno, "intenzione_eseguita", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
+			registro.aggiungi(stato.turno, Id.R_INTENZIONE_ESEGUITA, {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", "")})
 			Mattoncini.esegui_lista(self, n.intenzione.get("effetti", []), ContestoEffetto.new(n))
 		if finito():
 			return
-		emetti(EventiGioco.FINE_TURNO, {"chi": n})
+		emetti(Id.FINE_TURNO, {"chi": n})
 		if finito():
 			return
 	for n in stato.nemici_vivi():
@@ -391,7 +393,7 @@ func _turno_dei_nemici() -> void:
 
 func _rivela_intenzione(n: Nemico, turno: int) -> void:
 	n.intenzione = IntelligenzaNemici.scegli(n, turno, stato.casuale)
-	registro.aggiungi(stato.turno, "intenzione", {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", ""), "per_turno": turno})
+	registro.aggiungi(stato.turno, Id.R_INTENZIONE, {"nemico": nome_tecnico(n), "intenzione": n.intenzione.get("id", ""), "per_turno": turno})
 
 
 ## All'inizio del turno di chi lo possiede il blocco si riduce (dimezzato, arrotondato per difetto).
@@ -403,7 +405,7 @@ func _rimescola_scarti() -> void:
 	stato.mazzo.append_array(stato.scarti)
 	stato.scarti.clear()
 	stato.casuale.mescola(stato.mazzo)
-	registro.aggiungi(stato.turno, "rimescola", {"carte": stato.mazzo.size()})
+	registro.aggiungi(stato.turno, Id.R_RIMESCOLA, {"carte": stato.mazzo.size()})
 
 
 func _a_zero(c: Combattente) -> void:
@@ -414,9 +416,9 @@ func _a_zero(c: Combattente) -> void:
 		if stato.casa.tratti_negativi == 0:
 			stato.casa.tratti_negativi = 1
 		stato.casa.vita = maxi(1, roundi(stato.casa.vita_max / 2.0))
-		registro.aggiungi(stato.turno, "casa_a_zero", {"tratti_negativi": stato.casa.tratti_negativi, "vita": stato.casa.vita})
+		registro.aggiungi(stato.turno, Id.R_CASA_A_ZERO, {"tratti_negativi": stato.casa.tratti_negativi, "vita": stato.casa.vita})
 	elif c is Nemico:
-		registro.aggiungi(stato.turno, "morte", {"nemico": nome_tecnico(c)})
+		registro.aggiungi(stato.turno, Id.R_MORTE, {"nemico": nome_tecnico(c)})
 		(c as Nemico).intenzione = {}
 		if stato.nemici_vivi().is_empty():
 			_termina(Esito.VITTORIA)
@@ -426,13 +428,13 @@ func _termina(e: Esito) -> void:
 	if finito():
 		return
 	esito = e
-	registro.aggiungi(stato.turno, "fine_combattimento", {"esito": Esito.keys()[e].to_lower()})
-	emetti(EventiGioco.FINE_COMBATTIMENTO, {"esito": Esito.keys()[e].to_lower()})
+	registro.aggiungi(stato.turno, Id.FINE_COMBATTIMENTO, {"esito": nome_esito()})
+	emetti(Id.FINE_COMBATTIMENTO, {"esito": nome_esito()})
 
 
 func _serve_nemico(carta: Carta) -> bool:
 	for e in carta.effetti():
-		if str(e.get("bersaglio", "")) == "nemico":
+		if StringName(e.get("bersaglio", "")) == Id.NEMICO:
 			return true
 	return false
 

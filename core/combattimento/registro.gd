@@ -6,13 +6,13 @@ extends RefCounted
 var voci: Array[Dictionary] = []
 
 
-func aggiungi(turno: int, tipo: String, dati: Dictionary = {}) -> void:
+func aggiungi(turno: int, tipo: StringName, dati: Dictionary = {}) -> void:
 	var voce := {"turno": turno, "tipo": tipo}
 	voce.merge(dati)
 	voci.append(voce)
 
 
-func conta(tipo: String) -> int:
+func conta(tipo: StringName) -> int:
 	var n := 0
 	for v in voci:
 		if v["tipo"] == tipo:
@@ -20,7 +20,7 @@ func conta(tipo: String) -> int:
 	return n
 
 
-func filtra(tipo: String) -> Array[Dictionary]:
+func filtra(tipo: StringName) -> Array[Dictionary]:
 	var risultato: Array[Dictionary] = []
 	for v in voci:
 		if v["tipo"] == tipo:

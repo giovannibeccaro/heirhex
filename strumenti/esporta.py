@@ -82,6 +82,12 @@ ALTRE_CHIAVI = {
     "G — grani di una Notte normale (unità dell'economia)": "g",
 }
 
+# Righe della scheda Forme fattura che non sono forme ma parametri di una forma
+# (etichetta -> (forma, campo)); il valore sta nella colonna "Moltiplicatore danno".
+FORME_EXTRA = {
+    "Divorata: moltiplicatore dell'intenzione potenziata": ("divorata", "intenzione_potenziata"),
+}
+
 
 class ErroreFoglio(Exception):
     pass
@@ -329,10 +335,22 @@ def leggi_bilanciamento(wb, mazzi_base):
     b["economia"] = economia
 
     forme = {}
+    extra = []
     for r in righe(wb["Forme fattura"]):
-        forme[testo(r["Forma"])] = {"dalla_generazione": numero(r["Dalla generazione"]),
-                                    "vita": numero(r["Moltiplicatore vita"]),
-                                    "danno": numero(r["Moltiplicatore danno"])}
+        etichetta = testo(r["Forma"])
+        if numero(r.get("Dalla generazione")) is not None:
+            forme[etichetta] = {"dalla_generazione": numero(r["Dalla generazione"]),
+                                "vita": numero(r["Moltiplicatore vita"]),
+                                "danno": numero(r["Moltiplicatore danno"])}
+        elif etichetta in FORME_EXTRA:
+            extra.append((etichetta, numero(r.get("Moltiplicatore danno"))))
+        else:
+            raise ErroreFoglio(f"Forme fattura: riga '{etichetta}' non riconosciuta")
+    for etichetta, valore in extra:
+        forma, campo = FORME_EXTRA[etichetta]
+        if forma not in forme:
+            raise ErroreFoglio(f"Forme fattura: '{etichetta}' cita la forma inesistente '{forma}'")
+        forme[forma][campo] = valore
     b["forme"] = forme
     b["mazzi_base"] = mazzi_base
     return b

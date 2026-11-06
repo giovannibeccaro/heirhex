@@ -25,7 +25,109 @@ func carica(cartella_generati: String = GENERATI, cartella_manuali: String = MAN
 	catalogo.nemici = Catalogo.indicizza(nemici.get("nemici", []))
 	catalogo.stati = Catalogo.indicizza(stati.get("stati", []))
 	catalogo.bilanciamento = bilanciamento
-	return catalogo
+	errori.append_array(normalizza(catalogo))
+	return catalogo if errori.is_empty() else null
+
+
+# === Conversione degli identificatori ===========================================
+# Nei JSON gli identificatori sono stringhe; qui diventano gli StringName di Id.
+# Un valore che non esiste in Id è un errore: un refuso emerge al caricamento.
+
+## Converte sul posto gli identificatori del catalogo; restituisce gli errori trovati.
+static func normalizza(catalogo: Catalogo) -> PackedStringArray:
+	var errori := PackedStringArray()
+	for id in catalogo.carte:
+		_carta("carta " + str(id), catalogo.carte[id], errori)
+	for id in catalogo.nemici:
+		_nemico("nemico " + str(id), catalogo.nemici[id], errori)
+	for id in catalogo.stati:
+		_stato("stato " + str(id), catalogo.stati[id], errori)
+	var forme: Dictionary = catalogo.bilanciamento.get("forme", {})
+	for forma in forme.keys():
+		if not (StringName(forma) in Id.FORME):
+			errori.append("bilanciamento: forma sconosciuta '%s'" % forma)
+	return errori
+
+
+## Converte d[campo] in StringName se è tra gli ammessi; altrimenti registra un errore.
+static func _id(dove: String, d: Dictionary, campo: String, ammessi: Array[StringName], errori: PackedStringArray, obbligatorio: bool = false) -> void:
+	if not d.has(campo):
+		if obbligatorio:
+			errori.append("%s: manca il campo '%s'" % [dove, campo])
+		return
+	var valore := StringName(str(d[campo]))
+	if not (valore in ammessi):
+		errori.append("%s: %s sconosciuto '%s'" % [dove, campo, d[campo]])
+		return
+	d[campo] = valore
+
+
+static func _effetti(dove: String, effetti: Array, fuori_combattimento: bool, errori: PackedStringArray) -> void:
+	var tipi: Array[StringName] = Id.EFFETTI_COMBATTIMENTO.duplicate()
+	if fuori_combattimento:
+		tipi.append_array(Id.EFFETTI_FUORI_COMBATTIMENTO)
+	for e: Dictionary in effetti:
+		_id(dove, e, "tipo", tipi, errori, true)
+		_id(dove, e, "bersaglio", Id.BERSAGLI, errori)
+		_id(dove, e, "da", Id.ZONE, errori)
+		_id(dove, e, "dove", Id.ZONE, errori)
+		_id(dove, e, "modo", Id.MODI, errori)
+		if e.get("valore") is String:
+			_id(dove, e, "valore", [Id.TUTTE] as Array[StringName], errori)
+		if e.get("tipo") == Id.APPLICA_MODIFICATORE:
+			_id(dove, e, "proprieta", Id.PROPRIETA, errori, true)
+			_id(dove, e, "operazione", Id.OPERAZIONI, errori)
+			_id(dove, e, "durata", Id.DURATE, errori)
+
+
+static func _carta(dove: String, c: Dictionary, errori: PackedStringArray) -> void:
+	_id(dove, c, "tipo", Id.TIPI_CARTA, errori, true)
+	_effetti(dove, c.get("effetti", []), false, errori)
+	if c.has("lascito"):
+		_id(dove + " (lascito)", c["lascito"], "momento", Id.MOMENTI_LASCITO, errori, true)
+		_effetti(dove + " (lascito)", c["lascito"].get("effetti", []), true, errori)
+
+
+static func _intenzioni(dove: String, intenzioni: Array, errori: PackedStringArray) -> void:
+	for i: Dictionary in intenzioni:
+		_effetti("%s, intenzione %s" % [dove, i.get("id", "?")], i.get("effetti", []), false, errori)
+
+
+static func _nemico(dove: String, n: Dictionary, errori: PackedStringArray) -> void:
+	_id(dove, n, "comportamento", Id.COMPORTAMENTI, errori)
+	_id(dove, n, "livello", Id.LIVELLI, errori)
+	_intenzioni(dove, n.get("intenzioni", []), errori)
+	for f: Dictionary in n.get("fasi", []):
+		_id(dove + " (fase)", f, "comportamento", Id.COMPORTAMENTI, errori)
+		_intenzioni(dove + " (fase)", f.get("intenzioni", []), errori)
+	var forme: Dictionary = n.get("forme", {})
+	for forma in forme.keys():
+		if not (StringName(forma) in Id.FORME):
+			errori.append("%s: forma sconosciuta '%s'" % [dove, forma])
+			continue
+		_intenzioni("%s (forma %s)" % [dove, forma], forme[forma].get("intenzioni_aggiunte", []), errori)
+
+
+static func _stato(dove: String, s: Dictionary, errori: PackedStringArray) -> void:
+	_id(dove, s, "tipo", Id.TIPI_STATO, errori, true)
+	for a: Dictionary in s.get("agganci", []):
+		_id(dove, a, "quando", Id.EVENTI, errori, true)
+		_effetti(dove, a.get("effetti", []), false, errori)
+	for m: Dictionary in s.get("modificatori", []):
+		modificatore(dove, m, errori)
+
+
+## Converte un modificatore scritto nei dati (usato anche per amuleti, annate, casate).
+static func modificatore(dove: String, m: Dictionary, errori: PackedStringArray) -> void:
+	_id(dove, m, "proprieta", Id.PROPRIETA, errori, true)
+	_id(dove, m, "operazione", Id.OPERAZIONI, errori)
+	_id(dove, m, "durata", Id.DURATE, errori)
+	var b: Dictionary = m.get("bersaglio", {})
+	_id(dove, b, "tipo", Id.TIPI_OGGETTO, errori, true)
+	var filtro: Dictionary = b.get("filtro", {})
+	for chiave in filtro.keys():
+		if not (StringName(chiave) in Id.FILTRI):
+			errori.append("%s: filtro sconosciuto '%s'" % [dove, chiave])
 
 
 ## Legge un file JSON e controlla lo schema. In caso di problemi aggiunge un errore e restituisce {}.

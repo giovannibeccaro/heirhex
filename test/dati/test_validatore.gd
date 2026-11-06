@@ -61,7 +61,7 @@ func test_tipo_e_bersaglio_sconosciuti() -> void:
 	var c := _catalogo_minimo()
 	c.carte["a"]["effetti"].append({"tipo": "teletrasporto", "bersaglio": "luna"})
 	var e := _errori(c)
-	assert_string_contains(e, "tipo di effetto sconosciuto 'teletrasporto'")
+	assert_string_contains(e, "tipo sconosciuto 'teletrasporto'")
 	assert_string_contains(e, "bersaglio sconosciuto 'luna'")
 
 
@@ -70,7 +70,7 @@ func test_effetti_fuori_combattimento_solo_nel_lascito() -> void:
 	c.carte["a"]["lascito"] = {"momento": "inizio_vita", "effetti": [{"tipo": "vita_max", "valore": 5, "bersaglio": "se"}]}
 	assert_eq(_errori(c), "")
 	c.carte["a"]["effetti"].append({"tipo": "vita_max", "valore": 5})
-	assert_string_contains(_errori(c), "tipo di effetto sconosciuto 'vita_max'")
+	assert_string_contains(_errori(c), "tipo sconosciuto 'vita_max'")
 
 
 func test_sequenza_con_intenzione_inesistente() -> void:
@@ -91,7 +91,7 @@ func test_stato_con_evento_e_filtro_sconosciuti() -> void:
 	c.stati["s"]["agganci"] = [{"quando": "luna_piena", "effetti": []}]
 	c.stati["s"]["modificatori"] = [{"bersaglio": {"tipo": "carta", "filtro": {"colore": "rosso"}}, "proprieta": "costo", "operazione": "somma", "valore": 1}]
 	var e := _errori(c)
-	assert_string_contains(e, "evento sconosciuto 'luna_piena'")
+	assert_string_contains(e, "quando sconosciuto 'luna_piena'")
 	assert_string_contains(e, "filtro sconosciuto 'colore'")
 
 

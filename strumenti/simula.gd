@@ -6,7 +6,9 @@ extends SceneTree
 ## Non cambia nessun numero: misura e riporta.
 
 const REPORT := "res://docs/report-simulazione.md"
-const ETA := ["giovinezza", "eta_adulta"]
+const ETA: Array[StringName] = [Id.GIOVINEZZA, Id.ETA_ADULTA]
+## Scenario di riferimento del report (età adulta, strategia che non si difende).
+const SENZA_DIFESA := &"senza_difesa"
 
 
 func _initialize() -> void:
@@ -27,7 +29,7 @@ func _initialize() -> void:
 			mazzo.append(voce["carta"])
 	var nemici := []
 	for id in catalogo.nemici:
-		if str(catalogo.nemici[id].get("livello", "")) == "normale":
+		if catalogo.nemici[id].get("livello") == Id.NORMALE:
 			nemici.append(id)
 	var regole := RegoleCombattimento.da_bilanciamento(b)
 	var inizio := Time.get_ticks_msec()
@@ -38,16 +40,16 @@ func _initialize() -> void:
 			risultati[eta][id] = _simula(catalogo, regole, mazzo, id, eta, quanti)
 			print("%s / %s: fatto" % [eta, id])
 	# Riferimento: stessa età adulta, ma la strategia non si difende mai prima di attaccare
-	risultati["senza_difesa"] = {}
+	risultati[SENZA_DIFESA] = {}
 	for id in nemici:
-		risultati["senza_difesa"][id] = _simula(catalogo, regole, mazzo, id, "eta_adulta", quanti, false)
+		risultati[SENZA_DIFESA][id] = _simula(catalogo, regole, mazzo, id, Id.ETA_ADULTA, quanti, false)
 	var secondi := (Time.get_ticks_msec() - inizio) / 1000.0
 	_scrivi_report(b, casata, mazzo.size(), nemici, risultati, quanti, secondi)
 	print("Report scritto in %s (%.1f s)" % [REPORT, secondi])
 	quit(0)
 
 
-func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemico: String, eta: String, quanti: int, difende: bool = true) -> Dictionary:
+func _simula(catalogo: Catalogo, regole: RegoleCombattimento, mazzo: Array, nemico: String, eta: StringName, quanti: int, difende: bool = true) -> Dictionary:
 	var b := catalogo.bilanciamento
 	var dati_eta: Dictionary = b["eta"][eta]
 	var vita := int(dati_eta["vita"])
@@ -90,9 +92,9 @@ func _scrivi_report(b: Dictionary, casata: String, carte: int, nemici: Array, ri
 	r.append("- Strategia (`core/simulazione/giocatore_automatico.gd`): se un'intenzione visibile farà danni a te o alla casa oltre il blocco, gioca la carta che blocca di più (prima te, poi la casa); altrimenti la carta che fa più danni, sul nemico con meno vita; poi il resto.")
 	r.append("- Ancore di confronto (scheda Ancore): **%d turni** per un combattimento normale, **%d-%d%%** di vita persa." % [int(turni_obiettivo), int(min_vita), int(max_vita)])
 	r.append("- Tempo di calcolo: %.1f s." % secondi)
-	var titoli := {"giovinezza": "Giovinezza (vita 100, mano 4)", "eta_adulta": "Età adulta (vita 85, mano 5)",
-		"senza_difesa": "Riferimento: età adulta, strategia che attacca soltanto"}
-	for eta in ETA + ["senza_difesa"]:
+	var titoli := {Id.GIOVINEZZA: "Giovinezza", Id.ETA_ADULTA: "Età adulta",
+		SENZA_DIFESA: "Riferimento: età adulta, strategia che attacca soltanto"}
+	for eta in ETA + [SENZA_DIFESA]:
 		r.append("")
 		r.append("## " + str(titoli[eta]))
 		r.append("")

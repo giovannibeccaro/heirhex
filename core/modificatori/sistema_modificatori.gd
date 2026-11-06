@@ -22,12 +22,12 @@ func rimuovi_fonte(fonte: String) -> void:
 
 ## Toglie i modificatori che scadono quando finisce un turno, un combattimento, una vita…
 ## Le durate sono ordinate: la fine di un combattimento è anche la fine del turno.
-func scadenza(finito: String) -> void:
-	var livello := Modificatore.DURATE.find(finito)
-	lista = lista.filter(func(m: Modificatore) -> bool: return Modificatore.DURATE.find(m.durata) > livello)
+func scadenza(finito: StringName) -> void:
+	var livello := Id.DURATE.find(finito)
+	lista = lista.filter(func(m: Modificatore) -> bool: return Id.DURATE.find(m.durata) > livello)
 
 
-func attivi(proprieta: String, tipo_oggetto: String, oggetto: Variant, extra: Array[Modificatore] = []) -> Array[Modificatore]:
+func attivi(proprieta: StringName, tipo_oggetto: StringName, oggetto: Variant, extra: Array[Modificatore] = []) -> Array[Modificatore]:
 	var risultato: Array[Modificatore] = []
 	for m in lista + extra:
 		if m.si_applica(proprieta, tipo_oggetto, oggetto):
@@ -35,19 +35,19 @@ func attivi(proprieta: String, tipo_oggetto: String, oggetto: Variant, extra: Ar
 	return risultato
 
 
-func calcola(base: float, proprieta: String, tipo_oggetto: String, oggetto: Variant, extra: Array[Modificatore] = []) -> float:
+func calcola(base: float, proprieta: StringName, tipo_oggetto: StringName, oggetto: Variant, extra: Array[Modificatore] = []) -> float:
 	return applica(base, attivi(proprieta, tipo_oggetto, oggetto, extra))
 
 
 static func applica(base: float, mods: Array[Modificatore]) -> float:
 	var risultato := base
 	for m in mods:
-		if m.operazione == "somma":
+		if m.operazione == Id.SOMMA:
 			risultato += m.valore
 	for m in mods:
-		if m.operazione == "moltiplica":
+		if m.operazione == Id.MOLTIPLICA:
 			risultato *= m.valore
 	for m in mods:
-		if m.operazione == "imposta":
+		if m.operazione == Id.IMPOSTA:
 			risultato = m.valore
 	return risultato

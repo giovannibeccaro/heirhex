@@ -8,4 +8,4 @@ var tratti_negativi: int = 0
 
 
 func _init(p_vita_max: int = 1) -> void:
-	super._init("casa", p_vita_max, "combattimento.casa")
+	super._init(Id.CASA, p_vita_max, "combattimento.casa")

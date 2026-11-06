@@ -18,6 +18,9 @@ static func catalogo() -> Catalogo:
 	c.stati = Catalogo.indicizza(leggi_json(CARTELLA + "stati.json")["stati"])
 	c.bilanciamento = leggi_json(CARTELLA + "bilanciamento.json")
 	c.stati.merge(Catalogo.indicizza(leggi_json("res://data/manuali/stati.json")["stati"]))
+	# Come il caricatore vero: identificatori convertiti e controllati anche nei dati di prova
+	var errori := Caricatore.normalizza(c)
+	assert(errori.is_empty(), "\n".join(errori))
 	return c
 
 

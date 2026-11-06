@@ -25,7 +25,7 @@ func costo_base() -> int:
 func giocabile() -> bool:
 	if dati.has("giocabile"):
 		return bool(dati["giocabile"])
-	return dati.get("tipo", "") != "negativa"
+	return StringName(dati.get("tipo", "")) != Id.NEGATIVA
 
 
 func effetti() -> Array:

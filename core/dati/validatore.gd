@@ -1,16 +1,8 @@
 class_name Validatore
 extends RefCounted
-## Controlla la coerenza dei dati: riferimenti a id esistenti, tipi noti, chiavi di testo presenti.
+## Controlla la coerenza dei dati: identificatori noti (tramite Caricatore.normalizza, unica fonte),
+## riferimenti a id esistenti, chiavi di testo presenti.
 ## Gli errori rendono i dati inutilizzabili; gli avvisi segnalano cose da guardare (es. budget).
-
-## Effetti che esistono solo fuori dal combattimento (eventi, lasciti): schemi-dati.md.
-const TIPI_FUORI_COMBATTIMENTO := ["grani", "memoria", "ottieni_carta", "rimuovi_carta",
-	"ottieni_amuleto", "ottieni_rimedio", "benedici", "vita", "vita_max"]
-const TIPI_STATO := ["intensita", "durata", "soglia"]
-const COMPORTAMENTI := ["pesato", "sequenza"]
-const PROPRIETA := ["costo", "valore_effetti", "vita_max", "mano", "energia", "danno_subito", "prezzo", "ricompensa_grani"]
-const FILTRI := ["ereditata", "uid", "id", "tag", "rarita", "tipo", "famiglia", "casata", "ruolo", "livello"]
-const MOMENTI_LASCITO := ["inizio_vita", "inizio_combattimento"]
 
 var errori: PackedStringArray = []
 var avvisi: PackedStringArray = []
@@ -28,6 +20,7 @@ func valida(catalogo: Catalogo, chiavi_testo: Dictionary) -> bool:
 	chiavi_mancanti.clear()
 	_catalogo = catalogo
 	_testi = chiavi_testo
+	errori.append_array(Caricatore.normalizza(catalogo))
 	for id in catalogo.carte:
 		_valida_carta(id, catalogo.carte[id])
 	for id in catalogo.nemici:
@@ -62,10 +55,7 @@ func _valida_carta(id: String, c: Dictionary) -> void:
 	for e in c.get("effetti", []):
 		_effetto(dove, e, false)
 	if c.has("lascito"):
-		var l: Dictionary = c["lascito"]
-		if not (str(l.get("momento", "")) in MOMENTI_LASCITO):
-			errori.append("%s: momento del lascito sconosciuto '%s'" % [dove, l.get("momento", "")])
-		for e in l.get("effetti", []):
+		for e in c["lascito"].get("effetti", []):
 			_effetto(dove + " (lascito)", e, true)
 	var budget: Dictionary = c.get("budget", {})
 	if budget.has("esito") and str(budget["esito"]) != "OK":
@@ -76,13 +66,11 @@ func _valida_nemico(id: String, n: Dictionary) -> void:
 	var dove := "nemico " + id
 	_testo(dove, n.get("nome", ""))
 	_richiesti(dove, n, ["nome", "vita", "intenzioni"])
-	if not (str(n.get("comportamento", "pesato")) in COMPORTAMENTI):
-		errori.append("%s: comportamento sconosciuto '%s'" % [dove, n.get("comportamento")])
 	var ids := _valida_intenzioni(dove, n.get("intenzioni", []))
 	for passo in n.get("sequenza", []):
 		if not ids.has(passo):
 			errori.append("%s: la sequenza cita l'intenzione inesistente '%s'" % [dove, passo])
-	if str(n.get("comportamento", "")) == "sequenza" and (n.get("sequenza", []) as Array).is_empty():
+	if StringName(n.get("comportamento", "")) == Id.SEQUENZA and (n.get("sequenza", []) as Array).is_empty():
 		avvisi.append(dove + ": comportamento a sequenza senza campo sequenza (uso l'ordine delle intenzioni)")
 	for f in n.get("fasi", []):
 		_valida_intenzioni(dove + " (fase)", f.get("intenzioni", []))
@@ -109,17 +97,11 @@ func _valida_stato(id: String, s: Dictionary) -> void:
 	_testo(dove, s.get("nome", ""))
 	if s.has("testo"):
 		_testo(dove, s["testo"])
-	if not (str(s.get("tipo", "")) in TIPI_STATO):
-		errori.append("%s: tipo sconosciuto '%s'" % [dove, s.get("tipo", "")])
-	if str(s.get("tipo", "")) == "soglia" and int(s.get("soglia", 0)) <= 0:
+	if StringName(s.get("tipo", "")) == Id.SOGLIA and int(s.get("soglia", 0)) <= 0:
 		errori.append(dove + ": stato a soglia senza soglia")
 	for a in s.get("agganci", []):
-		if not (str(a.get("quando", "")) in EventiGioco.TUTTI):
-			errori.append("%s: aggancio a un evento sconosciuto '%s'" % [dove, a.get("quando", "")])
 		for e in a.get("effetti", []):
 			_effetto(dove, e, false)
-	for m in s.get("modificatori", []):
-		_modificatore(dove, m)
 
 
 func _valida_bilanciamento(b: Dictionary) -> void:
@@ -134,35 +116,16 @@ func _valida_bilanciamento(b: Dictionary) -> void:
 
 # --- pezzi comuni --------------------------------------------------------------------
 
-func _effetto(dove: String, e: Dictionary, fuori_combattimento_ammesso: bool) -> void:
-	var tipo := str(e.get("tipo", ""))
-	var ammesso := tipo in Mattoncini.TIPI or (fuori_combattimento_ammesso and tipo in TIPI_FUORI_COMBATTIMENTO)
-	if not ammesso:
-		errori.append("%s: tipo di effetto sconosciuto '%s'" % [dove, tipo])
-	if e.has("bersaglio") and not (str(e["bersaglio"]) in Mattoncini.BERSAGLI):
-		errori.append("%s: bersaglio sconosciuto '%s'" % [dove, e["bersaglio"]])
-	if tipo in ["applica_stato", "rimuovi_stato"]:
+## Riferimenti degli effetti (i tipi li ha già controllati Caricatore.normalizza).
+func _effetto(dove: String, e: Dictionary, _fuori_combattimento_ammesso: bool) -> void:
+	var tipo := StringName(e.get("tipo", ""))
+	if tipo == Id.APPLICA_STATO or tipo == Id.RIMUOVI_STATO:
 		if not _catalogo.stati.has(str(e.get("stato", ""))):
 			errori.append("%s: stato inesistente '%s'" % [dove, e.get("stato", "")])
-	if tipo == "aggiungi_carta":
+	if tipo == Id.AGGIUNGI_CARTA:
 		_rif_carta(dove, str(e.get("carta", "")))
-	if tipo == "evoca" and not _catalogo.nemici.has(str(e.get("nemico", ""))):
+	if tipo == Id.EVOCA and not _catalogo.nemici.has(str(e.get("nemico", ""))):
 		errori.append("%s: nemico inesistente '%s'" % [dove, e.get("nemico", "")])
-	if tipo == "applica_modificatore":
-		_modificatore(dove, {"bersaglio": {"tipo": "carta"}, "proprieta": e.get("proprieta", ""),
-			"operazione": e.get("operazione", "somma"), "durata": e.get("durata", "turno")})
-
-
-func _modificatore(dove: String, m: Dictionary) -> void:
-	if not (str(m.get("proprieta", "")) in PROPRIETA):
-		avvisi.append("%s: proprietà del modificatore non usata dal motore '%s'" % [dove, m.get("proprieta", "")])
-	if not (str(m.get("operazione", "somma")) in Modificatore.OPERAZIONI):
-		errori.append("%s: operazione sconosciuta '%s'" % [dove, m.get("operazione", "")])
-	if not (str(m.get("durata", "combattimento")) in Modificatore.DURATE):
-		errori.append("%s: durata sconosciuta '%s'" % [dove, m.get("durata", "")])
-	for chiave in m.get("bersaglio", {}).get("filtro", {}):
-		if not (str(chiave) in FILTRI):
-			errori.append("%s: filtro sconosciuto '%s'" % [dove, chiave])
 
 
 func _rif_carta(dove: String, id: String) -> void:

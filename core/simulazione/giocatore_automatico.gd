@@ -35,28 +35,28 @@ static func scegli_mossa(c: Combattimento, difende: bool = true) -> Dictionary:
 	if giocabili.is_empty():
 		return {}
 	var bersaglio := _nemico_piu_debole(c)
-	var scelte := {"nemico": bersaglio.uid} if bersaglio != null else {}
+	var scelte := {Id.NEMICO: bersaglio.uid} if bersaglio != null else {}
 
 	# 1. Difesa contro gli attacchi annunciati
 	var minaccia_se := danno_in_arrivo(c, s.giocatore) - s.giocatore.blocco
 	var minaccia_casa := danno_in_arrivo(c, s.casa) - s.casa.blocco
 	if difende and (minaccia_se > 0 or minaccia_casa > 0):
-		var chi := "se" if minaccia_se > 0 else "casa"
-		var migliore := _migliore(c, giocabili, "blocco", chi)
+		var chi := Id.SE if minaccia_se > 0 else Id.CASA
+		var migliore := _migliore(c, giocabili, Id.BLOCCO, chi)
 		if migliore != null:
 			var d := scelte.duplicate()
-			d["se_o_casa"] = chi
+			d[Id.SE_O_CASA] = chi
 			return {"carta": migliore.uid, "scelte": d}
 
 	# 2. Attacco
-	var attacco := _migliore(c, giocabili, "danno", "se")
+	var attacco := _migliore(c, giocabili, Id.DANNO, Id.SE)
 	if attacco != null:
 		return {"carta": attacco.uid, "scelte": scelte}
 
 	# 3. Il resto (pesca, cure, stati…); il blocco va dove serve di più
 	var altra := giocabili[0]
 	var d := scelte.duplicate()
-	d["se_o_casa"] = "casa" if s.casa.quota_vita() < s.giocatore.quota_vita() else "se"
+	d[Id.SE_O_CASA] = Id.CASA if s.casa.quota_vita() < s.giocatore.quota_vita() else Id.SE
 	return {"carta": altra.uid, "scelte": d}
 
 
@@ -67,10 +67,9 @@ static func danno_in_arrivo(c: Combattimento, bersaglio: Combattente) -> int:
 		if n.intenzione_annullata:
 			continue
 		for e in n.intenzione.get("effetti", []):
-			if str(e.get("tipo", "")) != "danno":
+			if StringName(e.get("tipo", "")) != Id.DANNO:
 				continue
-			var verso := str(e.get("bersaglio", "giocatore"))
-			var colpisce_casa := verso == "casa"
+			var colpisce_casa := StringName(e.get("bersaglio", Id.GIOCATORE)) == Id.CASA
 			if colpisce_casa != (bersaglio == c.stato.casa):
 				continue
 			if bool(e.get("letale", false)):
@@ -81,7 +80,7 @@ static func danno_in_arrivo(c: Combattimento, bersaglio: Combattente) -> int:
 
 
 ## La carta con il valore più alto per un tipo di effetto (danno o blocco); null se nessuna ne ha.
-static func _migliore(c: Combattimento, carte: Array[Carta], tipo: String, se_o_casa: String) -> Carta:
+static func _migliore(c: Combattimento, carte: Array[Carta], tipo: StringName, se_o_casa: StringName) -> Carta:
 	var migliore: Carta = null
 	var valore_migliore := 0
 	for carta in carte:
@@ -92,17 +91,17 @@ static func _migliore(c: Combattimento, carte: Array[Carta], tipo: String, se_o_
 	return migliore
 
 
-static func valore_della_carta(c: Combattimento, carta: Carta, tipo: String, se_o_casa: String) -> int:
+static func valore_della_carta(c: Combattimento, carta: Carta, tipo: StringName, se_o_casa: StringName) -> int:
 	var totale := 0
 	var ctx := ContestoEffetto.new(c.stato.giocatore, carta)
 	for e in carta.effetti():
-		if str(e.get("tipo", "")) != tipo:
+		if StringName(e.get("tipo", "")) != tipo:
 			continue
-		var b := str(e.get("bersaglio", "se"))
-		if tipo == "blocco" and not (b == "se_o_casa" or b == se_o_casa):
+		var b := StringName(e.get("bersaglio", Id.SE))
+		if tipo == Id.BLOCCO and not (b == Id.SE_O_CASA or b == se_o_casa):
 			continue
 		var v := c.valore_effetto(e, ctx)
-		if b == "tutti_nemici":
+		if b == Id.TUTTI_NEMICI:
 			v *= c.stato.nemici_vivi().size()
 		totale += v
 	return totale

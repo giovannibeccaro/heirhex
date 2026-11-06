@@ -84,9 +84,9 @@ func test_aggancio_esterno_a_inizio_combattimento() -> void:
 func test_ascoltatore_riceve_gli_eventi_in_ordine() -> void:
 	ricevuti.clear()
 	var c := Combattimento.new(Aiuti.catalogo(), Aiuti.impostazioni({"nemici": ["manichino"]}))
-	for evento in EventiGioco.TUTTI:
+	for evento in Id.EVENTI:
 		c.eventi.ascolta(evento, _registra.bind())
-	c.eventi.ascolta(EventiGioco.INIZIO_TURNO, func(d: Dictionary) -> void: ricevuti.append({"etichetta": "turno"}))
+	c.eventi.ascolta(Id.INIZIO_TURNO, func(d: Dictionary) -> void: ricevuti.append({"etichetta": "turno"}))
 	c.inizia()
 	c.gioca_carta(c.stato.mano[0].uid)
 	c.termina_turno()
@@ -101,7 +101,7 @@ func test_ascoltatore_riceve_gli_eventi_in_ordine() -> void:
 func test_fine_combattimento() -> void:
 	ricevuti.clear()
 	var c := Combattimento.new(Aiuti.catalogo(), Aiuti.impostazioni({"mazzo": ["colpo"], "nemici": [{"id": "fantoccio", "quota_vita": 0.1}]}))
-	c.eventi.ascolta(EventiGioco.FINE_COMBATTIMENTO, _registra)
+	c.eventi.ascolta(Id.FINE_COMBATTIMENTO, _registra)
 	c.inizia()
 	c.gioca_carta(c.stato.mano[0].uid)
 	assert_eq(ricevuti, [{"esito": "vittoria"}])
@@ -113,7 +113,7 @@ func test_i_modificatori_scadono_con_gli_eventi() -> void:
 	var c := Combattimento.new(Aiuti.catalogo(), imp)
 	c.inizia()
 	assert_eq(c.stato.modificatori.lista.size(), 1)
-	c.emetti(EventiGioco.FINE_TURNO, {"chi": c.stato.nemici[0]})
+	c.emetti(Id.FINE_TURNO, {"chi": c.stato.nemici[0]})
 	assert_eq(c.stato.modificatori.lista.size(), 1, "la fine del turno di un nemico non conta")
-	c.emetti(EventiGioco.FINE_TURNO, {"chi": c.stato.giocatore})
+	c.emetti(Id.FINE_TURNO, {"chi": c.stato.giocatore})
 	assert_eq(c.stato.modificatori.lista.size(), 0)

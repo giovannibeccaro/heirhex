@@ -53,9 +53,18 @@ Aggiornato dall'agente alla fine di ogni compito. Ordine: dal più recente al pi
 - **Validatore in GDScript, non in Python**: il design vuole il validatore anche all'avvio del gioco in modalità debug; scritto in `core/` serve a entrambi. Lo script da terminale è solo un involucro.
 - **Coerenza tra `stati.json` e le ancore** (Radici +2, Fattura 7 e 30%) non controllata: i valori sono scritti due volte (foglio e stati). Si potrebbe far leggere agli stati i valori delle ancore; per ora è un rischio noto.
 - **Push su GitHub**: il primo push falliva con HTTP 400 (pacchetto grande per GUT); risolto con `git config http.postBuffer 524288000`, solo nella configurazione locale del repository.
+- **Nomi dei campi dello schema scritti nel codice** (`effetto["valore"]`, `d.get("vita")`, le chiavi del riepilogo e del registro): li considero lo schema dei dati, non identificatori interni, e non li ho spostati in `Id`. Spostarli renderebbe il codice molto meno leggibile (`effetto[Id.VALORE]`). Sono invece in `Id` tutti i **valori** che quei campi possono assumere. Se preferisci centralizzare anche i nomi dei campi, è un lavoro meccanico.
+- **Test con stringhe letterali**: i test scrivono effetti e impostazioni come stringhe (`{"tipo": "danno"}`), come fanno i JSON; il motore li accetta perché converte sempre con `StringName(...)`.
 - **Commit della configurazione iniziale**: `CLAUDE.md`, `project.godot`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, l'icona e la `.gitignore` modificata erano non tracciati; li ho inclusi nel commit di T0.1.
 
 ## Registro dei compiti
+
+### T1.9 — Identificatori centralizzati ✅ (Tappa 2b, D57)
+- `core/id.gd` (`Id`): tutti gli identificatori interni come costanti `StringName` (`&"danno"`), con gli elenchi ammessi: tipi di effetto (in e fuori combattimento), bersagli, zone e modi, eventi, momenti del lascito, tipi di stato e di carta, comportamenti, livelli, forme, età, operazioni, durate, proprietà, tipi di oggetto e filtri dei modificatori, voci del registro. Un nome usato in più ruoli (es. `mano`) è una sola costante.
+- Motore, simulazione e strumenti usano solo `Id.…`: tolti gli elenchi duplicati (`Mattoncini.TIPI`, `Modificatore.DURATE`, `EventiGioco.TUTTI`, quelli del validatore). `EventiGioco` ora è solo il bus.
+- `Caricatore.normalizza()` converte le stringhe dei JSON in `StringName` e **rifiuta i valori sconosciuti** (con il percorso dell'errore, es. `carta a: bersaglio sconosciuto 'lune'`). Il validatore la riusa: un'unica fonte per i controlli sui tipi. Anche i dati di prova dei test passano da qui.
+- Il nuovo controllo ha trovato subito un problema vero: la riga "Divorata: moltiplicatore dell'intenzione potenziata" della scheda Forme fattura veniva esportata come una quarta forma. `esporta.py` ora la legge come `forme.divorata.intenzione_potenziata = 1.5` e si ferma con un errore su righe sconosciute.
+- Test: 8 nuovi in `test/dati/test_caricatore.gd`. 170 test verdi.
 
 ### T2.5 — La culla diventa la casa ✅ (Tappa 2b, D59)
 - Rinominati in codice, dati, testi, test e strumenti: `Culla` → `Casa` (`core/combattimento/casa.gd`), `culla` → `casa`, `se_o_culla` → `se_o_casa`, `attacco_culla` → `attacco_casa`, `predatore_culla` → `predatore_casa`. Testo: "Casa" / "Home".
